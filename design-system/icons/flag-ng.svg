@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+  <g clip-path="url(#flag-ng-clip0_1_3)">
+  <rect width="24" height="24" rx="12" fill="#50AF95"/>
+  <g clip-path="url(#flag-ng-clip1_1_3)">
+  <path d="M-4 -4H28.9443V28H-4V-4Z" fill="#008751"/>
+  <path d="M8 0C8 -2.20914 9.79086 -4 12 -4C14.2091 -4 16 -2.20914 16 0V24C16 26.2091 14.2091 28 12 28C9.79086 28 8 26.2091 8 24V0Z" fill="white"/>
+  </g>
+  </g>
+  <defs>
+    <clipPath id="flag-ng-clip0_1_3">
+    <rect width="24" height="24" rx="12" fill="white"/>
+    </clipPath>
+    <clipPath id="flag-ng-clip1_1_3">
+    <rect width="32.9443" height="32" fill="white" transform="translate(-4 -4)"/>
+    </clipPath>
+  </defs>
+</svg>
