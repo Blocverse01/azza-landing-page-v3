@@ -93,9 +93,39 @@ export function PhoneMockup({
           />
         ) : null}
 
-        {/* The screen sits UNDER the frame so the bezel overlaps its edges. */}
+        {/*
+          Figma child order in `507:761` and `570:462` is shadow -> body -> screen,
+          so the device body paints BEFORE the screen, not after it.
+
+          The original order here put the frame last, on top of the screen. That
+          looks harmless - a bezel overlapping the screen edges is the normal way
+          to build a mockup - and it typecheck/lint/build clean. But
+          `device-frame-phone.webp` carries alpha only for its rounded outer
+          corners; the screen aperture itself is filled opaque black. Verified two
+          ways: the file has a VP8X alpha flag and an ALPH chunk (so it is not a
+          flat opaque image), while three independent agents sampling the composite
+          got (0,0,0,255) at the screen centre, 25% and 75%.
+
+          Net effect: every screenshot loaded fine and was then completely covered,
+          on all four consumers site-wide. Painting the body first lets the frame's
+          real transparency do the bezel work and leaves the screen visible.
+        */}
+        <Image
+          src={deviceFrame}
+          alt=""
+          aria-hidden="true"
+          fill
+          priority={priority}
+          loading={priority ? undefined : "lazy"}
+          sizes={`${width}px`}
+          className={cn(
+            "pointer-events-none object-contain",
+            rasterShadow ? undefined : "drop-shadow-xl",
+          )}
+        />
+
         <div
-          className="absolute overflow-hidden"
+          className="pointer-events-none absolute overflow-hidden"
           style={{
             left: SCREEN_LEFT,
             top: SCREEN_TOP,
@@ -120,20 +150,6 @@ export function PhoneMockup({
             </div>
           )}
         </div>
-
-        <Image
-          src={deviceFrame}
-          alt=""
-          aria-hidden="true"
-          fill
-          priority={priority}
-          loading={priority ? undefined : "lazy"}
-          sizes={`${width}px`}
-          className={cn(
-            "pointer-events-none object-contain",
-            rasterShadow ? undefined : "drop-shadow-xl",
-          )}
-        />
       </div>
     </div>
   );
