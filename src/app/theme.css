@@ -1,0 +1,663 @@
+/*
+ * theme.css - the hand-authored half of the design system.
+ *
+ * WHY THIS FILE IS NOT GENERATED
+ * ------------------------------
+ * `scripts/generate-tokens.mjs` normalises every token key with
+ * `replace(/[^a-z0-9]+/g, "-")`. That collapses Tailwind v4's required double
+ * dash (`--text-x--line-height` -> `--text-x-line-height`, which silently stops
+ * working) and it hard-exits on a `*` key, so the `--text-*: initial` reset
+ * could never be expressed. Type, breakpoints and the resets therefore live
+ * here, by hand.
+ *
+ * DIVISION OF LABOUR - the two files must never overlap
+ * ----------------------------------------------------
+ *   tokens.generated.css  colour (--color-*), radius, shadow, blur
+ *   theme.css (this file) font families, type scale, spacing aliases,
+ *                         containers, chrome heights, breakpoints, gutters,
+ *                         motion durations and easings, base layer rules
+ *
+ * There is not a single `--color-*` or `--radius-*` declaration below, and
+ * there must never be one.
+ *
+ * SOURCES (all values traceable, none invented here)
+ * -------------------------------------------------
+ *   design/typography.md  S9 (scale) + S3 (values) + D-011 (Bebas is 400-only)
+ *   design/components.md  S11 C-1 (the corrected clamps), S10 (motion),
+ *                         S12.3 (the next/font seam)
+ *   design/layout.md      S10.1 (spacing aliases, containers, chrome heights)
+ *   design/responsive.md  S1.3 (breakpoints), S3.2 (the gutter ladder)
+ */
+
+/* ---------------------------------------------------------------------------
+ * Custom variants
+ * ------------------------------------------------------------------------- */
+
+/*
+ * components.md S10.6: every hover rule must sit inside
+ * `@media (hover: hover) and (pointer: fine)`. Tailwind's own `hover:` only
+ * guards `(hover: hover)`, which still leaves the sticky-hover bug on iOS
+ * Safari after a tap. Use `hoverable:` for every hover style in this codebase.
+ */
+@custom-variant hoverable {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      @slot;
+    }
+  }
+}
+
+/*
+ * The same guard without the `:hover` selector, for the handful of places that
+ * need to hover a DESCENDANT (`fine-pointer:[&_a:hover]:...`). Same rule, same
+ * reason - it just cannot be expressed with `hoverable:`.
+ */
+@custom-variant fine-pointer {
+  @media (hover: hover) and (pointer: fine) {
+    @slot;
+  }
+}
+
+@theme static {
+  /* -------------------------------------------------------------------------
+   * Font families - typography.md S9, with the components.md S12.3 seam.
+   *
+   * No fonts are loaded yet; `src/app/layout.tsx` gains `next/font` in wave 2D.
+   * Until then each `var(--font-*)` is undefined and the stack falls through to
+   * the literal family name and then to its fallbacks, so every wave builds and
+   * renders sensibly. After 2D the same declaration resolves to next/font's
+   * generated families with no edit here.
+   * ---------------------------------------------------------------------- */
+  --font-*: initial;
+
+  --font-sans:
+    var(--font-inter, "Inter"), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+  --font-display:
+    var(--font-bebas-neue, "Bebas Neue"), "Oswald", "Arial Narrow", system-ui,
+    sans-serif;
+  --font-accent:
+    var(--font-poppins, "Poppins"), "Century Gothic", system-ui, sans-serif;
+  --font-brand:
+    var(--font-cal-sans, "Cal Sans"), var(--font-inter, "Inter"), ui-sans-serif,
+    system-ui, sans-serif;
+
+  /*
+   * Re-declared explicitly. `--font-*: initial` clears the whole `--font-`
+   * prefix, and the O-swap span in `DisplayHeading` needs Light / Medium / Bold
+   * (typography.md S5) as real weight utilities.
+   */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --font-weight-black: 900;
+
+  /* -------------------------------------------------------------------------
+   * Type scale - typography.md S9, with components.md S11 C-1's clamps applied
+   * to every role whose 1440 value is >= 32px.
+   *
+   * Every clamp's MAX term is the exact Figma value, and every preferred term
+   * carries a `rem` component so WCAG 1.4.4 holds. Line height, letter spacing
+   * and weight are never clamped - only font-size.
+   *
+   * The reset is what makes gate 4 enforceable: after it, Tailwind's stock ramp
+   * does not exist and an implementer physically cannot reach an off-scale size.
+   * ---------------------------------------------------------------------- */
+  --text-*: initial;
+
+  /* --- Display ramp (font-display). Always paired with `uppercase`. ---------
+   * Bebas Neue serves weight 400 only (typography.md S2.1, D-011). The design's
+   * three Lemon weights collapse to one; the roles are differentiated by size
+   * and tracking, which the ramp already varies. Emitting 600/700 here would
+   * produce browser-synthesised faux-bold. */
+  --text-display-hero: clamp(2.5rem, 0.2857rem + 11.0714vw, 10.25rem); /* 164 */
+  --text-display-hero--line-height: 0.82;
+  --text-display-hero--letter-spacing: -0.01em;
+  --text-display-hero--font-weight: 400;
+
+  --text-display-1: clamp(2.375rem, 0.5536rem + 9.1071vw, 8.75rem); /* 140 */
+  --text-display-1--line-height: 0.96;
+  --text-display-1--letter-spacing: -0.01em;
+  --text-display-1--font-weight: 400;
+
+  --text-display-2: clamp(2.25rem, 0.4643rem + 8.9286vw, 8.5rem); /* 136 */
+  --text-display-2--line-height: 0.91;
+  --text-display-2--letter-spacing: 0.03em; /* positive, deliberate - O-6 */
+  --text-display-2--font-weight: 400;
+
+  --text-display-3: clamp(2.25rem, 0.6071rem + 8.2143vw, 8rem); /* 128 */
+  --text-display-3--line-height: 1;
+  --text-display-3--letter-spacing: -0.01em;
+  --text-display-3--font-weight: 400;
+
+  --text-display-3-bold: clamp(2.25rem, 0.6071rem + 8.2143vw, 8rem); /* 128 */
+  --text-display-3-bold--line-height: 1;
+  --text-display-3-bold--letter-spacing: -0.01em;
+  --text-display-3-bold--font-weight: 400;
+
+  --text-display-4: clamp(2.125rem, 0.9464rem + 5.8929vw, 6.25rem); /* 100 */
+  --text-display-4--line-height: 1.1;
+  --text-display-4--letter-spacing: -0.01em;
+  --text-display-4--font-weight: 400;
+
+  --text-display-4-tight: clamp(2.125rem, 0.9464rem + 5.8929vw, 6.25rem);
+  --text-display-4-tight--line-height: 0.95;
+  --text-display-4-tight--letter-spacing: -0.01em;
+  --text-display-4-tight--font-weight: 400;
+
+  --text-display-5: clamp(2.125rem, 1.0179rem + 5.5357vw, 6rem); /* 96 */
+  --text-display-5--line-height: 1.2;
+  --text-display-5--letter-spacing: -0.02em;
+  --text-display-5--font-weight: 400;
+
+  --text-display-6: clamp(2rem, 1.4286rem + 2.8571vw, 4rem); /* 64 */
+  --text-display-6--line-height: 0.97;
+  --text-display-6--letter-spacing: 0em;
+  --text-display-6--font-weight: 400;
+
+  /* --- Accent ramp (font-accent) ----------------------------------------- */
+  --text-accent-watermark: clamp(3rem, 0.375rem + 13.125vw, 12.1875rem); /* 195 */
+  --text-accent-watermark--line-height: 1.03;
+  --text-accent-watermark--letter-spacing: -0.05em;
+  --text-accent-watermark--font-weight: 900;
+
+  --text-accent-1: clamp(2rem, 1.0357rem + 4.8214vw, 5.375rem); /* 86 */
+  --text-accent-1--line-height: 0.98;
+  --text-accent-1--letter-spacing: -0.06em;
+  --text-accent-1--font-weight: 700;
+
+  --text-accent-2: clamp(2rem, 1.25rem + 3.75vw, 4.625rem); /* 74 */
+  --text-accent-2--line-height: 1.22;
+  --text-accent-2--letter-spacing: -0.08em;
+  --text-accent-2--font-weight: 900;
+
+  --text-accent-3: clamp(1.875rem, 1.4107rem + 2.3214vw, 3.5rem); /* 56 */
+  --text-accent-3--line-height: 1.22;
+  --text-accent-3--letter-spacing: -0.08em;
+  --text-accent-3--font-weight: 900;
+
+  --text-accent-4: clamp(1.625rem, 1.3393rem + 1.4286vw, 2.625rem); /* 42 */
+  --text-accent-4--line-height: 1;
+  --text-accent-4--letter-spacing: -0.08em;
+  --text-accent-4--font-weight: 900;
+
+  --text-accent-num: clamp(1.75rem, 1.5357rem + 1.0714vw, 2.5rem); /* 40 */
+  --text-accent-num--line-height: 1.03;
+  --text-accent-num--letter-spacing: -0.08em;
+  --text-accent-num--font-weight: 700;
+
+  --text-accent-step: 1.5rem; /* 24 - below 32, does not clamp */
+  --text-accent-step--line-height: 0.8;
+  --text-accent-step--letter-spacing: 0em;
+  --text-accent-step--font-weight: 700;
+
+  --text-accent-label: 1rem; /* 16 */
+  --text-accent-label--line-height: 1.3;
+  --text-accent-label--letter-spacing: -0.03em;
+  --text-accent-label--font-weight: 800;
+
+  --text-accent-caption: 1rem; /* 16 */
+  --text-accent-caption--line-height: 1.3;
+  --text-accent-caption--letter-spacing: 0.01em;
+  --text-accent-caption--font-weight: 700;
+
+  /* --- Text ramp (font-sans). Everything below 32px holds its design value
+   * at every breakpoint - components.md S11 C-8 drops the 17px rung. -------- */
+  --text-2xs: 0.75rem; /* 12 */
+  --text-2xs--line-height: 1.2;
+  --text-2xs--letter-spacing: -0.03em;
+  --text-2xs--font-weight: 500;
+
+  --text-xs: 0.875rem; /* 14 */
+  --text-xs--line-height: 1.3;
+  --text-xs--letter-spacing: -0.02em;
+  --text-xs--font-weight: 500;
+
+  --text-xs-tabular: 0.875rem;
+  --text-xs-tabular--line-height: 1.21;
+  --text-xs-tabular--letter-spacing: -0.02em;
+  --text-xs-tabular--font-weight: 500;
+
+  --text-xs-btn: 0.875rem;
+  --text-xs-btn--line-height: 1.21;
+  --text-xs-btn--letter-spacing: -0.01em;
+  --text-xs-btn--font-weight: 600;
+
+  --text-sm: 1rem; /* 16 */
+  --text-sm--line-height: 1.21;
+  --text-sm--letter-spacing: -0.02em;
+  --text-sm--font-weight: 500;
+
+  --text-sm-regular: 1rem;
+  --text-sm-regular--line-height: 1.21;
+  --text-sm-regular--letter-spacing: -0.02em;
+  --text-sm-regular--font-weight: 400;
+
+  --text-sm-bold: 1rem;
+  --text-sm-bold--line-height: 1.21;
+  --text-sm-bold--letter-spacing: -0.02em;
+  --text-sm-bold--font-weight: 700;
+
+  --text-sm-btn: 1rem;
+  --text-sm-btn--line-height: 1.21;
+  --text-sm-btn--letter-spacing: -0.02em;
+  --text-sm-btn--font-weight: 600;
+
+  --text-sm-body: 1rem;
+  --text-sm-body--line-height: 1.3;
+  --text-sm-body--letter-spacing: -0.03em;
+  --text-sm-body--font-weight: 400;
+
+  --text-sm-crumb: 1rem;
+  --text-sm-crumb--line-height: 1.3;
+  --text-sm-crumb--letter-spacing: -0.03em;
+  --text-sm-crumb--font-weight: 500;
+
+  --text-base: 1.125rem; /* 18 - the most-used style in the file */
+  --text-base--line-height: 1.21;
+  --text-base--letter-spacing: -0.02em;
+  --text-base--font-weight: 500;
+
+  --text-base-bold: 1.125rem;
+  --text-base-bold--line-height: 1.21;
+  --text-base-bold--letter-spacing: -0.02em;
+  --text-base-bold--font-weight: 700;
+
+  --text-base-tab: 1.125rem;
+  --text-base-tab--line-height: 1.2;
+  --text-base-tab--letter-spacing: -0.02em;
+  --text-base-tab--font-weight: 500;
+
+  --text-base-answer: 1.125rem;
+  --text-base-answer--line-height: 1.44;
+  --text-base-answer--letter-spacing: -0.01em;
+  --text-base-answer--font-weight: 400;
+
+  --text-base-quote: 1.125rem;
+  --text-base-quote--line-height: 1.22;
+  --text-base-quote--letter-spacing: -0.02em;
+  --text-base-quote--font-weight: 600;
+
+  --text-md: 1.25rem; /* 20 */
+  --text-md--line-height: 1.3;
+  --text-md--letter-spacing: -0.03em;
+  --text-md--font-weight: 500;
+
+  --text-md-semibold: 1.25rem;
+  --text-md-semibold--line-height: 1.3;
+  --text-md-semibold--letter-spacing: -0.03em;
+  --text-md-semibold--font-weight: 600;
+
+  /* typography.md S3.3 defines this step; S9's paste-ready block omits it.
+   * The `underline` is applied by the consumer, not baked into the token. */
+  --text-md-link: 1.25rem;
+  --text-md-link--line-height: 1.3;
+  --text-md-link--letter-spacing: -0.03em;
+  --text-md-link--font-weight: 500;
+
+  --text-md-prose: 1.25rem;
+  --text-md-prose--line-height: 1.6;
+  --text-md-prose--letter-spacing: -0.03em;
+  --text-md-prose--font-weight: 400;
+
+  --text-md-feature: 1.25rem;
+  --text-md-feature--line-height: 1.28;
+  --text-md-feature--letter-spacing: -0.03em;
+  --text-md-feature--font-weight: 400;
+
+  --text-md-hero: 1.25rem;
+  --text-md-hero--line-height: 1.4;
+  --text-md-hero--letter-spacing: -0.02em;
+  --text-md-hero--font-weight: 500;
+
+  --text-md-card: 1.25rem;
+  --text-md-card--line-height: 1.2;
+  --text-md-card--letter-spacing: -0.02em;
+  --text-md-card--font-weight: 500;
+
+  --text-md-auto: 1.25rem;
+  --text-md-auto--line-height: 1.21;
+  --text-md-auto--letter-spacing: -0.02em;
+  --text-md-auto--font-weight: 500;
+
+  --text-lg: 1.5rem; /* 24 */
+  --text-lg--line-height: 1.2;
+  --text-lg--letter-spacing: -0.03em;
+  --text-lg--font-weight: 500;
+
+  --text-lg-card: 1.5rem;
+  --text-lg-card--line-height: 1.3;
+  --text-lg-card--letter-spacing: -0.03em;
+  --text-lg-card--font-weight: 600;
+
+  --text-lg-standfirst: 1.5rem;
+  --text-lg-standfirst--line-height: 1.3;
+  --text-lg-standfirst--letter-spacing: -0.03em;
+  --text-lg-standfirst--font-weight: 500;
+
+  --text-lg-h3: 1.5rem;
+  --text-lg-h3--line-height: 1.33;
+  --text-lg-h3--letter-spacing: -0.03em;
+  --text-lg-h3--font-weight: 600;
+
+  --text-lg-caption: 1.5rem;
+  --text-lg-caption--line-height: 1.2;
+  --text-lg-caption--letter-spacing: -0.03em;
+  --text-lg-caption--font-weight: 400;
+
+  --text-xl: 1.75rem; /* 28 */
+  --text-xl--line-height: 1.13;
+  --text-xl--letter-spacing: -0.03em;
+  --text-xl--font-weight: 600;
+
+  --text-xl-h2: 1.75rem;
+  --text-xl-h2--line-height: 1.14;
+  --text-xl-h2--letter-spacing: -0.03em;
+  --text-xl-h2--font-weight: 500;
+
+  /* --- 32px and above: clamped per components.md S11 C-1 ------------------ */
+  --text-2xl: clamp(1.5rem, 1.3571rem + 0.7143vw, 2rem); /* 32 */
+  --text-2xl--line-height: 1.2;
+  --text-2xl--letter-spacing: -0.03em;
+  --text-2xl--font-weight: 500;
+
+  --text-2xl-related: clamp(1.5rem, 1.3571rem + 0.7143vw, 2rem);
+  --text-2xl-related--line-height: 1.1;
+  --text-2xl-related--letter-spacing: -0.03em;
+  --text-2xl-related--font-weight: 600;
+
+  --text-2xl-section: clamp(1.5rem, 1.3571rem + 0.7143vw, 2rem);
+  --text-2xl-section--line-height: 1.3;
+  --text-2xl-section--letter-spacing: -0.03em;
+  --text-2xl-section--font-weight: 500;
+
+  --text-2xl-feature: clamp(1.5rem, 1.3571rem + 0.7143vw, 2rem);
+  --text-2xl-feature--line-height: 1.3;
+  --text-2xl-feature--letter-spacing: -0.03em;
+  --text-2xl-feature--font-weight: 600;
+
+  --text-2xl-prose: clamp(1.5rem, 1.3571rem + 0.7143vw, 2rem);
+  --text-2xl-prose--line-height: 1.4;
+  --text-2xl-prose--letter-spacing: -0.03em;
+  --text-2xl-prose--font-weight: 500;
+
+  --text-3xl: clamp(1.625rem, 1.4464rem + 0.8929vw, 2.25rem); /* 36 */
+  --text-3xl--line-height: 1.3;
+  --text-3xl--letter-spacing: -0.03em;
+  --text-3xl--font-weight: 600;
+
+  --text-3xl-medium: clamp(1.625rem, 1.4464rem + 0.8929vw, 2.25rem);
+  --text-3xl-medium--line-height: 1.2;
+  --text-3xl-medium--letter-spacing: -0.03em;
+  --text-3xl-medium--font-weight: 500;
+
+  --text-4xl: clamp(1.75rem, 1.4643rem + 1.4286vw, 2.75rem); /* 44 */
+  --text-4xl--line-height: 1.3;
+  --text-4xl--letter-spacing: -0.03em;
+  --text-4xl--font-weight: 500;
+
+  --text-5xl: clamp(1.75rem, 1.3929rem + 1.7857vw, 3rem); /* 48 */
+  --text-5xl--line-height: 1.13;
+  --text-5xl--letter-spacing: -0.03em;
+  --text-5xl--font-weight: 500;
+
+  --text-5xl-tight: clamp(1.75rem, 1.3929rem + 1.7857vw, 3rem);
+  --text-5xl-tight--line-height: 1.1;
+  --text-5xl-tight--letter-spacing: -0.03em;
+  --text-5xl-tight--font-weight: 500;
+
+  /* --- Brand ramp (font-brand) ------------------------------------------- */
+  --text-brand-wordmark: 1.5rem; /* 24 */
+  --text-brand-wordmark--line-height: 1.2;
+  --text-brand-wordmark--letter-spacing: 0em;
+  --text-brand-wordmark--font-weight: 400;
+
+  /* -------------------------------------------------------------------------
+   * Breakpoints - responsive.md S1.3. Two deltas from stock v4: `xs` is new and
+   * `2xl` moves 96rem -> 90rem. sm/md/lg/xl keep their stock values on purpose.
+   * The namespace is NOT cleared - clearing and redeclaring all six invites a
+   * typo that silently shifts a stop.
+   *
+   * WARNING: `2xl:` means 1440 in this project, not Tailwind's stock 1536.
+   * ---------------------------------------------------------------------- */
+  --breakpoint-xs: 30rem; /* 480 */
+  --breakpoint-2xl: 90rem; /* 1440 */
+
+  /* -------------------------------------------------------------------------
+   * Section rhythm - layout.md S10.1. Tailwind's default `--spacing: 0.25rem`
+   * already produces the whole 4px scale, so it is deliberately NOT overridden.
+   * These are semantic aliases only.
+   * ---------------------------------------------------------------------- */
+  --spacing-section: 5rem; /*  80 - standard section padding-block */
+  --spacing-section-spotlight: 6.25rem; /* 100 - card deck, why-azza-steps */
+  --spacing-section-final: 7.5rem; /* 120 - last section before the footer */
+  --spacing-section-header: 3rem; /*  48 - section heading -> section body */
+  --spacing-gutter: 2.5rem; /*  40 - column gutter in card rows */
+
+  /* Sanctioned off-scale exceptions - layout.md S1.4. Do not "balance" these. */
+  --spacing-footer-split: 89px;
+  --spacing-footer-top: 107px;
+  --spacing-footer-bottom: 106px;
+
+  /* -------------------------------------------------------------------------
+   * Containers - layout.md S10.1 owns the 1440 widths, responsive.md S3.2 owns
+   * the form. `Container` applies `min(W, 100% - 2 * var(--gutter))` at every
+   * width, so at 1440 `default` resolves to exactly 1200 inside 120px gutters
+   * without a hard-coded number.
+   *
+   * components.md S11 C-10: these names also land in the container-query
+   * namespace. Named containers must always be `/name`-scoped; container
+   * QUERIES use arbitrary widths (`@min-[26rem]/card:`), never a named step.
+   * ---------------------------------------------------------------------- */
+  --container-bleed: 100%;
+  --container-deck: 81.25rem; /* 1300 - card deck stage, 511:364 */
+  --container-wide: 80rem; /* 1280 */
+  --container-default: 75rem; /* 1200 - modal value */
+  --container-grid: 72.5rem; /* 1160 */
+  --container-footer: 62.625rem; /* 1002 */
+  --container-faq: 61.6875rem; /*  987 */
+  --container-article: 61.5625rem; /*  985 */
+  --container-prose: 52.625rem; /*  842 - reading measure, never grows */
+  --container-nav: 852px; /*  852 - aligns to nothing else */
+
+  /* Fixed chrome - layout.md S10.1 */
+  --height-nav: 123px;
+  --height-footer: 764px;
+
+  /* -------------------------------------------------------------------------
+   * Motion - components.md S10.2 / S10.3. The Figma file contains zero authored
+   * motion; this is the whole invented contract. No implementer defines a
+   * duration or an easing curve anywhere else.
+   * ---------------------------------------------------------------------- */
+  --motion-instant: 80ms; /* press, focus box-shadow, icon colour  */
+  --motion-fast: 160ms; /* hover on small controls               */
+  --motion-base: 240ms; /* DEFAULT state change                  */
+  --motion-slow: 360ms; /* mobile nav sheet                      */
+  --motion-reveal: 520ms; /* scroll entrance                       */
+  --motion-deck: 640ms; /* card-deck promotion - the longest     */
+  --motion-stagger: 60ms; /* per-child delay in a staggered group  */
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* every entrance / open   */
+  --ease-in: cubic-bezier(0.64, 0, 0.78, 0); /* every exit / close      */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1); /* two-way position change */
+  --ease-spring: cubic-bezier(0.34, 1.32, 0.64, 1); /* deck + pill release ONLY */
+}
+
+/* ---------------------------------------------------------------------------
+ * Base layer
+ * ------------------------------------------------------------------------- */
+
+@layer base {
+  /*
+   * The gutter ladder - responsive.md S3.2. Stepped, never fluid: a fluid
+   * gutter makes every horizontal measurement in a Phase 3 capture a function
+   * of viewport width, which is unauditable. The steps are chosen so the
+   * default container reaches 1200 at 1360, which removes any jump at 1440.
+   */
+  :root {
+    --gutter: 20px;
+  }
+
+  @media (width >= 30rem) {
+    :root {
+      --gutter: 24px;
+    }
+  }
+
+  @media (width >= 40rem) {
+    :root {
+      --gutter: 32px;
+    }
+  }
+
+  @media (width >= 48rem) {
+    :root {
+      --gutter: 40px;
+    }
+  }
+
+  @media (width >= 64rem) {
+    :root {
+      --gutter: 48px;
+    }
+  }
+
+  @media (width >= 80rem) {
+    :root {
+      --gutter: 80px;
+    }
+  }
+
+  html {
+    /* Unconditional - anchor targets must clear the sticky nav regardless of
+     * motion preference. components.md S10.8. */
+    scroll-padding-top: var(--height-nav);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    background-color: var(--color-surface-page);
+    color: var(--color-fg-body);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /*
+   * Focus - components.md S10.7. The outline itself is never transitioned; a
+   * 160ms focus ring reads as lag during keyboard navigation. `outline: none`
+   * without a replacement is a defect, everywhere, always.
+   */
+  :focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+
+  [data-surface="inverse"] :focus-visible {
+    outline-color: var(--color-focus-ring-inverse);
+  }
+
+  /* responsive.md S3.4: long unbroken tokens must never force page scroll. */
+  :where(h1, h2, h3, h4, p, li, td, dd, dt) {
+    overflow-wrap: break-word;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Component layer - the three primitives whose behaviour cannot be expressed
+ * as utilities. Everything else is built with utilities in `src/components/ui`.
+ * ------------------------------------------------------------------------- */
+
+@layer components {
+  /*
+   * Container - one mechanism at every width (components.md S4.2).
+   * The width comes in as `--azza-container-w`; above the pin point the width
+   * holds and the gutters absorb the surplus.
+   */
+  .azza-container {
+    width: min(
+      var(--azza-container-w, var(--container-default)),
+      100% - 2 * var(--gutter)
+    );
+    margin-inline: auto;
+    min-width: 0;
+  }
+
+  .azza-container-bleed {
+    width: 100%;
+    margin-inline: auto;
+    min-width: 0;
+  }
+
+  /*
+   * Reveal - components.md S10.4. One entrance verb site-wide: fade up 16px.
+   *
+   * The hidden from-state exists ONLY inside
+   * `@media (prefers-reduced-motion: no-preference)`. A reduced-motion user, a
+   * no-JS user (layout.tsx ships the <noscript> override) and a crawler all get
+   * the final state. Never leave an element at opacity 0 when the animation
+   * does not run.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      opacity: 0;
+      transform: translateY(16px);
+      transition:
+        opacity var(--motion-reveal) var(--ease-out) var(--reveal-delay, 0ms),
+        transform var(--motion-reveal) var(--ease-out) var(--reveal-delay, 0ms);
+    }
+
+    .reveal[data-in="true"] {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /*
+   * Media - art-directed ratio steps (components.md S4.7). The slot's ratio is
+   * what reserves layout, so it must be set before the image loads; zero CLS is
+   * a hard requirement.
+   */
+  .azza-media {
+    aspect-ratio: var(--azza-media-ratio);
+  }
+
+  @media (width >= 48rem) {
+    .azza-media {
+      aspect-ratio: var(--azza-media-ratio-md);
+    }
+  }
+
+  @media (width >= 64rem) {
+    .azza-media {
+      aspect-ratio: var(--azza-media-ratio-lg);
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * The global reduced-motion floor - components.md S10.10.
+ *
+ * Unlayered and `!important` on purpose. This is a floor, NOT a substitute for
+ * the three tiers: Tier 1 removes decorative motion and sets the final state,
+ * Tier 2 makes functional motion instant rather than absent, Tier 3 restructures
+ * the card deck. Components still implement their own branches.
+ * ------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

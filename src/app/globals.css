@@ -11,3 +11,4 @@
  */
 @import "tailwindcss";
 @import "./tokens.generated.css";
+@import "./theme.css";
