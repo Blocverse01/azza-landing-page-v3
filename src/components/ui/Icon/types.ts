@@ -28,7 +28,15 @@ export type IconName =
   | "crypto-usdt"
   | "flag-ng"
   | "logo-azza-mark"
-  | "logo-azza-wordmark";
+  | "logo-azza-wordmark"
+  // Added after wave 2B by the r2 icon sweep. The first pass traversed only the
+  // `672:246` FOR BUILD section; both nav dropdowns (`94:850`, `63:350`) are
+  // direct children of the canvas and were never reached, so these four were
+  // missing while TopNav was already importing them. Appended, never reordered.
+  | "wallet" //         507:820 - Products > Crypto Wallet
+  | "money-bag" //      507:835 - Products > Cross-Border Payments
+  | "briefcase" //      507:840 - Products > Azza Business
+  | "social-youtube"; // 507:864 - Socials > YouTube
 
 /** 16 / 20 / 24 / 32 / 40. `md` (24) is the default. */
 export type IconSize = "xs" | "sm" | "md" | "lg" | "xl";

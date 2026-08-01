@@ -313,12 +313,22 @@ export function DeckCard({
        * Hit-testing is handed back to the two boxes that are actually painted.
        */}
       <div className="pointer-events-none absolute inset-0" style={layerStyle}>
-        {/* role="group" is what makes `aria-labelledby` meaningful: focus lands
-         * here after a promotion and the card's own headline is announced. */}
+        {/*
+         * role="group" is what makes `aria-labelledby` meaningful: focus lands
+         * here after a promotion and the card's own headline is announced.
+         *
+         * `tabindex="-1"` is PERMANENT, not conditional on `active`. Under the
+         * sticky track a promotion is a scroll, so the card is still at depth 1
+         * or 2 at the moment `promote()` moves focus to it - gating the
+         * attribute on `active` made `focus()` a silent no-op in exactly that
+         * case and dropped focus to <body>. -1 never enters the tab order, so
+         * the tab sequence is unchanged; it only makes the panel a legal
+         * programmatic target before it arrives at the front.
+         */}
         <div
           ref={panelRef}
           role="group"
-          tabIndex={active ? -1 : undefined}
+          tabIndex={-1}
           aria-labelledby={headingId}
           className={cn(
             "@container/deck pointer-events-auto absolute overflow-hidden rounded-xl",

@@ -74,29 +74,46 @@ const SOCIAL_HANDLE = {
   youtube: "",
 } as const;
 
-/** Products - 94:850. Hrefs follow the D-002 route map. */
+/** Products - 94:850. Hrefs follow the D-002 route map.
+ *
+ * Icons landed after wave 2B: the r2 icon sweep exported the three glyphs this
+ * dropdown draws (507:820 / 507:835 / 507:840), which the first pass missed
+ * because it traversed only the 672:246 FOR BUILD section. Slots reserved here
+ * under D-023 are now filled. */
 const PRODUCT_ITEMS: readonly NavDropdownItem[] = [
   {
     label: "Crypto Wallet",
     description: "Crypto made accessible.",
     href: "/products/crypto-wallet",
+    icon: "wallet",
   },
   {
     label: "Cross-Border Payments",
     description: "Make payments across borders.",
     href: "/products/cross-border-payments",
+    // 507:835. The design's own glyph for this row carries a YEN mark - see
+    // DECISIONS D-036. Shipped verbatim; swapping a currency symbol on an
+    // Africa-corridor product is the operator's call, not an implementer's.
+    icon: "money-bag",
   },
   {
     label: "Azza Business",
     description: "Set up your business account.",
     href: "/products/for-business",
+    icon: "briefcase",
   },
 ];
 
 /**
  * Socials - 63:350. `social-x` and `social-instagram` are the exported Fluent
- * outline glyphs and match the design's marks; there is no YouTube glyph in the
- * 21-name set, so that row reserves its slot and renders none (D-023).
+ * outline glyphs and match the design's marks. The YouTube glyph (507:864) was
+ * added by the r2 icon sweep after wave 2B, so this row no longer reserves an
+ * empty slot.
+ *
+ * NOTE (DECISIONS D-037): the design contains THREE disagreeing social sets -
+ * nav = X/Instagram/YouTube, Help = X/Instagram/WhatsApp, blog share =
+ * X/Instagram/TikTok/link - and the footer has none. This list is the nav's,
+ * transcribed from 63:350. Do not reconcile it against the others here.
  */
 const SOCIAL_ITEMS: readonly NavDropdownItem[] = [
   {
@@ -112,6 +129,7 @@ const SOCIAL_ITEMS: readonly NavDropdownItem[] = [
   {
     label: "YouTube",
     href: `https://www.youtube.com/${SOCIAL_HANDLE.youtube}`,
+    icon: "social-youtube",
   },
 ];
 

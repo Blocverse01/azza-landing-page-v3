@@ -109,7 +109,13 @@ export function DeckCarousel({ className }: DeckCarouselProps) {
   const atEnd = activeIndex === count - 1;
 
   return (
-    <div className={cn("w-full", className)}>
+    /*
+     * The `data-deck-*` attributes are styling hooks for one caller only: the
+     * <noscript> block in CardDeck.tsx, which has to reach in and turn this
+     * tree into the reduced-motion vertical stack when the script never runs.
+     * They are inert whenever scripting is on.
+     */
+    <div data-deck-flow="" className={cn("w-full", className)}>
       {/*
        * role="group" + a name + tabindex make the scroller keyboard-operable,
        * which WCAG 2.1.1 requires of any region that only scrolling can reveal.
@@ -118,6 +124,7 @@ export function DeckCarousel({ className }: DeckCarouselProps) {
        */}
       <div
         ref={scrollerRef}
+        data-deck-scroller=""
         role="group"
         aria-label="Feature cards"
         tabIndex={reduced ? undefined : 0}
@@ -129,7 +136,11 @@ export function DeckCarousel({ className }: DeckCarouselProps) {
           "motion-reduce:overflow-visible motion-reduce:[margin-inline:0] motion-reduce:[padding-inline:0]",
         )}
       >
-        <ul role="list" className="flex gap-4 motion-reduce:flex-col motion-reduce:gap-6">
+        <ul
+          data-deck-list=""
+          role="list"
+          className="flex gap-4 motion-reduce:flex-col motion-reduce:gap-6"
+        >
           {DECK_RECORDS.map((record, index) => (
             <DeckCard
               key={record.id}
@@ -154,7 +165,10 @@ export function DeckCarousel({ className }: DeckCarouselProps) {
           : ""}
       </span>
 
-      <div className="mt-6 flex items-center justify-center gap-2 motion-reduce:hidden">
+      <div
+        data-deck-controls=""
+        className="mt-6 flex items-center justify-center gap-2 motion-reduce:hidden"
+      >
         <CarouselButton
           label="Previous card"
           disabled={atStart}
