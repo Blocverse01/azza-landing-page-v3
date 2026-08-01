@@ -1,0 +1,56 @@
+<svg width="351" height="268" viewBox="0 0 351 268" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<filter id="filter0_d_1_3" x="-57.7415" y="-8.01086e-05" width="382.842" height="355.488" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dx="5.37428" dy="-4.47857"/>
+<feGaussianBlur stdDeviation="5.77736"/>
+<feComposite in2="hardAlpha" operator="out"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1_3"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1_3" result="shape"/>
+</filter>
+<filter id="filter1_d_1_3" x="-55.1439" y="16.0332" width="366.899" height="339.545" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="3.58286"/>
+<feGaussianBlur stdDeviation="1.79143"/>
+<feComposite in2="hardAlpha" operator="out"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1_3"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1_3" result="shape"/>
+</filter>
+<filter id="filter2_i_1_3" x="-31.9121" y="36.2324" width="320.348" height="297.777" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dx="6.27" dy="-8.95714"/>
+<feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0.0196078 0 0 0 0 0.301961 0 0 0 0 0.223529 0 0 0 0.5 0"/>
+<feBlend mode="normal" in2="shape" result="effect1_innerShadow_1_3"/>
+</filter>
+<clipPath id="clip0_1_3">
+<rect y="-357.777" width="1200" height="625" rx="12" fill="white"/>
+</clipPath>
+</defs>
+<g id="USDT tilted" opacity="0.7">
+<g id="USDT" filter="url(#filter0_d_1_3)">
+<g id="Group 1261153130">
+<g id="Ellipse 1" filter="url(#filter1_d_1_3)">
+<circle cx="173.137" cy="173.137" r="173.137" transform="matrix(0.99863 0.052336 0.285354 0.958422 -94 7.22266)" fill="#96CBC9"/>
+</g>
+<g id="Group 1261153129">
+<path id="Vector 2065" d="M135.692 177.02L134.302 173.613C175.201 173.594 194.982 177.789 205.461 185.121C215.94 192.452 184.957 206.88 132.005 209.293C85.7078 211.403 39.1376 199.642 40.9531 192.618C42.7687 185.594 64.9609 178.011 101.217 175.121L102.607 178.528C70.8812 181.709 52.7326 184.485 50.7151 191.305C49.6235 200.359 100.459 204.573 129.573 203.33C158.258 202.105 203.074 193.039 195.351 185.581C187.629 178.124 165.003 177.371 135.692 177.02Z" fill="white"/>
+<path id="Rectangle 554" d="M112.923 209.291L155.199 207.364L186.47 284.032L144.194 285.958L112.923 209.291Z" fill="white"/>
+<path id="Vector" d="M109.453 200.774L80.4924 129.77L21.674 132.45L7.55078 97.8242L167.463 90.5364L181.587 125.163L122.768 127.843L151.729 198.847L109.453 200.774Z" fill="white"/>
+</g>
+</g>
+</g>
+<g id="USDT tilted shadow">
+<path id="Subtract" d="M30.7231 20.016C50.3284 11.6945 73.216 8.22993 97.8501 9.85491C122.484 11.4799 148.295 18.1562 173.553 29.4369C198.811 40.7178 222.932 56.3426 244.297 75.2621C265.662 94.1816 283.778 115.959 297.43 139.134C311.082 162.309 319.954 186.346 323.452 209.632C326.949 232.919 324.991 254.916 317.708 274.15C310.426 293.383 297.987 309.408 281.227 321.15C268.693 329.93 253.96 336.163 237.606 339.648C294.263 318.631 321.619 261.112 300.772 191.093C273.486 99.4478 173.956 21.0976 78.4663 16.0932C61.2589 15.1914 45.357 16.733 31.0083 20.4028L30.7231 20.016Z" fill="#4D8C81"/>
+<g id="Ellipse 699" filter="url(#filter2_i_1_3)">
+<circle cx="154.61" cy="154.61" r="154.61" transform="matrix(0.997859 0.0654031 0.277482 0.960731 -68.9189 26.4707)" fill="#05513C" fill-opacity="0.01"/>
+</g>
+</g>
+</g>
+</svg>

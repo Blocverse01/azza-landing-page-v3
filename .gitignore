@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Quarantined: contains live-looking banking data (DECISIONS D-019)
+phone-screen-whatsapp-business.webp
