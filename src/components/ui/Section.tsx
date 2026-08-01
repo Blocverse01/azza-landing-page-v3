@@ -42,7 +42,17 @@ export interface SectionProps {
   gap?: 0 | 48;
   /** Full-bleed background utility, e.g. "bg-surface-subtle". Applied to the outer <section>. */
   background?: string;
-  /** overflow-hidden on the section box. Required wherever decorative art bleeds. Default false. */
+  /**
+   * Clips decorative bleed to the section box. Required wherever art overhangs.
+   * Default false.
+   *
+   * Emits `overflow-clip`, NOT `overflow-hidden`. They clip identically, but
+   * `hidden` makes the element a scroll container and a `position: sticky`
+   * descendant of a non-scrolling scrollport is **silently inert** - it
+   * typechecks, builds, and simply never sticks. The card deck lost a whole
+   * scroll track to this before it was caught in a browser. `clip` does not
+   * establish a scrollport, so sticky keeps working.
+   */
   clip?: boolean;
   /** Rendered element. Default "section". */
   as?: "section" | "div";
@@ -72,7 +82,7 @@ export function Section({
       className={cn(
         "w-full",
         RHYTHM_CLASS[rhythm],
-        clip ? "overflow-hidden" : undefined,
+        clip ? "overflow-clip" : undefined,
         background,
         className,
       )}
