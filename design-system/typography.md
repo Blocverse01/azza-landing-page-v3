@@ -76,15 +76,32 @@
 - **How to obtain:** **must be self-hosted from a licensed file supplied by the designer.**
   Not on Google Fonts. No npm/Fontsource package. `next/font/google` will silently give you the wrong
   face — do not use it.
-- **Interim stand-in while procurement resolves:** `Anton` (Google Fonts, SIL OFL, single weight,
-  ultra-condensed heavy grotesque) is the closest freely licensable match for the `Bold` and `Semi Bold`
-  roles. **Metrics differ** — Anton is slightly wider and has a taller x-height, so every display
-  headline will reflow. Treat any Anton build as provisional and re-check §3.1 line breaks after the
-  real file lands.
+- **DISPLAY FACE — OPERATOR DIRECTIVE (2026-08-01): use `Bebas Neue`, not `Lemon`.**
+  The operator has instructed that `Bebas Neue` replaces `Lemon` as the headline face. This supersedes
+  the `Anton` stand-in this document originally proposed. It is a decision, not a stopgap — implementers
+  build against Bebas Neue and there is no pending procurement for the display face.
+
+  - Obtainable via `next/font/google` (SIL OFL). No licensing action needed.
+  - **Single weight only.** Verified against the Google Fonts CSS API on 2026-08-01: the family serves
+    `font-weight: 400` and nothing else. The design uses Lemon at three weights — `Regular` (4 segments),
+    `Semi Bold` (20), `Bold` (9) — so **the three-weight display hierarchy collapses to one.**
+    Do not fake the missing weights with `font-weight: 600/700` on a 400-only family; browsers will
+    synthesise a smeared faux-bold. Differentiate those roles with size and tracking, which §3.1 already
+    varies, and leave weight at 400 throughout the display ramp.
+  - **Metrics differ from Lemon**, so every display headline will reflow. The §3.1 line-break notes were
+    derived from Lemon renders and must be re-checked once the site renders in Bebas Neue.
+  - Bebas Neue is an **uppercase-only** face — lowercase codepoints render as capitals. This is
+    compatible with the design, which sets every Lemon node uppercase (§0), but it means the
+    `textCase: UPPER` trap in §0 is now doubly load-bearing: the *source string* must still be preserved
+    verbatim for accessibility and copy/paste, because the visual uppercasing is now happening in the
+    font as well as in CSS.
+  - Interacts with the O-swap device (§5): Bebas Neue's `O` is a flat-sided rounded rectangle, whereas
+    Lemon's was closer to Subjectivity's circular `O`. The swap will read as a stronger contrast than the
+    designer intended. Keep the device; flag the visual difference at Phase 3 rather than dropping it.
 
 ```css
 /* target */
-font-family: "Lemon", "Anton", "Oswald", "Arial Narrow", system-ui, sans-serif;
+font-family: "Bebas Neue", "Oswald", "Arial Narrow", system-ui, sans-serif;
 ```
 
 ### 2.2 `Subjectivity` — accent / numeric face
@@ -577,7 +594,7 @@ acceptance gate 4 requires.
   --font-*: initial;
 
   --font-sans:    "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-display: "Lemon", "Anton", "Oswald", "Arial Narrow", system-ui, sans-serif;
+  --font-display: "Bebas Neue", "Oswald", "Arial Narrow", system-ui, sans-serif;
   --font-accent:  "Subjectivity", "Poppins", "Century Gothic", system-ui, sans-serif;
   --font-brand:   "Cal Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
 
