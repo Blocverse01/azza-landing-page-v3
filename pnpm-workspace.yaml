@@ -1,0 +1,7 @@
+# pnpm 11 blocks dependency build scripts unless they are explicitly allowed here.
+# Both entries are required, not optional:
+#   sharp         - native image codec next/image uses for production optimisation
+#   unrs-resolver - native module resolver pulled in by eslint-config-next
+allowBuilds:
+  sharp: true
+  unrs-resolver: true

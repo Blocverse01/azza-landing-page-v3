@@ -1,0 +1,20 @@
+/*
+ * GENERATED FILE - DO NOT EDIT.
+ *
+ * Produced by scripts/generate-tokens.mjs from tokens.json.
+ * Edit tokens.json and run `pnpm tokens` instead; any manual change here is
+ * overwritten on the next dev or build.
+ *
+ * Every declaration below is available as `var(<name>)` anywhere in the app,
+ * and as a Tailwind utility where the group is a Tailwind v4 theme namespace.
+ *
+ * `static` is deliberate. Without it Tailwind emits only the theme variables
+ * it can see referenced in source, so a token used solely through an inline
+ * style or a hand-written stylesheet would silently resolve to nothing.
+ * `static` emits every token to :root unconditionally.
+ */
+@theme static {
+  --color-background-03: #F3F3F3;
+  --color-green: #D3FEB6;
+  --color-white: #FFFFFF;
+}

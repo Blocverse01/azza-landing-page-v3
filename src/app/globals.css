@@ -1,0 +1,13 @@
+/*
+ * Global stylesheet - the single entry point for all CSS in the app.
+ *
+ * Import order matters:
+ *   1. tailwindcss           - preflight, utility engine, default theme
+ *   2. tokens.generated.css  - this project's design tokens, as an `@theme` block
+ *
+ * tokens.generated.css is produced from tokens.json by `pnpm tokens`, which
+ * `pnpm dev` and `pnpm build` both run first. Never edit it by hand, and never
+ * hard-code a design value in this file - change tokens.json and regenerate.
+ */
+@import "tailwindcss";
+@import "./tokens.generated.css";
