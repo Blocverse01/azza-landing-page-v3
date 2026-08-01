@@ -619,17 +619,31 @@ The swapped `<span>` inherits `font-size`, `line-height` and `letter-spacing` un
 
 **The nine headlines that carry the device, and nothing else:**
 
-| Node | `children` | `step` | `swapIndices` | `swapWeight` |
-|---|---|---|---|---|
-| `412:788` | `Your mONEY` | `display-hero` | `[5]` | `bold` |
-| `412:1066` | `what people say` | `display-1` | `[7]` | `medium` |
-| `412:1286` | `use azza today!` | `display-1` | `[11]` | `medium` |
-| `412:1572` | `QUESTIONS` | `display-6` | `[4]` | `medium` |
-| `412:1777` | `QUESTIONS` | `display-6` | `[4]` | `medium` |
-| `412:2014` | `QUESTIONS` | `display-6` | `[4]` | `medium` |
-| `412:2651` | `QUESTIONS` | `display-6` | `[4]` | `medium` |
-| `352:3586` | `THE AZZA BLOG` | `display-4` | `[10]` | `bold` |
-| `412:2442` | `Your money should work anywhere.` | `display-2` | `[6, 12, 19]` | `light` |
+> **CORRECTED 2026-08-01 by the orchestrator. Eight of these nine rows were wrong.**
+>
+> `swapIndices` is a **zero-based index into the `children` string**, naming the `O` to replace with the brand
+> glyph. The original table was off by one or two on every row but `412:1066`. Applied literally it rendered
+> the brand device on the wrong letter — the `d` of "today", the `T` of "QUESTIONS", the `L` of "BLOG", the
+> `m` of "mONEY" — across the hero, all four FAQ headlines, the blog index and the business hero.
+>
+> Reported independently by two blind agents (`impl-cta` and `impl-faq`, different sections, neither able to
+> see the other's report). The orchestrator then re-derived **all nine rows by hand** rather than accept
+> either report; the corrected column below is that derivation. `typography.md` §5 independently corroborates
+> `412:1286` by calling the glyph "the **o** in today".
+>
+> Verify by counting characters, including spaces. `QUESTIONS` = `Q0 U1 E2 S3 T4 I5 O6 N7 S8` → the `O` is 6.
+
+| Node | `children` | `step` | `swapIndices` | was | `swapWeight` |
+|---|---|---|---|---|---|
+| `412:788` | `Your mONEY` | `display-hero` | `[6]` | ~~`[5]`~~ → `m` | `bold` |
+| `412:1066` | `what people say` | `display-1` | `[7]` | correct | `medium` |
+| `412:1286` | `use azza today!` | `display-1` | `[10]` | ~~`[11]`~~ → `d` | `medium` |
+| `412:1572` | `QUESTIONS` | `display-6` | `[6]` | ~~`[4]`~~ → `T` | `medium` |
+| `412:1777` | `QUESTIONS` | `display-6` | `[6]` | ~~`[4]`~~ → `T` | `medium` |
+| `412:2014` | `QUESTIONS` | `display-6` | `[6]` | ~~`[4]`~~ → `T` | `medium` |
+| `412:2651` | `QUESTIONS` | `display-6` | `[6]` | ~~`[4]`~~ → `T` | `medium` |
+| `352:3586` | `THE AZZA BLOG` | `display-4` | `[11]` | ~~`[10]`~~ → `L` | `bold` |
+| `412:2442` | `Your money should work anywhere.` | `display-2` | `[6, 13, 19]` | ~~`[6, 12, 19]`~~ → `h` | `light` |
 
 **Headlines that contain an O and deliberately do NOT swap it** — verified single-segment nodes. Passing
 `swapIndices` here is a defect: `412:787`, `412:1620`, `412:1859`, `374:574`/`374:629`/`374:643`,

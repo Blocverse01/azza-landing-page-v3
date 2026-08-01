@@ -463,6 +463,17 @@
   --container-prose: 52.625rem; /*  842 - reading measure, never grows */
   --container-nav: 852px; /*  852 - aligns to nothing else */
 
+  /* responsive.md S3's `--measure-*` roles. They live in the `--container-*`
+   * namespace because that is what Tailwind v4 generates `max-w-*` from - a
+   * `--measure-*` namespace produces no utility at all. `--measure-prose` is
+   * already here as `--container-prose` (both 842).
+   *
+   * Added by the orchestrator after wave 2B: these two were specified in
+   * responsive.md but never emitted, so four components across three agents
+   * each hard-coded `max-w-[661px]` / `max-w-[635px]`. Use the token. */
+  --container-narrow: 41.3125rem; /*  661 - 570:435, 553:290 */
+  --container-centered: 39.6875rem; /*  635 - 412:1284 */
+
   /* Fixed chrome - layout.md S10.1 */
   --height-nav: 123px;
   --height-footer: 764px;

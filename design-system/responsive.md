@@ -244,7 +244,10 @@ Display roles below 32px at 1440 (eyebrows `412:1618` 14px, labels `412:1171` 21
 
 ---
 
-## 5. Container queries — four, and only four
+## 5. Container queries — three, and only three
+
+> **Was "four, and only four". Container #4 (Why-Azza feature column) was withdrawn by the orchestrator on
+> 2026-08-01 as unimplementable — see the correction in the table below. Containers 1–3 are unaffected.**
 
 Container queries are core in Tailwind v4.3.3 (verified). They are not free: a `container-type: inline-size` element cannot be sized by its own content in the inline axis, and a nested container silently shadows an outer one. They are used here **only where the viewport is genuinely the wrong signal** — meaning the same component renders at materially different widths at the *same* viewport width.
 
@@ -253,7 +256,36 @@ Container queries are core in Tailwind v4.3.3 (verified). They are not free: a `
 | **1** | **Card deck card** | `507:684` internals | The card is inside a `transform`ed, absolutely-positioned stack. A transform changes rendered size while the viewport says nothing changed — a viewport query would be **actively wrong**, not merely coarse. Strongest case in the project. |
 | **2** | **Article card** | `500:2215`, `352:3744` | The identical card renders at 360 in the `/blog` 3-up (`500:2213`), at 360 in the `/blog/[slug]` related 3-up (`352:3743`), and at full width when stacked. The two routes reach a 3-up at *different* viewport widths (`/blog` has a wider grid container than the article page's 985 column `[D]`), so one viewport rule cannot serve both. |
 | **3** | **Help resource card** | `500:1771`, `500:1777`, `500:1784`, `500:1790` | 420 wide in the 2-up (`500:1770`) `[D]`, but sits inside the 868 content column which itself competes with a 300 sidebar (`500:1738`). Whether the 40px icon (`500:1773`) sits above or inline with the title follows the card's width, not the page's. |
-| **4** | **Why-Azza feature column** | `553:292`, `553:299` | 508 wide in the 2-up `[D]`, full-width when stacked, and the two columns have *opposite* internal orders in the design (see §7.3.2). The label/phone arrangement follows column width. |
+| **4** | ~~**Why-Azza feature column**~~ **WITHDRAWN** | `553:292`, `553:299` | ~~508 wide in the 2-up `[D]`, full-width when stacked…~~ **See the correction directly below. This one is unimplementable; there are three container queries, not four.** |
+
+> **CORRECTION — container #4 is withdrawn by the orchestrator, 2026-08-01.**
+>
+> Reported by `impl-why-azza-crossborder` while building `553:287`, then verified by the orchestrator. A
+> container query on the feature column **cannot** distinguish the stacked state from the two-up state,
+> because the two width ranges **overlap**:
+>
+> | State | Narrowest | Widest |
+> |---|---|---|
+> | Two-up column | **372** — at `lg`, `(784 − 40) / 2` | **508** — at 1440 `[D]` |
+> | Stacked column | ~240 — at `base`, 280 container − 40 card padding | **608** — at `md`, 688 container − 80 |
+>
+> The stacked range (~240–608) **contains** the two-up range (372–508). No width threshold separates them, so
+> any container query that correctly reorders the stacked layout also fires on the desktop two-up and destroys
+> the designed alternation — precisely the outcome §7.3.2's reorder rule exists to prevent.
+>
+> The reporting agent framed this as "the stacked column is *wider* than the two-up column". That is true at
+> the `md`/`lg` crossover it measured, but it is not the whole reason and a later reader could refute it with a
+> narrow viewport. The correct statement is the overlap above. Moving the container up to the row does not help
+> either: at a 1023px viewport the row is 863px — over any plausible threshold — while `lg:grid-cols-2` has not
+> yet fired.
+>
+> **Ruling:** implement §7.3.2's **outcome** (at `< lg`, normalise both columns to label-then-phone) by any
+> mechanism that works. `lg:flex-col-reverse` on the second column is the accepted implementation and is what
+> ships in `WhyAzzaCrossBorder`. The "never with `order:` at page level" prohibition is retained — it exists to
+> stop DOM order and visual order diverging for keyboard and screen-reader users, and a per-column flex
+> reversal does not have that effect at the page level.
+>
+> **§7.3.2's reorder rule is unchanged.** Only its prescribed mechanism is.
 
 **Declaration pattern (v4):**
 
@@ -715,7 +747,28 @@ The `01 / 02 / 03` numbering is a genuine sequence `[D]` — it is an ordered se
 |---|---|
 | base–`sm` | 1 column: heading, steps (`<ol>`, numeral chip inline-start, row min-height 64), then phone max 280. |
 | `md` | 1 column, phone max 360. |
-| `lg`+ | 2 columns: steps left / phone right, as designed. |
+| `lg`+ | 2 columns: steps left / phone right. **"as designed" is unreachable at `lg` — see below.** |
+
+> **CORRECTION — the `lg` row was arithmetically unsatisfiable. Orchestrator, 2026-08-01.**
+>
+> Reported by `impl-why-azza-business`, verified: the designed composition is left column 500 at x = 170 and
+> phone 400 at x = 870, so the gap is 870 − 670 = **200**, and the whole thing spans **500 + 200 + 400 =
+> 1100**. At `lg` the content box is **928** (1024 viewport − 2 × 48 gutter). 1100 does not fit in 928, so
+> "as designed" cannot be honoured at `lg` no matter how it is implemented.
+>
+> **Ruling:** the 200px gap is the only elastic term — the two columns carry content at measured sizes, the
+> gutter is fixed by §4. Step the gap and let it reach the design value where there is room for it:
+> `lg:gap-16` (64) → `xl:gap-50` (200 `[D]`). At `xl` the composition is exactly as designed.
+>
+> **The 64px rung at `lg` is invented** — it is not in the design and no artifact specifies it. It is the
+> largest gap that leaves both columns above their content minimums at 928. Recorded here rather than left in
+> one agent's `open_questions`, so that any other section hitting the same squeeze uses the same rung instead
+> of inventing a different one.
+>
+> **This is the second unsatisfiable rule found in this artifact** (cf. §5 container #4). Both were caught by
+> implementers doing arithmetic the artifact did not. Treat `< xl` prescriptions here as *intent to be
+> honoured*, not as literal geometry — the design has no sub-1440 frames, so every number below `xl` is
+> derived rather than measured.
 
 **FAQ `412:2633`** (3 questions, card 561 tall `[D]`) · **Footer `412:2665`** · **QR `412:2602`** — per their sections.
 
