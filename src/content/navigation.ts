@@ -53,11 +53,9 @@ export interface NavItem extends Omit<NavLink, "href"> {
  * twice in responsive.md (S189, S899) as an overflow-wrap case. `07041900011`
  * in E.164 form: drop the leading 0, prefix 234.
  *
- * OUTSTANDING (DECISIONS D-034): the design labels 498:631 as a contact number
- * beside hq@azza.com. It does not state that it is the WhatsApp destination.
- * Treating it as such is the most faithful reading available - it is the only
- * number in the file and the product is a WhatsApp bot - but it is an inference
- * and the operator has been asked to confirm it.
+ * CONFIRMED by the operator on 2026-08-02 (DECISIONS D-041): this is the
+ * WhatsApp destination. It was an inference until then - the design labels
+ * 498:631 only as a contact number beside hq@azza.com - and is now settled.
  */
 const WHATSAPP_NUMBER = "2347041900011";
 

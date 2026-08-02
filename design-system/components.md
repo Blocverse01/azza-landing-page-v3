@@ -632,10 +632,33 @@ The swapped `<span>` inherits `font-size`, `line-height` and `letter-spacing` un
 > `412:1286` by calling the glyph "the **o** in today".
 >
 > Verify by counting characters, including spaces. `QUESTIONS` = `Q0 U1 E2 S3 T4 I5 O6 N7 S8` → the `O` is 6.
+>
+> ---
+>
+> **SECOND CORRECTION, 2026-08-02 — row `412:788` again. The first correction was also wrong.**
+>
+> I changed `412:788` from `[5]` to `[6]` by counting to the capital `O` in "mONEY". `impl-hero-landing`
+> built `[6]` as instructed and reported that the Figma node disagrees: its segments are
+> `<Lemon>Y</Lemon><Subjectivity>o</Subjectivity><Lemon>ur mONEY</Lemon>` — the accent face is on the
+> **lowercase `o` in "Your"**, index **1**.
+>
+> **`typography.md` §5 said so all along, twice**: its table reads "the 1st `o`", and its worked example is
+> literally `Y<span class="font-accent">o</span>ur mONEY`. It is a per-row authority for this device and I
+> did not read it before correcting the table — I applied a heuristic ("the device swaps an O, find the O")
+> to a device that §5 states explicitly **is not automatic**.
+>
+> **Every other row was re-checked against §5 and all seven are correct as they now stand:**
+> `412:1066` "the `o` in people" = 7 · `412:1286` "the `o` in today" = 10 · the four `QUESTIONS` "the `O`" = 6
+> · `352:3586` "the `O` in BLOG" = 11 · `412:2442` "all three `o` glyphs" = 6, 13, 19 (§5 excludes the `o` in
+> "Your" on this node — the device is per-node and the two headlines legitimately differ).
+>
+> **The rule this table needs, stated once:** `swapIndices` is whatever glyph the **Figma node's own segment
+> split** puts on the accent face. It is usually an `o`/`O` and it is never derivable by looking for one.
+> Confirm against `typography.md` §5 and the node's segments, never by counting to the nearest `O`.
 
 | Node | `children` | `step` | `swapIndices` | was | `swapWeight` |
 |---|---|---|---|---|---|
-| `412:788` | `Your mONEY` | `display-hero` | `[6]` | ~~`[5]`~~ → `m` | `bold` |
+| `412:788` | `Your mONEY` | `display-hero` | **`[1]`** | ~~`[5]`~~ → `m`, then ~~`[6]`~~ → wrong `O` | `bold` |
 | `412:1066` | `what people say` | `display-1` | `[7]` | correct | `medium` |
 | `412:1286` | `use azza today!` | `display-1` | `[10]` | ~~`[11]`~~ → `d` | `medium` |
 | `412:1572` | `QUESTIONS` | `display-6` | `[6]` | ~~`[4]`~~ → `T` | `medium` |
