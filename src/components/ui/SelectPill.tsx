@@ -41,6 +41,40 @@ export interface SelectPillProps {
   className?: string;
 }
 
+/*
+ * WHY THIS CONTROL IS `aria-disabled`.
+ *
+ * The design draws the chip with a chevron and specifies no picker: no menu
+ * frame, no option list, no open state, nowhere for the four currencies to
+ * come from. So there is no behaviour to implement, and inventing a listbox
+ * would be inventing design.
+ *
+ * What was shipped instead was a bare `<button>` with an `aria-label` and no
+ * handler - a control that announces "Select send currency, button", accepts
+ * Enter, and does nothing. That is the one outcome worse than an unavailable
+ * control: it is an unavailable control that claims to work.
+ *
+ * `aria-disabled`, never `disabled`. A `disabled` button leaves the focus
+ * order entirely, so a keyboard user tabbing the widget would never learn the
+ * chip exists - and the chip carries the currency, which is information. This
+ * is the project's established pattern for the seven other controls the design
+ * defines no behaviour for (the Wrapped arrows, the testimonial play buttons):
+ * reachable, focusable, and honest about being inert.
+ *
+ * HOW THE NOTE REACHES AT, AND WHY IT IS NOT A `<VisuallyHidden>` CHILD.
+ * An `aria-label` REPLACES the element's contents for name computation, and a
+ * button is a leaf in the accessibility tree - a screen reader announces its
+ * name, not its subtree. A visually-hidden child would therefore be silent:
+ * dead markup that reads as a fix. The note ships as part of the accessible
+ * name, which is the only channel this control has that is not painted. It is
+ * appended to - never replaces - the consumer's own label, so the four call
+ * sites keep the names the design gives them.
+ *
+ * `aria-disabled` alone already announces "unavailable"/"dimmed"; the sentence
+ * says WHY, which "unavailable" cannot. Delete both the moment a picker exists.
+ */
+const UNAVAILABLE_NOTE = "Currency selection is not available";
+
 /**
  * The currency / ticker selector chip.
  *
@@ -65,7 +99,8 @@ export function SelectPill({
   return (
     <button
       type="button"
-      aria-label={ariaLabel}
+      aria-label={`${ariaLabel}. ${UNAVAILABLE_NOTE}.`}
+      aria-disabled="true"
       className={cn(
         "inline-flex h-11 items-center gap-2 rounded-pill px-4",
         "text-sm",

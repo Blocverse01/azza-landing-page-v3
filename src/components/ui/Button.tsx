@@ -64,6 +64,20 @@ export interface ButtonProps {
   /** Renders <a> when href is present, <button> otherwise. Never both. */
   href?: string;
   type?: "button" | "submit";
+  /**
+   * Press handler for the `<button>` branch only.
+   *
+   * Deliberately NOT accepted alongside `href`: an `<a>` whose behaviour lives
+   * in an onClick is a link that does not link, and the two branches of this
+   * component are `<a>`-or-`<button>` precisely so that never happens. If a
+   * control needs a handler it is a button, so it must not be given an href.
+   *
+   * Its absence is why four consumers wrap this component in a `<div onClick>`
+   * (a11y A14). Those wrappers are correct-but-unnecessary today and are left
+   * alone here; unwinding them is a consumer edit this pass does not own. The
+   * prop is additive, so nothing that renders `Button` today changes.
+   */
+  onClick?: () => void;
   /** Trailing glyph. arrow-right on 412:1290/1224/1228/1231/1624. gap is 8px. */
   iconRight?: IconName;
   iconLeft?: IconName;
@@ -93,6 +107,7 @@ export function Button({
   size = "md",
   href,
   type = "button",
+  onClick,
   iconRight,
   iconLeft,
   fullWidth = false,
@@ -153,6 +168,7 @@ export function Button({
     <button
       type={type}
       disabled={disabled}
+      onClick={onClick}
       aria-label={ariaLabel}
       className={classes}
     >

@@ -5,8 +5,6 @@ import deviceShadow from "@design-system/assets/product/device-frame-phone-shado
 import whatsappTransfer from "@design-system/assets/product/phone-screen-whatsapp-transfer.webp";
 import { cn } from "@/lib/cn";
 
-import { VisuallyHidden } from "./VisuallyHidden";
-
 export type PhoneScreen = "whatsapp-transfer" | "whatsapp-business" | "redacted";
 
 /*
@@ -52,7 +50,8 @@ export interface PhoneMockupProps {
  * It is NOT in the repository and is .gitignore'd by filename. So:
  *
  *   - `screen` defaults to "redacted", which renders a flat surface.placeholder
- *     panel at the screen geometry with a visually-hidden note. It ships
+ *     panel at the screen geometry. The panel is `aria-hidden`: it is
+ *     decorative, and the build status behind it is not page content. It ships
  *     without the asset.
  *   - `screen="whatsapp-business"` must not be passed by any Phase 2 agent. It
  *     exists so that dropping a scrubbed screenshot at
@@ -145,9 +144,22 @@ export function PhoneMockup({
               className="object-cover object-[center_42%]"
             />
           ) : (
-            <div className="h-full w-full bg-surface-placeholder">
-              <VisuallyHidden>Screenshot pending — placeholder</VisuallyHidden>
-            </div>
+            /*
+             * The redacted panel is decorative and says nothing to a reader.
+             * It used to carry a visually-hidden "Screenshot pending -
+             * placeholder" note, which put internal build status into the
+             * product narrative: on /products/for-business a screen-reader
+             * user heard it mid-section, between two real sentences. Build
+             * state is not page content. The panel is `aria-hidden` instead,
+             * which matches the device frame and its shadow - every other
+             * layer of this mockup is already hidden from AT - and leaves the
+             * section reading exactly as it does for a sighted user, who is
+             * likewise told nothing about a pending screenshot.
+             */
+            <div
+              aria-hidden="true"
+              className="h-full w-full bg-surface-placeholder"
+            />
           )}
         </div>
       </div>

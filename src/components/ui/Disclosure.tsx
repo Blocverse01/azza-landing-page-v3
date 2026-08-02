@@ -13,6 +13,29 @@ import {
 export interface DisclosureProps {
   /** Uncontrolled default. */
   defaultOpen?: boolean;
+  /**
+   * Emit `role="region"` + `aria-labelledby` on the panel. DEFAULT FALSE.
+   *
+   * The ARIA accordion pattern makes the panel region OPTIONAL and advises
+   * against it "if the accordion has a large number of panels", because every
+   * region is a landmark and landmark navigation is a coarse index of a page's
+   * top-level structure. Emitting one unconditionally put 11+ landmarks on `/`
+   * alone - 7 from the feature list, 4 from the FAQ - plus more in the nav
+   * sheet and the help sidebar, which is not an index, it is the whole page
+   * listed twice.
+   *
+   * The trigger already carries `aria-expanded` and `aria-controls`, so the
+   * relationship and the state are conveyed without the landmark; the region
+   * only ever added a *navigation* affordance, and at this count it removed
+   * one. Opt in for the small number of panels that genuinely deserve to be
+   * reachable from the landmark list.
+   *
+   * `aria-labelledby` is emitted with the role and never without it: a plain
+   * `<div>` maps to the `generic` role, which PROHIBITS an accessible name, so
+   * a bare `aria-labelledby` is both inert and an axe `aria-prohibited-attr`
+   * violation. The two ship together or not at all.
+   */
+  region?: boolean;
   /** Controlled - used by Faq, where exactly one row is open at a time. */
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -63,6 +86,7 @@ export interface DisclosureProps {
  */
 export function Disclosure({
   defaultOpen = false,
+  region = false,
   open: openProp,
   onOpenChange,
   children,
@@ -110,8 +134,10 @@ export function Disclosure({
         },
         panelProps: {
           id: panelId,
-          role: "region",
-          "aria-labelledby": triggerId,
+          // See `region` on DisclosureProps. Both or neither - never a naming
+          // attribute on a role that cannot be named.
+          role: region ? "region" : undefined,
+          "aria-labelledby": region ? triggerId : undefined,
           hidden: !open,
         },
       })}

@@ -55,6 +55,12 @@ export interface IconProps {
  * an `auto` dimension lets the glyph expand to its intrinsic size, which for
  * `crypto-bnb` is 141px. Non-square glyphs honour their own aspect ratio -
  * `size` sets the height and the width follows from the viewBox.
+ *
+ * THIS COMPONENT USES NO HOOKS AND MUST NOT START. It renders from Server
+ * Components across the site, so `useId()` is unavailable to it - which is why
+ * the accessible name below is an `aria-label` rather than `aria-labelledby` +
+ * `<title id>`, and why glyphs.tsx carries an absolute ban on `<defs>` ids.
+ * Both are the same constraint, met twice.
  */
 export function Icon({
   name,
@@ -83,6 +89,18 @@ export function Icon({
       fill="none"
       className={cn(
         "inline-block shrink-0 align-middle",
+        /*
+         * Three glyphs were exported clipped to the circle inscribed in their
+         * viewBox (`<rect width=W height=W rx=W/2>`). A `<clipPath>` needs a
+         * document-unique id and this component cannot mint one, so the clip is
+         * expressed on the element box instead. It is the same circle, not an
+         * approximation: `width`/`height` above map the viewBox 1:1 onto a
+         * square box at every step of the scale, so `border-radius: 50%` cuts
+         * exactly where `rx=W/2` did. `overflow-hidden` is the outermost
+         * `<svg>`'s UA default and is restated only so the clip cannot be lost
+         * to a future reset.
+         */
+        glyph.clip === "circle" ? "overflow-hidden rounded-full" : undefined,
         rotate !== 0 ? ROTATE_CLASS[rotate] : undefined,
         className,
       )}
