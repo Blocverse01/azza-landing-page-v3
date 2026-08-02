@@ -3,7 +3,7 @@ import type { StaticImageData } from "next/image";
 import { cn } from "@/lib/cn";
 
 import { Card } from "./Card";
-import { Media } from "./Media";
+import { Media, type MediaProps } from "./Media";
 import { Pill } from "./Pill";
 import { StretchedLink } from "./StretchedLink";
 
@@ -40,15 +40,47 @@ export interface ArticleCardProps {
    */
   variant?: "featured" | "grid";
   priority?: boolean;
+  /**
+   * Overrides the crop anchor derived from the source's orientation below.
+   * Only pass it when a landscape source also needs an off-centre crop.
+   */
+  imagePosition?: MediaProps["position"];
   className?: string;
 }
 
+/*
+ * "May 4, 2026" - 500:2221 / 352:3595, en-US month-first. It was en-GB, which
+ * renders "4 May 2026": a different string from the one the design authors.
+ * The locale is pinned rather than left to the runtime so the server and the
+ * client cannot disagree about it.
+ */
 const DATE_FORMAT: Intl.DateTimeFormatOptions = {
-  day: "numeric",
   month: "long",
+  day: "numeric",
   year: "numeric",
   timeZone: "UTC",
 };
+
+/*
+ * THE CROP ANCHOR, DERIVED RATHER THAN CONFIGURED.
+ *
+ * assets.md S6.2 predicted this in advance: `blog-card-naira-to-cedis.webp` is
+ * portrait (1456x1817) in a landscape 360x280 slot, so a centred `cover` crop
+ * removes roughly 56% of the height - including the headline baked into the top
+ * third. The card cropped away its own subject.
+ *
+ * The anchor is read off the source's own dimensions rather than added to the
+ * post record, because `BlogPost` is a published contract (S7.1) that
+ * `src/content/blog.ts` implements structurally, and a new field would have to
+ * land in both halves at once. Orientation is the actual rule: a portrait
+ * source in a landscape slot always loses its top, and a designed social card
+ * always puts the headline there. The five landscape bitmaps are ~1.25 against
+ * a 1.29 slot and crop imperceptibly, so they stay centred - which is what
+ * S6.2 asks for. `imagePosition` overrides it.
+ */
+function cropAnchor(image: StaticImageData): NonNullable<MediaProps["position"]> {
+  return image.height > image.width ? "top" : "center";
+}
 
 /**
  * The blog card.
@@ -66,6 +98,7 @@ export function ArticleCard({
   post,
   variant = "grid",
   priority = false,
+  imagePosition,
   className,
 }: ArticleCardProps) {
   const featured = variant === "featured";
@@ -87,6 +120,7 @@ export function ArticleCard({
         ratioMd={featured ? "2/1" : "9/7"}
         ratioBase="3/2"
         placeholderColor={post.placeholderColor}
+        position={imagePosition ?? cropAnchor(post.image)}
         priority={priority}
         sizes={
           featured
@@ -97,7 +131,16 @@ export function ArticleCard({
       />
 
       <div className="flex flex-col gap-4">
-        <Pill variant="tag">{post.category}</Pill>
+        {/*
+         * The featured card sits on the `surface.brand-subtle` hero panel and
+         * paints no fill of its own, so a `brand-subtle` chip on it is exactly
+         * invisible. The design draws the two chips differently for that
+         * reason: 500:1838 (featured) is `surface.page`, 500:2217 (grid) is
+         * `surface.brand-subtle`.
+         */}
+        <Pill variant="tag" tone={featured ? "page" : "brand-subtle"}>
+          {post.category}
+        </Pill>
 
         <h3 className={featured ? "text-2xl-feature" : "text-lg-card"}>
           <StretchedLink href={`/blog/${post.slug}`}>
@@ -109,9 +152,14 @@ export function ArticleCard({
           <p className="text-sm-body text-fg-body-strong">{post.standfirst}</p>
         ) : null}
 
-        <p className="text-xs text-fg-muted">
+        {/*
+         * 500:2221 / 352:3595 - 20px Medium at -0.03em, `fg.subtle`.
+         * It shipped at 14px `fg.muted`, which is two type steps and a shade
+         * away from the authored meta line.
+         */}
+        <p className="text-md text-fg-subtle">
           <time dateTime={post.date}>
-            {published.toLocaleDateString("en-GB", DATE_FORMAT)}
+            {published.toLocaleDateString("en-US", DATE_FORMAT)}
           </time>
           {post.readingTime ? <> · {post.readingTime}</> : null}
         </p>

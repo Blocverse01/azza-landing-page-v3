@@ -6,7 +6,15 @@ import { Icon } from "./Icon";
 import { VisuallyHidden } from "./VisuallyHidden";
 
 export interface SearchFieldProps {
-  /** Visually hidden unless `labelVisible`. Required - the field is never label-less. */
+  /**
+   * Always visually hidden. Required - the field is never label-less.
+   *
+   * This said "visually hidden unless `labelVisible`", naming a prop that has
+   * never existed on this interface. Neither search field in the design draws a
+   * visible label (500:2202, 500:1739), so the comment was corrected rather
+   * than the prop invented: a typed option nothing needs is API surface that
+   * has to be maintained and can drift again.
+   */
   label: string;
   placeholder: string;
   name?: string;
@@ -56,7 +64,18 @@ export function SearchField({
           "flex w-full items-center gap-3 rounded-2xl p-4",
           "bg-field-surface text-field-fg",
           "border border-field-border",
-          "transition-colors duration-(--motion-fast) ease-out",
+          /*
+           * `transition-[border-color]`, NOT `transition-colors`. Tailwind's
+           * `transition-colors` expands to a property list that includes
+           * `outline-color`, and this wrapper is where the focus indicator
+           * lives - so the ring faded in over 160ms from `currentColor`.
+           * components.md S10.7 forbids transitioning a focus indicator, and a
+           * ring that is the wrong colour at t=0 is not there when a keyboard
+           * user needs it. Measured: `outline-color` immediately after focus
+           * read rgb(53,53,53) and only reached rgb(52,48,233) at t=600ms.
+           * The border is the only colour this element actually animates.
+           */
+          "transition-[border-color] duration-(--motion-fast) ease-out",
           "hoverable:border-field-border-hover",
           // The input suppresses its own outline, so the focus indicator moves
           // to the wrapper - `outline: none` without a replacement is a defect.

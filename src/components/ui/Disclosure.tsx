@@ -40,12 +40,26 @@ export interface DisclosureProps {
  * (components.md S10.5), never `max-height` guesswork - a guessed max-height
  * either clips a long answer or stalls a short one.
  *
- * NOTE on `panelProps.hidden`: the props contract in components.md S4.11 lists
- * `hidden` among the panel props, and it is supplied here as written. It is
- * mutually exclusive with the grid-rows transition, because `display: none`
- * cannot animate. A consumer that needs the animation should spread
- * `panelProps` and then override `hidden={undefined}`, driving visibility from
- * the `open` flag instead. Raised in this agent's open_questions.
+ * `panelProps.hidden` AND WHY `inert` IS NOT SUPPLIED HERE.
+ *
+ * components.md S4.11 lists `hidden` among the panel props, and it is supplied
+ * as written. It is mutually exclusive with the grid-rows transition, because
+ * `display: none` cannot animate. D-030 ruled on it: spread `panelProps`,
+ * override `hidden={undefined}`, and mark the collapsed panel `inert` - which
+ * removes the subtree from the focus order and the a11y tree while leaving it
+ * animatable. EVERY consumer must do both halves; the type system cannot catch
+ * a miss, which is a real defect in this contract.
+ *
+ * Folding `inert: !open` in here so that correct is the default was considered
+ * and rejected, because `inert` is not universally correct. It cannot carry a
+ * breakpoint, and one consumer's panel must be visible and focusable at `lg`+
+ * no matter what `open` says - it drives that with `invisible ... lg:visible`
+ * precisely because a media query can reach `visibility` and cannot reach
+ * `inert`. Supplying `inert` unconditionally would take that subtree out of the
+ * focus order at desktop, turning a contract defect into an a11y regression.
+ *
+ * Fixing it properly means a per-consumer opt-out, which means editing
+ * consumers. Recorded as a finding instead.
  */
 export function Disclosure({
   defaultOpen = false,

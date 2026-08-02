@@ -13,6 +13,12 @@ export interface ProseProps {
    * narrative (412:2520).
    */
   gap?: 20 | 60;
+  /**
+   * Body ink. Defaults to whichever the design gives the chosen `step`:
+   * `md-prose` -> `prose` (352:3708), `2xl-prose` -> `body`
+   * (412:2521-2525). Pass it explicitly only to override that.
+   */
+  tone?: "prose" | "body";
   /** Caps the reading measure at 842px. Never grows above it. Default true. */
   measure?: boolean;
   as?: "div" | "section";
@@ -28,6 +34,27 @@ const STEP_CLASS: Record<NonNullable<ProseProps["step"]>, string> = {
 const GAP_CLASS: Record<NonNullable<ProseProps["gap"]>, string> = {
   20: "gap-5",
   60: "gap-15",
+};
+
+const TONE_CLASS: Record<NonNullable<ProseProps["tone"]>, string> = {
+  prose: "text-fg-prose", // article + help body, 352:3708
+  body: "text-fg-body", // business narrative, 412:2521-2525
+};
+
+/*
+ * Ink is a function of the step in the design, so that is the default rather
+ * than a single pinned colour. `text-fg-prose` was pinned for both, which made
+ * the business narrative `fg.prose` against an authored `fg.body`, and there
+ * was no prop to say otherwise - only a `className`, which `cn` will not
+ * resolve against the pinned class (D7). The explicit `tone` prop is the
+ * override.
+ */
+const STEP_TONE: Record<
+  NonNullable<ProseProps["step"]>,
+  NonNullable<ProseProps["tone"]>
+> = {
+  "md-prose": "prose",
+  "2xl-prose": "body",
 };
 
 /**
@@ -47,6 +74,7 @@ const GAP_CLASS: Record<NonNullable<ProseProps["gap"]>, string> = {
 export function Prose({
   step = "md-prose",
   gap = 60,
+  tone,
   measure = true,
   as = "div",
   className,
@@ -57,13 +85,19 @@ export function Prose({
   return (
     <Tag
       className={cn(
-        "flex flex-col text-fg-prose",
+        "flex flex-col",
+        TONE_CLASS[tone ?? STEP_TONE[step]],
         STEP_CLASS[step],
         GAP_CLASS[gap],
         measure ? "w-full max-w-(--container-prose)" : "w-full",
         "[&_strong]:font-semibold",
         "[&_a]:text-link-inline [&_a]:underline",
-        "[&_a]:transition-colors [&_a]:duration-(--motion-fast) [&_a]:ease-out",
+        // `transition-[color]`, NOT `transition-colors`: the latter's property
+        // list carries `outline-color`, so an inline link's focus ring would
+        // interpolate from currentColor. It is invisible today only because
+        // `link.inline` happens to equal `focus.ring`; the moment either token
+        // moves it becomes a 160ms-late focus ring. components.md S10.7.
+        "[&_a]:transition-[color] [&_a]:duration-(--motion-fast) [&_a]:ease-out",
         "fine-pointer:[&_a:hover]:text-link-inline-hover",
         "[&_a:focus-visible]:text-link-inline-hover",
         className,

@@ -28,6 +28,14 @@ export interface MediaProps {
   /**
    * Art-directed crop change at a breakpoint. `ratio` applies from `lg` up,
    * `ratioMd` from `md`, `ratioBase` below that. responsive.md S10.
+   *
+   * These change the SLOT's aspect ratio only. components.md S4.11 describes
+   * them as rendering `<picture>` "with distinct sources"; there is no such
+   * thing to render. assets.md S6.1 ships ONE master bitmap per image - six
+   * files for ten blog cards - so there is no second crop to point a
+   * `<source>` at, and a `<picture>` with one source is a `<picture>` with no
+   * art direction in it. What art direction the design actually has is a crop
+   * change against a fixed master, which is the ratio below plus `position`.
    */
   ratioMd?: string;
   ratioBase?: string;

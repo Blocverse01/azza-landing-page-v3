@@ -27,15 +27,30 @@ const VARIANT_CLASS: Record<NonNullable<ButtonProps["variant"]>, string> = {
  * Height + padding + type token.
  *   sm -> h-11 px-4 text-xs-btn  (QR badge CTA, 14px Semi Bold)
  *   md -> h-12 px-5 text-sm-btn  (nav CTA 144x43 -> 44, hero CTA 182x51)
- *   lg -> h-14 px-6 text-md      (253x56 "Get Started", 314x56 "Generate ...")
+ *   lg -> h-14 px-5 text-sm-btn  (253x56 412:1288, 314x56 412:1222, 193x56
+ *                                 412:1622)
  *
  * The floor is 44x44 at every breakpoint (responsive.md S6.1); the nav CTA's
  * designed 43px height is padded to 44 and that is not a fidelity defect.
+ *
+ * `lg` WAS `px-6 text-md`, i.e. 24px inset around a 20px label. No lg button in
+ * the file is either. The three the design authors all inset 20px and all size
+ * their label at 16 or 18:
+ *
+ *   412:1288  253x56   label 412:1289 16px Semi Bold, 20 + 181 + 8 + 24 + 20
+ *   412:1622  193x56   label 412:1623 16px           , 20 + 122 + 8 + 24 + 20
+ *   412:1222  314x56   label 412:1223 18px Medium    , 20 + 242 + 8 + 24 + 20
+ *
+ * Each of those sums back to the authored width exactly at px-5 and to width+8
+ * at px-6, which is what settles the padding independently of the type. The
+ * label step follows the two 16px Semi Bold nodes, which also keeps the ladder
+ * consistent - sm/md/lg are then 14/16/16 Semi Bold and only the box grows.
+ * 412:1223's 18px Medium is the outlier and is not matched; recorded.
  */
 const SIZE_CLASS: Record<NonNullable<ButtonProps["size"]>, string> = {
   sm: "h-11 px-4 text-xs-btn",
   md: "h-12 px-5 text-sm-btn",
-  lg: "h-14 px-6 text-md",
+  lg: "h-14 px-5 text-sm-btn",
 };
 
 const DISABLED_CLASS =

@@ -26,7 +26,12 @@ export function StretchedLink({
 }: StretchedLinkProps) {
   const classes = cn(
     "no-underline after:absolute after:inset-0 after:content-['']",
-    "transition-colors duration-(--motion-fast) ease-out",
+    // `transition-[color]`, NOT `transition-colors` - the latter's property
+    // list includes `outline-color`, which made the :focus-visible ring fade in
+    // from currentColor over 160ms. components.md S10.7: the focus indicator is
+    // never transitioned. Measured rgb(53,53,53) at t=0 against a token colour
+    // of rgb(52,48,233). Text colour is the only thing this link animates.
+    "transition-[color] duration-(--motion-fast) ease-out",
     "hoverable:text-link-hover focus-visible:text-link-hover",
     className,
   );

@@ -28,6 +28,20 @@ export interface RevealProps {
  * The observer fires once and then disconnects - a reveal that replays on every
  * scroll-by is a distraction, not an entrance.
  *
+ * WHY THIS IS NOT AN IntersectionObserver ON ITS OWN. An observer only reports
+ * at sampled frames. An element that travels from below the viewport to above
+ * it inside ONE scroll step is not intersecting at any sampled frame, so the
+ * callback never runs at all - checking `entry.boundingClientRect` inside it
+ * fixes nothing - and `data-in` stays `false` forever. That leaves the
+ * `opacity: 0` from-state permanent, which is content lost rather than an
+ * entrance missed. Measured at 1440x900: a single `wheel(0, 8563)` past this
+ * element left it at `opacity: 0` at t=1000ms and still at t=4000ms.
+ *
+ * Reachable in ordinary use by back-navigation scroll restoration, a scrollbar
+ * drag, a hash deep link, or one fast wheel flick. So the observer is backed by
+ * the same test expressed geometrically, run on mount and on a passive,
+ * rAF-coalesced scroll/resize fallback. Everything unhooks on first reveal.
+ *
  * Stagger is capped at 6 so a nine-card blog grid does not take 540ms to finish
  * arriving.
  *
@@ -65,17 +79,34 @@ export function Reveal({
     const element = ref.current;
     if (!element) return;
 
-    if (typeof IntersectionObserver === "undefined") {
+    /*
+     * The observer's own trigger line, expressed geometrically: `threshold: 0`
+     * with `rootMargin: 0 0 -12% 0` fires once the element's top crosses 88% of
+     * the viewport height.
+     *
+     * The usual companion test `rect.bottom > 0` is deliberately NOT applied.
+     * An element that is already ABOVE the viewport must count as revealed -
+     * that is precisely the state the observer cannot see, and treating it as
+     * "not yet" is what strands the content.
+     */
+    const pastTrigger = () =>
+      element.getBoundingClientRect().top < window.innerHeight * 0.88;
+
+    // Mount check first: scroll restoration and hash deep links land here, with
+    // the element already behind the reader before the observer ever runs.
+    if (pastTrigger() || typeof IntersectionObserver === "undefined") {
       setInView(true);
       return;
     }
+
+    let done = false;
+    let frame = 0;
 
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
-            setInView(true);
-            observer.disconnect();
+            reveal();
             return;
           }
         }
@@ -83,8 +114,41 @@ export function Reveal({
       { threshold: 0, rootMargin: "0px 0px -12% 0px" },
     );
 
+    function teardown() {
+      observer.disconnect();
+      if (frame) cancelAnimationFrame(frame);
+      frame = 0;
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    }
+
+    function reveal() {
+      if (done) return;
+      done = true;
+      teardown();
+      setInView(true);
+    }
+
+    function onScroll() {
+      if (done || frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        if (pastTrigger()) reveal();
+      });
+    }
+
     observer.observe(element);
-    return () => observer.disconnect();
+
+    /*
+     * The fallback that closes the single-frame jump. Passive so it never
+     * blocks scrolling, rAF-coalesced so it costs one rect read per frame at
+     * most, and removed the moment this instance reveals - so the listener
+     * count falls to zero as the page is read rather than accumulating.
+     */
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+
+    return teardown;
   }, []);
 
   const steps = Math.min(Math.max(index, 0), 6);
