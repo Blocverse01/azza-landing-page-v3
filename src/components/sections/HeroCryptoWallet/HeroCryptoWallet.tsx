@@ -2,21 +2,10 @@ import { QrBadge } from "@/components/sections/QrBadge";
 import { Button, DisplayHeading, Pill, Section } from "@/components/ui";
 
 import { BuyCryptoWidget } from "./BuyCryptoWidget";
+import { WHATSAPP_CHAT_URL } from "@/content/navigation";
 
 const HEADING_ID = "crypto-wallet-hero-heading";
 
-/**
- * The design gives this CTA no destination - no prototype link, no annotation.
- * AZZA is a WhatsApp-only product ("No apps. No switching platforms. Just
- * WhatsApp." is this hero's own subcopy), so WhatsApp is the faithful reading,
- * and the number is the one confirmed by the operator in D-041 from the footer
- * node 498:631. It is transcribed, never invented.
- *
- * This duplicates a run-level constant that has no home I am permitted to
- * import - see `open_questions`. It belongs in `src/lib/site.ts` alongside the
- * other infrastructure values, once one agent owns that edit.
- */
-const WHATSAPP_CHAT_URL = "https://wa.me/2347041900011";
 
 /**
  * `/products/crypto-wallet` hero - 412:1587.

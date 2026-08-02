@@ -2,6 +2,7 @@ import { QrBadge } from "@/components/sections/QrBadge";
 import { Button, Section } from "@/components/ui";
 
 import { HeroHeadline } from "./HeroHeadline";
+import { WHATSAPP_CHAT_URL } from "@/content/navigation";
 
 /**
  * The landing hero - 412:761, the first thing anyone sees on `/`.
@@ -47,15 +48,6 @@ import { HeroHeadline } from "./HeroHeadline";
 
 const HEADING_ID = "hero-landing-heading";
 
-/**
- * D-041, confirmed by the operator: 412:631's `07041900011` in the footer is the
- * WhatsApp number, in international form. One destination for every "Chat with
- * Azza" / "Get Started" CTA on the site.
- *
- * Held locally because no shared constants module is in this agent's allowlist.
- * Flagged for extraction in `open_questions`.
- */
-const WHATSAPP_CHAT_URL = "https://wa.me/2347041900011";
 
 /** 412:789, verbatim. */
 const SUBCOPY =
