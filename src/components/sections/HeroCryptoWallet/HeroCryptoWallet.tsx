@@ -98,7 +98,22 @@ export function HeroCryptoWallet() {
        * is why this <section> carries `relative`, and hides itself below `lg` -
        * a QR code cannot be scanned by the device rendering it.
        */}
-      <QrBadge />
+      {/*
+       * Gated to `xl`, matching HeroCrossBorder. `responsive.md` S7.3.1 rules
+       * that on THIS hero the badge appears at `xl`/`2xl` - unlike the landing
+       * hero, where S7.2.1 rules `lg` and no collision occurs.
+       *
+       * Measured at 1024 in a browser before the guard: the badge box (x
+       * 807-927) overlapped the "Select the currency you pay with" button by
+       * 103px and WON the hit test - elementFromPoint at the overlap centre
+       * returned the badge, so that control was partly unclickable. The badge
+       * anchors `right-[82px]` to the section while the widget sits in a
+       * container shrunk to `100% - 2*gutter`, so the two walk toward each
+       * other as the viewport narrows.
+       */}
+      <div className="hidden xl:block">
+        <QrBadge />
+      </div>
     </Section>
   );
 }
