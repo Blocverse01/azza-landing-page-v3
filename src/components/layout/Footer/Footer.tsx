@@ -8,6 +8,24 @@ import { FooterWatermark } from "./FooterWatermark";
 
 export interface FooterProps {
   className?: string;
+  /**
+   * The route currently rendered. The matching footer link gets
+   * `aria-current="page"` - design/responsive.md S6.4 row 9 asks for it on the
+   * footer links as well as the nav ones, and until now `FooterProps` had no
+   * way to receive it.
+   *
+   * OPTIONAL, and it stays optional. `Footer` is a SERVER component; the App
+   * Router gives a server tree no way to read its own pathname, so the value
+   * can only arrive from a caller that already holds it. Requiring it would
+   * force every caller across a client boundary, which is the exact cost
+   * `SiteChrome` is currently paying for `TopNav` and which this pass removes.
+   * Omitted, the footer renders exactly as before and marks nothing.
+   *
+   * No visual treatment is attached: the design draws no "current" state for a
+   * footer link and inventing one is not an implementation decision. This is
+   * the assistive-technology cue only.
+   */
+  currentPath?: string;
 }
 
 /**
@@ -76,7 +94,7 @@ const LINK_CLASS = cn(
  *   lg    logo left, 4-up links right - the designed arrangement
  *   xl/2xl  as designed, content 1002 centred
  */
-export function Footer({ className }: FooterProps) {
+export function Footer({ className, currentPath }: FooterProps) {
   return (
     <footer
       // Switches `:focus-visible` to `--color-focus-ring-inverse` for the whole
@@ -142,24 +160,41 @@ export function Footer({ className }: FooterProps) {
                 {FOOTER_COLUMNS.map((column) => (
                   <div key={column.heading} className="flex flex-col gap-6">
                     {/*
-                     * typography.md S4.2 maps the footer column heading to h4 on
-                     * `text-base-bold` (Inter Bold 18 / 1.21 / -0.02em).
+                     * typography.md S4.2 maps the footer column heading to the
+                     * `text-base-bold` role (Inter Bold 18 / 1.21 / -0.02em) and
+                     * names h4 alongside it. The TOKEN is what that artifact
+                     * owns and it is unchanged; the LEVEL is a per-page fact and
+                     * h4 was wrong here. The last heading before the footer is an
+                     * <h2> on `/` and on `/help`'s article state, so h4 skipped a
+                     * level in the document outline. h3 is the first level that
+                     * is correct on every one of the seven routes.
                      */}
-                    <h4 className="text-base-bold text-fg-on-inverse">{column.heading}</h4>
+                    <h3 className="text-base-bold text-fg-on-inverse">{column.heading}</h3>
                     <ul className="flex flex-col gap-6">
-                      {column.links.map((link) => (
-                        <li key={link.href} className="flex">
-                          {isExternalHref(link.href) ? (
-                            <a href={link.href} className={LINK_CLASS}>
-                              {link.label}
-                            </a>
-                          ) : (
-                            <Link href={link.href} className={LINK_CLASS}>
-                              {link.label}
-                            </Link>
-                          )}
-                        </li>
-                      ))}
+                      {column.links.map((link) => {
+                        const external = isExternalHref(link.href);
+
+                        return (
+                          <li key={link.href} className="flex">
+                            {external ? (
+                              <a href={link.href} className={LINK_CLASS}>
+                                {link.label}
+                              </a>
+                            ) : (
+                              <Link
+                                href={link.href}
+                                prefetch={link.prefetch}
+                                aria-current={
+                                  currentPath === link.href ? "page" : undefined
+                                }
+                                className={LINK_CLASS}
+                              >
+                                {link.label}
+                              </Link>
+                            )}
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
                 ))}

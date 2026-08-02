@@ -19,8 +19,19 @@ import { MobileNavPanel } from "./MobileNavPanel";
 import { NavDropdown } from "./NavDropdown";
 
 export interface TopNavProps {
-  /** Marks the nav item for the current route with aria-current + nav.fg-current. */
-  currentPath: string;
+  /**
+   * Marks the nav item for the current route with aria-current + nav.fg-current.
+   *
+   * OPTIONAL, and falls back to `usePathname()`. It was required, and that was
+   * the sole reason `SiteChrome` carried `"use client"`: a server layout cannot
+   * read its own pathname, so the only way to satisfy a required prop was to
+   * make the caller a client component - which dragged `SkipLink` and `Footer`
+   * into the client bundle with it. `TopNav` is already a client component and
+   * already calls `usePathname()`, so reading it here costs nothing and lets the
+   * caller stay on the server. The prop is kept so a caller that DOES hold the
+   * path (a test, a story, a future server-resolved route segment) can override.
+   */
+  currentPath?: string;
 }
 
 const FOCUSABLE = [
@@ -39,6 +50,48 @@ function focusableWithin(root: HTMLElement | null): HTMLElement[] {
       !element.closest("[inert]") && element.getClientRects().length > 0,
   );
 }
+
+/*
+ * THE NO-JS COUNTERPART. Same shape as `layout.tsx`'s `.reveal` rescue and
+ * `CardDeck`'s deck rescue: the fallback markup is always in the DOM and always
+ * `display: none`, and this stylesheet - which only a browser with scripting
+ * DISABLED ever applies - swaps which of the two is shown.
+ *
+ * Without it, below 1024 a no-JS reader gets the logo and the WhatsApp CTA and
+ * nothing else: the bar's destination list is `hidden lg:flex` and the sheet
+ * that replaces it opens from a `useState` setter that never runs. There is no
+ * route out of the page.
+ *
+ * Written as a string through `dangerouslySetInnerHTML` because once scripting
+ * is ENABLED the browser parses <noscript> content as raw text, so hydrating
+ * real element children against that text node is a mismatch. Every selector is
+ * a `[data-azza-nav-*]` attribute, so nothing outside this component is
+ * reachable. `!important` beats the utilities it overrides for the reason
+ * `layout.tsx` records: important always wins over normal, whatever the layer.
+ *
+ *   header    static + auto height. The bar is `sticky` at a FIXED 64/72/123px;
+ *             the fallback lives inside it and would otherwise overflow that
+ *             box AND pin a full-height panel to the top of the viewport.
+ *   bar links hidden. At >= 1024 they would duplicate the fallback, and their
+ *             two dropdown siblings cannot open without a script - so at every
+ *             width the fallback is the complete list and the bar row is a
+ *             partial one. One nav, not one and a half.
+ *   trigger   hidden. Its entire behaviour is a state setter.
+ *   sheet     hidden. `inert` and translated off-screen by props that never
+ *             change without a script.
+ */
+const NO_JS_STYLE =
+  "<style>" +
+  "[data-azza-nav]{position:static!important;height:auto!important}" +
+  "[data-azza-nav-links],[data-azza-nav-trigger],[data-azza-nav-sheet]{display:none!important}" +
+  "[data-azza-nav-fallback]{display:block!important}" +
+  "</style>";
+
+/** 44px rows - the no-JS surface is the only nav there is, so it is not tight. */
+const FALLBACK_ROW = cn(
+  "flex min-h-11 items-center text-sm no-underline",
+  "text-nav-fg hoverable:text-nav-fg-hover focus-visible:text-nav-fg-hover",
+);
 
 /**
  * The site's top navigation - 412:2066 and its seven identical siblings
@@ -69,7 +122,11 @@ export function TopNav({ currentPath }: TopNavProps) {
   const menuId = useId();
   const pathname = usePathname();
 
+  /** The prop wins when given; otherwise the router's own value. */
+  const activePath = currentPath ?? pathname;
+
   const [open, setOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
 
@@ -187,9 +244,23 @@ export function TopNav({ currentPath }: TopNavProps) {
    * otherwise swallow it. A sheet is one layer to the user; staged dismissal
    * is surprising.
    *
-   * The trap spans { trigger, ...panel }. Tab off the last member wraps to the
-   * trigger and Shift+Tab off the trigger wraps to the last, so focus cannot
-   * reach the page behind while it is inert.
+   * THE TRAP SPANS THE WHOLE <header>, not { trigger, ...panel }.
+   *
+   * The narrower cycle was wrong, and visibly so: `<header>` also holds the
+   * logo home link and the bar's "Chat with Azza" CTA. Neither is inert, both
+   * stay visible and mouse-clickable while the sheet is open, and both were
+   * unreachable by keyboard - the trap wrapped straight over them. A control a
+   * mouse can press and a keyboard cannot is the defect; the two states have to
+   * agree. Marking them `inert` instead would agree by taking the CTA away from
+   * the pointer as well, and the CTA is the product's conversion action.
+   *
+   * `focusableWithin` already excludes anything inside `[inert]` and anything
+   * with no client rects, so the cycle self-selects: the `hidden lg:flex` bar
+   * list and the no-JS fallback are `display: none` and drop out, collapsed
+   * accordion panels are `inert` and drop out, and what remains is exactly the
+   * visible interactive surface, in document order - logo, CTA, trigger, then
+   * the sheet's own rows. Tab off the last wraps to the first and Shift+Tab off
+   * the first wraps to the last, so focus still cannot reach the inert page.
    */
   const onKeyDownCapture = (event: KeyboardEvent<HTMLElement>) => {
     if (!open) return;
@@ -203,10 +274,9 @@ export function TopNav({ currentPath }: TopNavProps) {
 
     if (event.key !== "Tab") return;
 
-    const trigger = triggerRef.current;
-    if (!trigger) return;
+    const cycle = focusableWithin(headerRef.current);
+    if (cycle.length === 0) return;
 
-    const cycle = [trigger, ...focusableWithin(panelRef.current)];
     const first = cycle[0];
     const last = cycle[cycle.length - 1];
     const active = document.activeElement;
@@ -232,6 +302,8 @@ export function TopNav({ currentPath }: TopNavProps) {
 
   return (
     <header
+      ref={headerRef}
+      data-azza-nav=""
       onKeyDownCapture={onKeyDownCapture}
       className={cn(
         // The one place the bar height is declared. Everything else reads it.
@@ -252,9 +324,25 @@ export function TopNav({ currentPath }: TopNavProps) {
               alignment - the 20px logo and the 19px link row are baseline
               matched, not centre matched (layout.md S8). */}
           <div className="flex items-end gap-8">
-            <Logo variant="wordmark" height={20} asHomeLink />
+            {/*
+             * `-my-3 py-3` is the responsive.md S6.1 hit expansion, the same
+             * one `Footer.tsx` uses: 12px of padding above and below turns the
+             * 20px wordmark into a 44px target, and the equal negative margin
+             * cancels it in the flow so the margin box - which is what
+             * `items-end` aligns - is still 20px and the glyph does not move by
+             * a pixel. The link was a 20px target on all seven routes.
+             */}
+            <Logo
+              variant="wordmark"
+              height={20}
+              asHomeLink
+              className="-my-3 py-3"
+            />
 
-            <ul className="hidden items-center gap-8 lg:flex">
+            <ul
+              data-azza-nav-links=""
+              className="hidden items-center gap-8 lg:flex"
+            >
               {PRIMARY_NAV.map((item) => {
                 const children = item.items;
 
@@ -264,20 +352,27 @@ export function TopNav({ currentPath }: TopNavProps) {
                       key={item.label}
                       label={item.label}
                       items={children}
-                      currentPath={currentPath}
+                      currentPath={activePath}
                     />
                   );
                 }
 
                 const href = item.href ?? "/";
-                const isCurrent = currentPath === href;
+                const isCurrent = activePath === href;
 
                 return (
                   <li key={item.label}>
                     <Link
                       href={href}
+                      prefetch={item.prefetch}
                       aria-current={isCurrent ? "page" : undefined}
                       className={cn(
+                        // Same 44px hit expansion as the logo above. `inline-flex`
+                        // is required, not cosmetic: vertical margins are ignored
+                        // on a plain inline box, so the cancellation only works on
+                        // an atomic inline one. The `ul` centre-aligns the 20px
+                        // margin box, so the label stays exactly where it was.
+                        "-my-3 inline-flex items-center py-3",
                         "text-sm no-underline",
                         "transition-colors duration-(--motion-fast) ease-out",
                         "motion-reduce:transition-none",
@@ -326,6 +421,7 @@ export function TopNav({ currentPath }: TopNavProps) {
 
             <button
               ref={triggerRef}
+              data-azza-nav-trigger=""
               type="button"
               aria-expanded={open}
               aria-controls={menuId}
@@ -379,8 +475,83 @@ export function TopNav({ currentPath }: TopNavProps) {
         id={menuId}
         panelRef={panelRef}
         onDismiss={() => close(true)}
-        currentPath={currentPath}
+        currentPath={activePath}
       />
+
+      <noscript dangerouslySetInnerHTML={{ __html: NO_JS_STYLE }} />
+
+      {/*
+       * The no-JS navigation. `hidden` (the UTILITY, a normal declaration -
+       * never the `hidden` ATTRIBUTE, which Tailwind v4's preflight pins with
+       * `!important` and which an author rule then cannot reliably beat), so it
+       * is inert, unfocusable and invisible whenever a script is running, and
+       * `NO_JS_STYLE` above is the only thing that can reveal it.
+       *
+       * It carries EVERY destination, including the six inside the two
+       * dropdowns - those are `<button>`-opened at every width, so without a
+       * script they are unreachable on desktop too, not only below `lg`.
+       *
+       * Plain `<a>`, not `next/link`: with scripting off there is no router to
+       * hand them to, and with scripting on this subtree is `display: none` so
+       * nothing here should ever be prefetched or clicked.
+       */}
+      <nav
+        data-azza-nav-fallback=""
+        aria-label="All pages"
+        className="hidden border-t border-nav-border bg-nav-surface"
+      >
+        <Container width="nav" className="flex flex-col gap-4 py-4">
+          {PRIMARY_NAV.map((item) => {
+            const children = item.items;
+
+            if (children) {
+              return (
+                <div key={item.label}>
+                  {/*
+                   * A <p>, not a heading. These are group labels for a list, and
+                   * two extra headings ahead of the page's own <h1> would break
+                   * the outline for exactly the reader this block exists for.
+                   * `aria-label` on the <ul> carries the grouping instead.
+                   */}
+                  <p className="text-xs text-nav-dropdown-fg-muted">
+                    {item.label}
+                  </p>
+                  <ul aria-label={item.label}>
+                    {children.map((child) => {
+                      const external = !child.href.startsWith("/");
+
+                      return (
+                        <li key={child.href + child.label}>
+                          <a
+                            href={child.href}
+                            {...(external
+                              ? { target: "_blank", rel: "noreferrer noopener" }
+                              : null)}
+                            className={FALLBACK_ROW}
+                          >
+                            {child.label}
+                          </a>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              );
+            }
+
+            return (
+              <a
+                key={item.label}
+                href={item.href ?? "/"}
+                aria-current={activePath === item.href ? "page" : undefined}
+                className={FALLBACK_ROW}
+              >
+                {item.label}
+              </a>
+            );
+          })}
+        </Container>
+      </nav>
     </header>
   );
 }

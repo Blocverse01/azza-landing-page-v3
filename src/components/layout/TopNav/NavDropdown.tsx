@@ -171,7 +171,14 @@ export function NavDropdown({ label, items, currentPath }: NavDropdownProps) {
         onClick={() => (open ? close(false) : setOpen(true))}
         onKeyDown={onTriggerKeyDown}
         className={cn(
-          "inline-flex cursor-pointer items-center gap-0.5 bg-transparent p-0 text-sm",
+          // `-my-3 py-3` is the responsive.md S6.1/S6.2 hit expansion - S6.2 asks
+          // for "the whole trigger row, >= 44 tall" and the row measured ~20.
+          // The negative margin cancels the padding in the flow, so the <li>'s
+          // height is unchanged, `top-full` on the panel below still resolves to
+          // the same y, and the label and chevron do not move. The trigger's hit
+          // box now reaches exactly to the panel's `mt-3` top edge, which also
+          // closes the 12px hover gap between them.
+          "-my-3 inline-flex cursor-pointer items-center gap-0.5 bg-transparent px-0 py-3 text-sm",
           "transition-colors duration-(--motion-fast) ease-out",
           "motion-reduce:transition-none",
           current ? "text-nav-fg-current" : "text-nav-fg",
@@ -249,6 +256,22 @@ export function NavDropdown({ label, items, currentPath }: NavDropdownProps) {
               "transition-colors duration-(--motion-fast) ease-out",
               "motion-reduce:transition-none",
               "hoverable:bg-nav-dropdown-item-hover focus-visible:bg-nav-dropdown-item-hover",
+              /*
+               * responsive.md S6.2: the Products rows (`wide`) are 36px glyph +
+               * py-1 = 44 and the artifact records them as "Passes. Keep." The
+               * Socials rows are a 24px glyph + py-1 = 32 and the artifact asks
+               * for 48 with the icon left at 24.
+               *
+               * This is S6.1's own `::after` recipe rather than more padding,
+               * because padding here is PAINTED: `nav.dropdown.item-hover` fills
+               * the padding box, so growing it 32 -> 48 would swell the hover
+               * pill until the three rows nearly touched. The pseudo-element is
+               * transparent, belongs to the `<a>` so it hit-tests as the link,
+               * and takes 8px into each 20px gap - leaving 4px of clearance, so
+               * no row can steal its neighbour's press.
+               */
+              !wide &&
+                "relative after:absolute after:inset-x-0 after:top-1/2 after:h-12 after:-translate-y-1/2 after:content-['']",
             );
 
             return (

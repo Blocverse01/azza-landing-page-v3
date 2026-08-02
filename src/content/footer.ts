@@ -29,6 +29,18 @@
 export interface NavLink {
   label: string;
   href: string;
+  /**
+   * Passed straight to `next/link`'s `prefetch`. Set only on the destinations
+   * the design NAMES but the D-002 sitemap has no route for (see the routing
+   * note on `FOOTER_COLUMNS`).
+   *
+   * Next's App Router prefetches every in-viewport `<Link>`, and the footer is
+   * on all seven routes - so three non-existent routes were being requested,
+   * and 404ing, on every page load. `prefetch={false}` disables it on viewport
+   * AND on hover (next 15.5 `link.d.ts`). The anchor is untouched: same markup,
+   * same treatment, same destination. Delete the flag when the route lands.
+   */
+  prefetch?: false;
 }
 
 export interface FooterColumn {
@@ -47,6 +59,8 @@ export interface FooterColumn {
  * Documentation, Media Kit, Privacy Policy and Terms of Use. Each is pointed at
  * the path its label names rather than at a placeholder or at a near-miss route;
  * reversing any of them is a one-line change here and touches no component.
+ * All four carry `prefetch: false` so the browser stops requesting a page that
+ * does not exist - see `NavLink.prefetch`.
  */
 export const FOOTER_COLUMNS: readonly FooterColumn[] = [
   {
@@ -64,16 +78,16 @@ export const FOOTER_COLUMNS: readonly FooterColumn[] = [
     heading: "Resources",
     links: [
       { label: "Blog", href: "/blog" },
-      { label: "Documentation", href: "/docs" },
+      { label: "Documentation", href: "/docs", prefetch: false },
       { label: "Help & Support", href: "/help" },
     ],
   },
   {
     heading: "Company",
     links: [
-      { label: "Media Kit", href: "/media-kit" },
-      { label: "Privacy Policy", href: "/privacy-policy" },
-      { label: "Terms of Use", href: "/terms-of-use" },
+      { label: "Media Kit", href: "/media-kit", prefetch: false },
+      { label: "Privacy Policy", href: "/privacy-policy", prefetch: false },
+      { label: "Terms of Use", href: "/terms-of-use", prefetch: false },
     ],
   },
   {

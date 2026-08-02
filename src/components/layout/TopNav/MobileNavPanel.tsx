@@ -115,6 +115,10 @@ export function MobileNavPanel({
 }: MobileNavPanelProps) {
   return (
     <div
+      // `TopNav`'s <noscript> stylesheet hides the whole sheet: without a script
+      // it can never open, and leaving its rows in the layer stack would put a
+      // second, unreachable copy of the nav behind the no-JS fallback list.
+      data-azza-nav-sheet=""
       className={cn(
         // Fixed to the viewport below the bar. `--azza-nav-h` is set on the
         // <header> and steps 64 / 72 / 123 with the bar itself.
@@ -230,6 +234,7 @@ export function MobileNavPanel({
               <li key={item.label}>
                 <Link
                   href={href}
+                  prefetch={item.prefetch}
                   aria-current={isCurrent ? "page" : undefined}
                   className={cn(
                     ROW,

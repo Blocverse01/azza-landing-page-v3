@@ -15,6 +15,20 @@ import type { IconName } from "@/components/ui";
 export interface NavLink {
   label: string;
   href: string;
+  /**
+   * Passed straight to `next/link`'s `prefetch`. Omitted everywhere except the
+   * destinations the design NAMES but the D-002 sitemap has no route for.
+   *
+   * Next's App Router prefetches every in-viewport `<Link>`; a prefetch of a
+   * route that does not exist is a real 404 request, on every page load, on
+   * every route the link ships on. `prefetch={false}` disables it on viewport
+   * AND on hover (next 15.5 `link.d.ts`), so the anchor still renders, still
+   * looks identical and still navigates - it just stops asking the server for a
+   * page nobody has built. Keeping the link is deliberate: removing a
+   * destination the designer drew is a scope decision, not an implementation
+   * one. Delete this flag the moment the route lands.
+   */
+  prefetch?: false;
 }
 
 export interface NavDropdownItem extends NavLink {
@@ -138,13 +152,14 @@ const SOCIAL_ITEMS: readonly NavDropdownItem[] = [
  * `/about` has no frame in the Figma file and no route in the D-002 sitemap.
  * The label is the designer's, so the destination is kebab-cased from it the
  * same way every other route was, and the gap is raised rather than papered
- * over by pointing the link at a page that exists but is not About Us.
+ * over by pointing the link at a page that exists but is not About Us. It
+ * therefore carries `prefetch: false` - see `NavLink.prefetch`.
  */
 export const PRIMARY_NAV: readonly NavItem[] = [
   { label: "Products", items: PRODUCT_ITEMS },
   { label: "Socials", items: SOCIAL_ITEMS },
   { label: "Blog", href: "/blog" },
-  { label: "About Us", href: "/about" },
+  { label: "About Us", href: "/about", prefetch: false },
 ];
 
 /** 412:2087 - the product's entire conversion action. */
