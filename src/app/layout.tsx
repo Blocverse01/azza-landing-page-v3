@@ -80,13 +80,22 @@ const poppins = Poppins({
  */
 
 export const metadata: Metadata = {
+  /*
+   * `metadataBase` is what lets a route declare `openGraph.images` with a
+   * relative path. Without it Next resolves those against localhost and bakes
+   * `http://localhost:3000/_next/static/media/...` into the STATIC HTML - it
+   * typechecks, it builds, and every social preview on the site is broken.
+   * `impl-routes-content` hit exactly this on all ten article pages and pulled
+   * its OG images rather than ship it.
+   *
+   * Set NEXT_PUBLIC_SITE_URL at build time. The fallback is a placeholder.
+   */
+  metadataBase: new URL(SITE.url),
   title: {
     default: `${SITE.name} — money that moves on WhatsApp`,
     template: `%s · ${SITE.name}`,
   },
-  description:
-    "Send, receive, and spend money across borders, instantly on WhatsApp. " +
-    "Crypto or local currency, without the usual stress.",
+  description: SITE.description,
 };
 
 export default function RootLayout({
