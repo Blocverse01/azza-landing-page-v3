@@ -21,8 +21,15 @@
  * There is not a raw hex anywhere in this directory.
  */
 
-/** Which decorative composition sits behind the card's text. */
-export type DeckArt = "crypto-coins" | null;
+/**
+ * Which decorative composition sits behind the card's text. One per card - the
+ * design gives all three a full-card background, and `DeckCard` paints each of
+ * them from a committed export in `design-system/assets/illustration/`.
+ *
+ * `null` remains legal for a card whose art has no export yet. Nothing is null
+ * today; every one of the three is wired.
+ */
+export type DeckArt = "crypto-coins" | "globe" | "flag-ribbon" | null;
 
 export interface DeckRecord {
   /** Stable id - drives React keys, DOM ids and the dot controls. */
@@ -76,10 +83,16 @@ export const DECK_RECORDS: readonly DeckRecord[] = [
     titleClass: "text-fg-on-accent-lilac",
     // 458:395 is fg.body at 80% alpha, which is the `fg.body-strong` role.
     bodyClass: "text-fg-body-strong",
-    // The globe (458:396) and the three location pins (458:402 / 458:417 /
-    // 458:432) were never exported - assets.md S4 only covers the art on the
-    // one variant that is placed on the page. Slot reserved, nothing rendered.
-    art: null,
+    // The globe `458:396` WAS exported after this section was first built -
+    // assets.md S4.4 / S14 row 3, `illustration/deck-globe.svg`. It is wired.
+    //
+    // Its three red pins (`458:399` / `458:414` / `458:429`) are still not
+    // shipped: assets.md S12.4 records them as the SAME shape as
+    // `location-pin-1/2/3.svg`, but those three files were exported with their
+    // /products/for-business rotations (-35.07 / +39.78 / +24.20 deg) baked in,
+    // and the deck's pins sit at 0 deg. There is no upright export to point at,
+    // so the globe ships without them rather than with three tilted ones.
+    art: "globe",
   },
   {
     id: "move-money",
@@ -90,8 +103,10 @@ export const DECK_RECORDS: readonly DeckRecord[] = [
     surfaceClass: "bg-surface-accent-mint",
     titleClass: "text-fg-on-accent-mint",
     bodyClass: "text-fg-body-strong",
-    // The five rotated country coins (458:334 / 458:340 / 458:348 / 458:352 /
-    // 458:374) were never exported either. Same treatment.
-    art: null,
+    // The five flag roundels (458:334 Nigeria / 458:340 Ghana / 458:348 South
+    // Africa / 458:352 Kenya / 458:374 Rwanda) ship as ONE file - they are a
+    // single frame `458:333` in the design and were exported as such, assets.md
+    // S4.4 / S14 row 2, `illustration/deck-flag-roundel-ribbon.svg`.
+    art: "flag-ribbon",
   },
 ];

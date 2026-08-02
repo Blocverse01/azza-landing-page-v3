@@ -1,19 +1,27 @@
+import type { StaticImageData } from "next/image";
 import type { CSSProperties } from "react";
 
-import { DisplayHeading, PhoneMockup } from "@/components/ui";
+import { DisplayHeading, Media, PhoneMockup } from "@/components/ui";
 import { cn } from "@/lib/cn";
 
 import coinUsdcAsset from "@design-system/assets/illustration/coin-usdc.svg";
 import coinUsdtAsset from "@design-system/assets/illustration/coin-usdt-tilted.svg";
+import deckFlagRibbonAsset from "@design-system/assets/illustration/deck-flag-roundel-ribbon.svg";
+import deckGlobeAsset from "@design-system/assets/illustration/deck-globe.svg";
 
-import { DECK_RECORDS, DECK_SCREEN_ALT, type DeckRecord } from "./deck-content";
+import { DECK_RECORDS, DECK_SCREEN_ALT, type DeckArt, type DeckRecord } from "./deck-content";
 
 /*
  * next/image-types declares `*.svg` as `any` so that an SVGR setup can override
  * it. Narrow it here rather than letting `any` leak into the component.
+ *
+ * The two coins are painted as CSS backgrounds and only ever need `.src`; the
+ * globe and the ribbon go through `Media`, which wants the whole descriptor.
  */
 const coinUsdc = coinUsdcAsset as { src: string };
 const coinUsdtTilted = coinUsdtAsset as { src: string };
+const deckGlobe = deckGlobeAsset as StaticImageData;
+const deckFlagRibbon = deckFlagRibbonAsset as StaticImageData;
 
 /* ---------------------------------------------------------------------------
  * Fan geometry - measured off the placed instance `507:684` and cross-checked
@@ -195,10 +203,7 @@ export function DeckCard({
       }
     : {};
 
-  const art =
-    record.art === "crypto-coins" ? (
-      <CryptoCoins className={interiorClass} />
-    ) : null;
+  const art = renderDeckArt(record.art, interiorClass);
 
   const textBlock = (
     <div
@@ -365,8 +370,149 @@ export function DeckCard({
 }
 
 /**
- * `507:729` (USDC) and `507:739` (USDT tilted), the only deck art that exists
- * in `design-system/assets/`.
+ * ONE BACKGROUND PER CARD.
+ *
+ * All three cards carry a full-card decorative composition in the design, and
+ * all three are now exported. They were not always: `deck-globe.svg` and
+ * `deck-flag-roundel-ribbon.svg` landed in a later asset sweep, after this
+ * section had been built against `art: null` slots, and nothing wired them in -
+ * so two of three cards rendered as flat colour. Both are wired here.
+ *
+ * A switch rather than a lookup object so an unhandled member of `DeckArt` is a
+ * type error at the call site rather than `undefined` at runtime.
+ */
+function renderDeckArt(art: DeckArt, className: string | undefined) {
+  switch (art) {
+    case "crypto-coins":
+      return <CryptoCoins className={className} />;
+    case "globe":
+      return <DeckGlobe className={className} />;
+    case "flag-ribbon":
+      return <FlagRoundelRibbon className={className} />;
+    default:
+      return null;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * ART GEOMETRY - why every value below is `cqw` and not `%`.
+ *
+ * The card is 1200 x 625 in the design, so `1cqw` of the `@container/deck` on
+ * the card is exactly 12 design pixels, on BOTH axes, at every stage width.
+ * A percentage would not be: `top: 40%` resolves against the card's HEIGHT, and
+ * the card is 1200x625 in the fan but roughly 420x520 in the carousel, so the
+ * same percentage lands in two completely different places. `cqw` resolves
+ * against the inline size in both, which is what keeps a composition rigid.
+ *
+ * Each piece is therefore anchored to the edge the design clips it against, and
+ * offsets are `<design px> / 12` cqw. The card's own `overflow: hidden` does
+ * the clipping, exactly as the frame does in Figma - so a narrower card reveals
+ * LESS art rather than squashing it (assets.md S4.2 / S4.4).
+ * ------------------------------------------------------------------------- */
+
+/**
+ * `458:396`, the globe behind "Operate Locally" (`507:496`).
+ *
+ * 678 x 678, placed at (416, 462) inside the 1200 x 625 card frame `458:392`,
+ * which clips it: only the top **163px** is ever visible and the remaining 515
+ * sit below the card. assets.md S14 ships it whole for that reason - the crop
+ * belongs in CSS, not in the file.
+ *
+ * BOTTOM-anchored, which is what makes that true at any card height. The
+ * globe's box is pushed 515/12 cqw past the bottom edge, so 163/12 cqw of it
+ * rises above the edge and the rest is clipped. Anchoring it from the top would
+ * put the whole 678 inside a short carousel card and show a full circle the
+ * design never shows.
+ *
+ * The three red pins over it (`458:399` / `458:414` / `458:429`) are NOT here -
+ * see the note in `deck-content.ts`. Nothing was invented to stand in for them.
+ *
+ * `rounded-full overflow-hidden` IS LOAD-BEARING, and it is compensating for a
+ * defect in the export rather than styling anything.
+ * ------------------------------------------------------------------------
+ * In Figma the landmass `458:397` is a BOOLEAN OPERATION intersected with the
+ * ocean disc, so it stops at the coastline: rendering `458:396` on its own
+ * returns 678x163 with everything outside the arc transparent. The exporter
+ * flattened that boolean to its raw `map` path - `deck-globe.svg` contains no
+ * `clipPath` at all and its `Map` group is 1386.5 wide against a 678 viewBox -
+ * so the continents spill out of the disc and the square viewBox crops them
+ * into a rectangle. Rendered without this clip the card shows a green slab with
+ * a hard right edge, not a globe. Confirmed by rendering the file standalone.
+ *
+ * The disc is `rx=339` in a 678 box, i.e. exactly half - so a 50% radius on a
+ * square wrapper reproduces Figma's own boundary precisely; it is a measured
+ * value, not a nudge. It is also the placement's crop rather than a change of
+ * meaning, which is where assets.md S4.4 puts crops in the first place ("that
+ * crop belongs in CSS ... so a narrower card reveals more art").
+ *
+ * The durable fix is re-exporting the SVG with the boolean applied. That file
+ * is outside this agent's allowlist; raised as a finding.
+ */
+function DeckGlobe({ className }: { className?: string }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={cn(
+        "pointer-events-none absolute inset-0 z-0 overflow-hidden",
+        className,
+      )}
+    >
+      <div
+        className="absolute overflow-hidden rounded-full"
+        style={{
+          left: "34.6667cqw", // 416 / 12
+          bottom: "-42.9167cqw", // -(678 - 163) / 12
+          width: "56.5cqw", // 678 / 12
+        }}
+      >
+        <Media src={deckGlobe} alt="" ratio="1 / 1" />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * `458:333`, the diagonal ribbon of five flag roundels - Nigeria, Ghana, South
+ * Africa, Kenya, Rwanda - that is the whole background of "Move Money"
+ * (`507:497`).
+ *
+ * 1271.64 x 920.31, placed at (-25.97, -169) inside the 1200 x 625 card frame
+ * `458:332`, which clips it on all four sides. The export's own viewBox is
+ * `-25.97 -169 1271.64 920.31`, i.e. its internal coordinates ARE card
+ * coordinates, so placing the element at that offset at that size lands every
+ * roundel exactly where Figma has it. Verified against the 1:1 Figma render of
+ * `507:497`: the Ghana roundel's box is x 252.7..504.7, y 21.8..273.8 in card
+ * space in both.
+ *
+ * TOP-anchored, because the ribbon enters through the card's top-left corner.
+ * `overflow: hidden` on the card removes the 169 above and the 126 below.
+ */
+function FlagRoundelRibbon({ className }: { className?: string }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={cn(
+        "pointer-events-none absolute inset-0 z-0 overflow-hidden",
+        className,
+      )}
+    >
+      <div
+        className="absolute"
+        style={{
+          left: "-2.1642cqw", // -25.97 / 12
+          top: "-14.0833cqw", // -169 / 12
+          width: "105.97cqw", // 1271.64 / 12
+        }}
+      >
+        <Media src={deckFlagRibbon} alt="" ratio="1271.64 / 920.31" />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * `507:729` (USDC) and `507:739` (USDT tilted), the art on the placed variant
+ * `507:684`.
  *
  * Both exports are cropped to the geometry that survives the card's clip - the
  * USDC export is 428x299 for a node rendered at 427x427, the missing 128px

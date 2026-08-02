@@ -297,12 +297,42 @@ export function CardDeck() {
      * `gap={0}` because the section has exactly one child; the deck carries no
      * section heading in the design (`412:2196` contains only the instance), so
      * the three card headlines are the h2s and nothing is invented above them.
+     *
+     * THE 70px GUTTER - responsive.md S3.3 and S7.0.1, and it is this surface ONLY
+     * ---------------------------------------------------------------------------
+     * `container="deck"` resolves `min(var(--container-deck), 100% - 2 *
+     * var(--gutter))`, and `--gutter` is the GLOBAL ladder, which steps to 80 at
+     * `xl`. That gives `min(1300, 1440 - 160)` = 1280 at the design width - 20px
+     * narrow - and, far worse, it is not invariant above 1440: at 1920 the same
+     * expression resolves to the full 1300, so the stage GROWS between 1440 and
+     * 1920 and the section height moves with it (689.2 -> 700 at 13:7). That
+     * fails responsive.md S12 check 9, which requires >= 1440 to be one layout.
+     *
+     * The design does not use the global gutter here. `511:364` sits at x = 70
+     * in a 1440 frame, w = 1300, so responsive.md S7.0.1 states the rule for
+     * this one surface at `xl` and `2xl`: `min(1300px, 100% - 140px)`. A 70px
+     * gutter, not 80.
+     *
+     * So `--gutter` is overridden to 70 on THIS section, at `xl`+ only. It is a
+     * custom property, so it inherits to the `Container` this section renders
+     * and to nothing else in the document - every other container on the site
+     * keeps the ladder untouched. The alternative, widening the global step to
+     * 70, would move all 22 sections to fix one.
+     *
+     * Scoped to `xl`+ deliberately. Below 1280 responsive.md S7.0.1 says the
+     * stage is simply "width: 100%" of the content box, which is what the
+     * unmodified ladder already gives, and the carousel that replaces the fan
+     * there bleeds into the gutters with `var(--gutter)` and must keep reading
+     * the real one. (It cannot see this override in practice - it is
+     * `motion-safe:lg:hidden` above 1024, and under reduced motion it zeroes its
+     * own inline margin - but the breakpoint keeps the two independent by
+     * construction rather than by coincidence.)
      */
     <Section
       rhythm="spotlight"
       container="deck"
       gap={0}
-      className="overflow-x-clip"
+      className="overflow-x-clip xl:[--gutter:70px]"
     >
       <div className="w-full">
         <noscript dangerouslySetInnerHTML={{ __html: NO_JS_STYLE }} />
