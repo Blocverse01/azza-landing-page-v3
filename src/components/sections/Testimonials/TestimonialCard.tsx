@@ -103,20 +103,19 @@ export function TestimonialCard({
       as="div"
       surface="contrast"
       /*
-       * The measured radius is 16px (--radius-2xl). `CardProps.radius` has no
-       * 16px step - its union jumps 12 (xl) -> 20 (3xl) - so the nearest
-       * documented value is passed and the real one is applied on top.
+       * The measured radius is 16px. `CardProps.radius` gained a `2xl` step in
+       * the post-2C primitives refine, so this is now a plain prop.
        *
-       * The `!` is load-bearing and is not decoration. `cn` deliberately does
-       * not merge conflicting classes, so both `rounded-xl` and `rounded-2xl`
-       * reach the element and the winner is decided by emission order. Measured
-       * in a browser: plain `rounded-2xl` LOSES and the card renders at 12px.
-       * The important flag makes it deterministic instead of dependent on how
-       * Tailwind happens to sort the radius scale.
+       * It used to be `radius="xl"` plus `rounded-2xl!` in the className: the
+       * union jumped 12 (xl) -> 20 (3xl), and because `cn` deliberately does not
+       * merge conflicting classes, an un-flagged `rounded-2xl` LOST to
+       * `rounded-xl` on emission order and the card rendered at 12px. The
+       * important flag was load-bearing. Widening the union removed the fight
+       * rather than winning it.
        */
-      radius="xl"
+      radius="2xl"
       className={cn(
-        "relative w-full overflow-clip rounded-2xl!",
+        "relative w-full overflow-clip",
         // 305 x 319. The tile is a fixed-ratio media card at every width, which
         // is what lets the portrait and scrim be positioned in percentages.
         "aspect-[305/319]",

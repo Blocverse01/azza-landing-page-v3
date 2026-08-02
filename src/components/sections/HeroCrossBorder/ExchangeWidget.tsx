@@ -199,7 +199,12 @@ function AmountField({
             "text-field-fg placeholder:text-fg-disabled text-sm",
           )}
         />
-        <SelectPill icon={currencyIcon} code={currency} aria-label={selectLabel} />
+        <SelectPill
+          icon={currencyIcon}
+          code={currency}
+          tone="plain"
+          aria-label={selectLabel}
+        />
       </div>
     </div>
   );

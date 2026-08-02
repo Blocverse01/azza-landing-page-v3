@@ -51,7 +51,10 @@ export default function QrBadge({ className }: QrBadgeProps) {
         // The Card `interactive` treatment, applied to the anchor itself:
         // translateY only, its focus-visible twin, no scale (components.md
         // S10.6).
-        "transition-[transform,box-shadow] duration-(--motion-base) ease-out",
+        // `translate`, not `transform`: Tailwind v4 emits `-translate-y-1` as the
+        // standalone `translate` property, so the old transform list animated
+        // nothing and the lift jumped while the shadow faded.
+        "transition-[translate,box-shadow] duration-(--motion-base) ease-out",
         "hoverable:-translate-y-1 hoverable:shadow-hover-lift",
         "focus-visible:shadow-hover-lift focus-visible:-translate-y-1",
         className,
