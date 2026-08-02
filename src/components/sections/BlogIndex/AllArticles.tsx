@@ -29,6 +29,30 @@ const HEADING_ID = "all-articles-heading";
  */
 const INITIAL_VISIBLE = 6;
 
+/**
+ * The label token for this section's two `action.quiet` pills.
+ *
+ * `Button`'s `md` step is `text-sm-btn` (16 / 1.21 / -0.02em / 600), which is
+ * correct for a button and is not to be widened - `sm/md/lg` are 14/16/16 Semi
+ * Bold against their own design nodes, and every other `size="md"` caller on
+ * the site depends on it. But 507:478, the "View More" label, is authored
+ * `Inter Medium 20 / 1.3 / -0.6px` - i.e. exactly `text-md` (-0.6 / 20 =
+ * -0.03em). It is a CTA pill drawn with a button's affordances, so the type
+ * token belongs at the call site rather than in the ladder.
+ *
+ * The `!` is load-bearing, for the reason BlogHero.tsx:84 already documents:
+ * `cn` joins and de-duplicates but does not resolve conflicts, so without it
+ * `text-sm-btn` vs `text-md` would be settled by Tailwind's emission order
+ * rather than by this file.
+ *
+ * `Button` is kept - and `Pill variant="cta"` is not substituted, despite
+ * carrying this token already - because both controls here must be real
+ * `<button>`s: each sits inside a wrapper that owns the click handler, and
+ * `Pill` renders a `<span>` with no `as="button"`, which would leave the
+ * control unreachable by keyboard.
+ */
+const PILL_LABEL = "text-md!";
+
 export interface AllArticlesProps {
   /**
    * `readonly` where components.md S6 writes `BlogPost[]`. S7.1 declares
@@ -203,7 +227,7 @@ export function AllArticles({ posts }: AllArticlesProps) {
             No articles match that search.
           </p>
           <div className="w-fit" onClick={handleReset}>
-            <Button variant="quiet" size="md">
+            <Button variant="quiet" size="md" className={PILL_LABEL}>
               Show all articles
             </Button>
           </div>
@@ -244,7 +268,12 @@ export function AllArticles({ posts }: AllArticlesProps) {
       {/* 507:477. Only reachable at base, and only while something is hidden. */}
       {!empty && !expanded && visible.length > INITIAL_VISIBLE ? (
         <div className="w-fit self-center xs:hidden" onClick={handleViewMore}>
-          <Button variant="quiet" size="md" aria-label="View more articles">
+          <Button
+            variant="quiet"
+            size="md"
+            aria-label="View more articles"
+            className={PILL_LABEL}
+          >
             View More
           </Button>
         </div>

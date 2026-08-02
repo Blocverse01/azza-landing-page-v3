@@ -1,4 +1,13 @@
-import { Button, DisplayHeading, Pill, Reveal, Section } from "@/components/ui";
+import ctaCoins from "@design-system/assets/illustration/cta-coins-composition.svg";
+
+import {
+  Button,
+  DisplayHeading,
+  Media,
+  Pill,
+  Reveal,
+  Section,
+} from "@/components/ui";
 import { WHATSAPP_CHAT_URL as WHATSAPP_HREF } from "@/content/navigation";
 
 const HEADING_ID = "use-azza-today-heading";
@@ -123,26 +132,47 @@ export default function UseAzzaToday() {
 
       {/*
        * 412:1234 - the decorative "AZ ZA" coin cluster, 1069.9 x 615.4 at
-       * (170, 467). Fifteen overlapping ellipse and vector nodes, of which
-       * assets.md exported exactly one (`brand/wordmark-azza-outline.svg`, the
-       * 412:1251 mark, whose paths are filled surface.brand-faint and are
-       * therefore invisible without the indigo disc they sit on). The three
-       * coin discs and the two ghost ellipses have no committed asset, and this
-       * agent may not add one.
+       * (170, 467).
        *
-       * So the slot is reserved and renders nothing - the D-023 pattern. It
-       * holds the section's designed height, keeps the omission visible rather
-       * than silently shortening the page, and makes dropping the real art in
-       * later a change with no reflow. Decorative throughout, so `aria-hidden`.
+       * This slot was reserved and empty (the D-023 pattern) for as long as the
+       * composition had no committed export: fifteen overlapping ellipse and
+       * vector nodes, of which only `brand/wordmark-azza-outline.svg` had been
+       * exported, and that mark is invisible on its own (its paths are filled
+       * surface.brand-faint and need the indigo disc beneath them).
+       *
+       * `illustration/cta-coins-composition.svg` is that export, and it is the
+       * whole band flattened into one file. design-system/assets.md S3 explains
+       * why it is flat rather than six positioned pieces: the discs blend
+       * against each other, and `mix-blend-mode` across sibling DOM nodes
+       * resolves to the page backdrop instead. The file carries
+       * `isolation:isolate` on its root group so the page can never leak into
+       * that blend, and it is vector, so it stays crisp at all six stops
+       * (1070x616 at 1440 down to 238x137 at 320) where a raster sized for 1440
+       * would be soft below `lg`.
+       *
+       * RATIO. `1070/616` is the file's own viewBox and the node's own
+       * 1069.9 x 615.4 - so `object-cover` crops nothing and nothing distorts.
+       * The slot previously reserved 1069/615, a 0.07% difference, so this is a
+       * zero-reflow change.
+       *
+       * Decorative throughout: `alt=""` plus `aria-hidden` on the wrapper, no
+       * focusable child, contributing no accessible name. It is below the fold
+       * on every viewport, so it stays lazy - no `priority`.
        *
        * No parallax, at any motion setting (components.md S10.9).
        */}
       <div
         aria-hidden="true"
-        className="pointer-events-none mt-4 aspect-[1069/615] w-full max-w-[1069px]"
+        className="pointer-events-none mt-4 w-full max-w-[1069px]"
         data-figma-node="412:1234"
-        data-art-pending="true"
-      />
+      >
+        <Media
+          src={ctaCoins}
+          alt=""
+          ratio="1070/616"
+          sizes="(max-width: 1069px) 100vw, 1069px"
+        />
+      </div>
     </Section>
   );
 }

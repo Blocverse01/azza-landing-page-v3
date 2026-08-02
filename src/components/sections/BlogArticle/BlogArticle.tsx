@@ -25,6 +25,52 @@ import { RelatedArticles } from "./RelatedArticles";
 /** The route's single <h1>. One instance per page, so a constant id is safe. */
 const TITLE_ID = "article-title";
 
+/*
+ * THE HERO FRAME AND ITS CROP.
+ *
+ * 352:3706 is 985 x 600 and its fill is `cover`. The Figma fill transform is
+ * `w-full max-w-none h-[131.33%] top-[-2.67%]`: the master is fitted to the
+ * frame's WIDTH and cropped vertically, anchored 16px (2.67% of 599) below its
+ * own top edge. 1400 / 1120 scaled to 985 wide is 788 tall, and 788 / 600 is
+ * that 131.33% - the numbers close exactly.
+ *
+ * What shipped was `object-position: 50% 50%`. On the design's own artwork that
+ * moves the cut 78px further down and slices the AZZA badge off the top of
+ * every article; on the portrait master it removed the headline outright.
+ * `object-top` is the token in `MediaProps["position"]` closest to the authored
+ * anchor - 0% against the authored 8.5% of the crop, a 16px difference on a
+ * 788px image - and it is the same ruling assets.md S6.2 already made for the
+ * portrait master in the card slot: "so the headline survives".
+ *
+ * WHY THE RATIO IS A FLOOR RATHER THAN A CONSTANT. Anchoring the top fixes
+ * every master that is TALLER than the frame, because the crop is vertical and
+ * the subject is top-weighted. It cannot fix a master that is WIDER: the
+ * featured post's banner is 2320 x 696 (3.33) and a 1.64 frame takes 51% of its
+ * width out of the middle of a headline that spans the full file. The design
+ * never draws that placement - 352:3706 is authored with the 1.25 master, and
+ * the banner's only authored placement is the /blog featured card at its exact
+ * 3.33 - so the faithful reading is that the frame never crops horizontally.
+ * Taking the greater of the designed ratio and the master's own leaves all
+ * three designed steps untouched for the nine posts that are taller than them,
+ * and lets the one wide banner keep its own aspect, which is what it already
+ * does correctly on /blog.
+ */
+/** The three designed steps, verbatim from components.md S4.7, and their values. */
+const HERO_RATIO = [
+  ["3/2", 3 / 2],
+  ["16/9", 16 / 9],
+  ["985/600", 985 / 600],
+] as const satisfies ReadonlyArray<readonly [string, number]>;
+
+function heroRatio(
+  image: BlogPost["image"],
+  [designed, value]: (typeof HERO_RATIO)[number],
+): string {
+  return image.width / image.height > value
+    ? `${image.width}/${image.height}`
+    : designed;
+}
+
 export interface BlogArticleProps {
   post: BlogPost;
   related: BlogPost[];
@@ -59,18 +105,21 @@ export function BlogArticle({ post, related }: BlogArticleProps) {
          * rather than a second import. It is the one raster above the fold on
          * this route (components.md S4.7), hence `priority`.
          *
-         * Ratio steps 985/600 -> 16/9 -> 3/2 and `sizes` are both taken
-         * verbatim from components.md S4.7. Figma anchors the crop near the top
-         * (-2.67% of an image scaled to 131.33%); assets.md S6.2 rules centre
-         * cover acceptable here and that ruling is followed - reported as a
-         * finding.
+         * Ratio steps 985/600 -> 16/9 -> 3/2 and `sizes` are taken verbatim
+         * from components.md S4.7; `heroRatio` only ever widens a step, and
+         * only for a master already wider than it. `position="top"` is the
+         * authored crop anchor. Both are explained above.
+         *
+         * assets.md S6.2 provisionally ruled centre cover acceptable here and
+         * asked for it to be verified in Phase 3. It was, and it is not.
          */}
         <Media
           src={post.image}
           alt={post.imageAlt}
-          ratio="985/600"
-          ratioMd="16/9"
-          ratioBase="3/2"
+          ratio={heroRatio(post.image, HERO_RATIO[2])}
+          ratioMd={heroRatio(post.image, HERO_RATIO[1])}
+          ratioBase={heroRatio(post.image, HERO_RATIO[0])}
+          position="top"
           placeholderColor={post.placeholderColor}
           sizes="(max-width:1023px) 100vw, 985px"
           radius="4xl"

@@ -47,8 +47,31 @@ export function RelatedArticles({ posts }: RelatedArticlesProps) {
              * 521:572 / 521:573 - a 129x46 `action.quiet` pill. The design
              * gives it no destination; /blog is the only page that lists
              * articles. Recorded in open_questions.
+             *
+             * `text-md!` is the label token 521:573 is authored in - Inter
+             * Medium 20 / 1.3 / -0.6px, i.e. `text-md` exactly. `Button`'s `md`
+             * step is `text-sm-btn` (16 Semi Bold), which is right for a button
+             * and must not be widened: every other `size="md"` caller on the
+             * site depends on that ladder. The `!` is load-bearing for the
+             * reason BlogHero.tsx:84 documents - `cn` does not resolve
+             * conflicts, so without it Tailwind's emission order would decide.
+             *
+             * The box already agrees with the design at this token: a 20px
+             * Medium "View More" measures ~89px, and 89 + px-5 either side is
+             * the authored 129. Only the height differs (h-12 = 48 against the
+             * drawn 46), which is the 44px floor being kept.
+             *
+             * `Button` is kept rather than `Pill variant="cta"` - which carries
+             * `text-md` natively - because this is an internal destination and
+             * `Button` routes it through next/link. `Pill`'s href path emits a
+             * bare <a>, which would cost a full document navigation.
              */}
-            <Button variant="quiet" size="md" href="/blog">
+            <Button
+              variant="quiet"
+              size="md"
+              href="/blog"
+              className="text-md!"
+            >
               View More
             </Button>
           </div>
