@@ -119,7 +119,28 @@ export function HelpSupport({ topics, article }: HelpSupportProps) {
           }
         />
 
-        <div className="flex w-full min-w-0 flex-col lg:flex-1">
+        {/*
+         * `500:1765` / `500:2334` - 868 wide at x=452, in a 1280 container.
+         *
+         * `flex-1` ALONE IS WRONG ABOVE `xl`. 1280 - 300 - 72 = 908, so a bare
+         * `flex-1` eats the 40px the design leaves standing at the right and
+         * lands the column at x=1360 instead of x=1320. layout.md S4.9: the
+         * section's `primaryAxisAlignItems: MIN` means the right inset is 120,
+         * not the declared 80 - "reproduce with `justify-start`, not
+         * `justify-between`" - and the row is already `justify-start` by
+         * default. The missing half is that the column must also stop growing.
+         *
+         * The cap, NOT a fixed width. responsive.md S7.6 asks for `1fr` at `lg`
+         * and the designed 868 at `xl`+, and those are the same rule: below the
+         * cap `flex-1` fills (556 at 1024, 748 at 1280 - both narrower than 868,
+         * so a hard `w-217` would overflow the container by 120 at 1280), at and
+         * above 1440 the container pins at 1280 and the cap binds. One
+         * declaration covers both stops.
+         *
+         * 217 x 4px = 868, the same spacing-scale idiom as the sidebar's
+         * `lg:w-75` (300).
+         */}
+        <div className="flex w-full min-w-0 flex-col lg:flex-1 lg:max-w-217">
           {openArticle ? (
             /* `500:2334` - V, gap 48. */
             <div className="flex w-full min-w-0 flex-col gap-12">
@@ -139,7 +160,14 @@ export function HelpSupport({ topics, article }: HelpSupportProps) {
                  * LCP element, and components.md S10.4 excludes both from the
                  * entrance.
                  */}
-                <header className="flex w-full flex-col gap-4">
+                {/*
+                 * `500:1767` is 586 x 99 inside the 868 column, not 868 wide -
+                 * the heading and its standfirst carry their own measure and
+                 * the remaining 282 is deliberate. Without the cap the
+                 * standfirst sets to the full column and the header block stops
+                 * matching the frame. Same number on `500:1797` below.
+                 */}
+                <header className="flex w-full max-w-[586px] flex-col gap-4">
                   <h1
                     ref={hubHeadingRef}
                     tabIndex={-1}
@@ -161,7 +189,8 @@ export function HelpSupport({ topics, article }: HelpSupportProps) {
                 aria-labelledby="help-community-heading"
                 className="flex w-full min-w-0 flex-col gap-10"
               >
-                <Reveal className="flex w-full flex-col gap-4">
+                {/* `500:1797` - 586 x 84, the closed state's header measure. */}
+                <Reveal className="flex w-full max-w-[586px] flex-col gap-4">
                   <h2
                     id="help-community-heading"
                     className="text-2xl-section text-fg-primary"

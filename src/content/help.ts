@@ -341,3 +341,14 @@ export const HELP_SEARCH_PLACEHOLDER = "Search help & support";
 
 /** The `< lg` sidebar disclosure trigger (responsive.md S7.6). Not a Figma string. */
 export const HELP_BROWSE_TOPICS_LABEL = "Browse topics";
+
+/**
+ * The search field's result states. Not Figma strings either - the design is a
+ * single static composition and cannot draw a filtered or empty tree.
+ *
+ * Written as a statement of fact plus the one control that undoes it, per the
+ * same rule the `/blog` grid's empty state follows: say what happened, offer
+ * the way back, do not apologise and do not be vague.
+ */
+export const HELP_SEARCH_EMPTY = "No topics match that search.";
+export const HELP_SEARCH_CLEAR_LABEL = "Clear search";

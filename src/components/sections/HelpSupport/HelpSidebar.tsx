@@ -1,8 +1,18 @@
+import {
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
+
 import { Disclosure, Icon, SearchField } from "@/components/ui";
 import { cn } from "@/lib/cn";
 
 import {
   HELP_BROWSE_TOPICS_LABEL,
+  HELP_SEARCH_CLEAR_LABEL,
+  HELP_SEARCH_EMPTY,
   HELP_SEARCH_LABEL,
   HELP_SEARCH_PLACEHOLDER,
   hasHelpArticle,
@@ -18,13 +28,26 @@ export interface HelpSidebarProps {
 }
 
 /*
- * Row geometry - responsive.md S6.2.
+ * Row geometry - responsive.md S6.2, measured against `500:1738`.
  *
- * The design's rows are 22px tall on a 42px pitch (`500:1748` and siblings),
- * which is under the touch floor. `py-2.5` around a 22px line gives a 42px
- * target on the SAME 42px pitch, so the desktop composition is unchanged while
- * the target grows; `min-h-12` lifts it to 48 below `lg`, which is the pitch
- * responsive.md asks for there.
+ * The design's rows are 22px tall on a 42px pitch (`500:1747` at y=39,
+ * `500:1751` at y=81, `500:1755` at y=123, `500:1757` at y=165), which is under
+ * the touch floor. `py-2.5` around a 22px line gives a 42px target; `min-h-12`
+ * lifts it to 48 below `lg`, which is the pitch responsive.md asks for there.
+ *
+ * `-my-2.5` IS NOT COSMETIC. Without it that 10px of padding is silently
+ * subtracted from every gap declared around the row, and the file has to write
+ * `gap-2.5`/`gap-7.5` (10/30) to render the designed 20/40 - values that
+ * layout.md S10.3 assertion 3 puts off-scale and assertion 4 bans by name, and
+ * which make the sidebar unauditable: the declared number and the measured
+ * number disagree everywhere. Cancelling the padding out of the margin box
+ * restores the row to its designed 22px in layout while leaving the 42px hit
+ * area intact, so every surrounding gap can be declared at its true value:
+ * `gap-5` (20) between rows and after a group label, `gap-10` (40) between
+ * groups and under the search field. Same rendered pitch, honest declarations.
+ *
+ * Each `<li>` is a flex item and therefore an independent formatting context,
+ * so the negative margins cannot collapse out through the list.
  *
  * responsive.md's own wording - "Row -> 44; pitch 42 -> 48 at < lg" - cannot
  * hold at `lg`+: a 44px row does not fit a 42px pitch. 42 is the closest value
@@ -32,7 +55,7 @@ export interface HelpSidebarProps {
  * Recorded in this agent's `findings`.
  */
 const ROW =
-  "flex min-h-12 w-full items-center justify-between gap-2 py-2.5 lg:min-h-0";
+  "flex min-h-12 w-full items-center justify-between gap-2 py-2.5 -my-2.5 lg:min-h-0";
 
 /**
  * The disclosure chevron.
@@ -55,6 +78,40 @@ function RowChevron({ open }: { open: boolean }) {
     >
       <Icon name="chevron-right" size="sm" />
     </span>
+  );
+}
+
+/**
+ * Depth-first search filter over the topic tree.
+ *
+ * A topic survives if its own label matches - in which case its whole subtree
+ * comes with it, because the user asked for that branch by name - or if any
+ * descendant matches, in which case only the matching descendants survive.
+ * Matching a third-level label therefore surfaces the second-level row that
+ * owns it, which is the row the reader can actually open.
+ */
+function filterTopic(topic: HelpTopic, needle: string): HelpTopic | null {
+  if (topic.label.toLowerCase().includes(needle)) return topic;
+
+  const children = (topic.children ?? [])
+    .map((child) => filterTopic(child, needle))
+    .filter((child): child is HelpTopic => child !== null);
+
+  return children.length > 0 ? { ...topic, children } : null;
+}
+
+/**
+ * What the result count announces: the rows a sighted user can see at rest.
+ *
+ * A group with children contributes its rows; a group with none ("Introduction",
+ * `500:1744`) is itself a row. Third-level topics sit inside a collapsed
+ * disclosure and are deliberately NOT counted - announcing a number larger than
+ * the visible list is a worse failure than announcing nothing.
+ */
+function countRows(groups: readonly HelpTopic[]): number {
+  return groups.reduce(
+    (total, group) => total + (group.children?.length ?? 1),
+    0,
   );
 }
 
@@ -99,7 +156,16 @@ function TopicRow({
           <>
             <button
               {...triggerProps}
-              aria-current={open ? "page" : undefined}
+              /*
+               * NO `aria-current="page"`. responsive.md S7.6 asks for it, but it
+               * was written for a tree of links; D-001 made these disclosure
+               * triggers, and this one opens a panel inside the route it is
+               * already on. `page` names the current page in a set of pages, so
+               * on a control that never navigates it is a false statement about
+               * what pressing it does. `aria-expanded` - which `triggerProps`
+               * already carries - is the accurate one, and the 90deg chevron is
+               * its non-colour visual twin.
+               */
               className={cn(
                 ROW,
                 "rounded-sm text-left text-base",
@@ -148,7 +214,14 @@ function TopicRow({
                     open ? "opacity-100 ease-out delay-[40ms]" : "opacity-0 ease-in",
                   )}
                 >
-                  <ul className="flex w-full flex-col">
+                  {/*
+                   * `pt-5` is the 20px that separates the parent row from the
+                   * first child row; the rows themselves sit on the same
+                   * `gap-5` as every other list here. 20 + 22 + 20 + 22 = 84,
+                   * which is exactly the +84 layout.md S4.10 measures on
+                   * `500:1745` -> `500:2314` when this panel opens.
+                   */}
+                  <ul className="flex w-full flex-col gap-5 pt-5">
                     {children.map((child) => (
                       <li key={child.id}>
                         <div className={cn(ROW, "text-base text-fg-secondary")}>
@@ -180,23 +253,16 @@ function TopicGroup({
   const children = group.children ?? [];
 
   return (
-    <div className="flex w-full flex-col gap-2.5">
-      <p
-        id={labelId}
-        className={cn(
-          "text-sm-bold text-fg-primary",
-          // "Introduction" (`500:1744`) is a bare label with no items under it -
-          // a sibling of the two real groups at the same 40px pitch, not their
-          // parent. Its own padding restores that pitch, which the groups get
-          // from their last row's padding instead.
-          children.length === 0 && "py-2.5",
-        )}
-      >
+    /* `500:1745` / `500:1759` - V, gap 20 between the label and the rows. */
+    <div className="flex w-full flex-col gap-5">
+      <p id={labelId} className="text-sm-bold text-fg-primary">
         {group.label}
       </p>
 
       {children.length > 0 ? (
-        <ul aria-labelledby={labelId} className="flex w-full flex-col">
+        /* Rows are 22 tall on a 42 pitch, so the declared gap is the 20 the
+           design draws - the row's touch padding is cancelled by `-my-2.5`. */
+        <ul aria-labelledby={labelId} className="flex w-full flex-col gap-5">
           {children.map((topic) => (
             <TopicRow
               key={topic.id}
@@ -219,6 +285,27 @@ function TopicGroup({
  * search field stays visible above it, because search is the primary entry
  * point and must not be hidden behind a toggle (responsive.md S7.6).
  *
+ * SEARCH FILTERS THIS TREE, and says how many rows are left.
+ *
+ * It previously rendered a field labelled "Search help & support" with no
+ * handler, no `<form>` and no state: a control whose accessible name states a
+ * function it does not perform, which is worse than no control. It now filters
+ * the topic tree and announces the count through an `sr-only role="status"`,
+ * the same shape `/blog` already uses.
+ *
+ * `SearchField` is uncontrolled by contract - components.md S4.11 gives it a
+ * `defaultValue` and no change handler - so the query is read the way `/blog`
+ * reads it: the native `input` event bubbles, React propagates `onInput`
+ * through the tree, and the wrapper hears every keystroke, the browser's own
+ * clear (x) and paste, without the shared primitive changing at all. Clearing
+ * writes back through a ref for the same reason.
+ *
+ * SCOPE. The field sits inside `<nav aria-label="Help topics">` and filters
+ * that nav - what the DOM says it does is what it does. It deliberately does
+ * NOT reach across into the content column: the hub's four cards are the same
+ * four topics, and having a sidebar control silently empty the main region -
+ * including while an article is open - would be a surprise, not a feature.
+ *
  * The breakpoint switch is pure CSS - no `matchMedia`, no hydration guess. The
  * collapsed panel uses `visibility` rather than `inert` precisely because
  * visibility can carry an `lg:` override and `inert` cannot: at `lg`+ the tree
@@ -238,11 +325,64 @@ export function HelpSidebar({
   onSelectTopic,
   className,
 }: HelpSidebarProps) {
+  const [query, setQuery] = useState("");
+  const [browseOpen, setBrowseOpen] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  const needle = query.trim().toLowerCase();
+
+  const visibleTopics = useMemo(() => {
+    if (!needle) return topics;
+
+    return topics
+      .map((group) => filterTopic(group, needle))
+      .filter((group): group is HelpTopic => group !== null);
+  }, [needle, topics]);
+
+  const handleSearchInput = useCallback((event: FormEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLElement;
+    if (!(target instanceof HTMLInputElement)) return;
+
+    setQuery(target.value);
+
+    /*
+     * Below `lg` the tree lives behind "Browse topics". Filtering a list the
+     * reader cannot see is the same defect in a new shape, so a non-empty query
+     * opens the panel. It stays a normal disclosure otherwise - the trigger can
+     * still close it, and clearing the field does not force it back open.
+     */
+    if (target.value.trim()) setBrowseOpen(true);
+  }, []);
+
+  /*
+   * The field is uncontrolled, so resetting React state alone would leave the
+   * typed text sitting in the input while the tree showed everything. Focus
+   * returns to the field because the control that took it is about to be
+   * removed from the DOM.
+   */
+  const clearSearch = useCallback(() => {
+    const input =
+      searchRef.current?.querySelector<HTMLInputElement>(
+        'input[type="search"]',
+      ) ?? null;
+
+    if (input) {
+      input.value = "";
+      input.focus();
+    }
+
+    setQuery("");
+  }, []);
+
+  const count = countRows(visibleTopics);
+  const empty = count === 0;
+
   return (
     <nav
       aria-label="Help topics"
       className={cn(
-        "flex w-full min-w-0 flex-col gap-7.5",
+        // `500:1738` - V, gap 40: search bottom (58) to "Introduction" (98).
+        "flex w-full min-w-0 flex-col gap-10",
         "lg:w-75 lg:shrink-0",
         // responsive.md S7.6: sticky rail at `lg`+. `Section` must not carry
         // `clip` anywhere above this - `overflow: hidden` on an ancestor makes
@@ -252,16 +392,41 @@ export function HelpSidebar({
         className,
       )}
     >
-      <SearchField
-        label={HELP_SEARCH_LABEL}
-        placeholder={HELP_SEARCH_PLACEHOLDER}
-        name="help"
-        width="full"
-      />
+      <div ref={searchRef} onInput={handleSearchInput} className="w-full">
+        <SearchField
+          label={HELP_SEARCH_LABEL}
+          placeholder={HELP_SEARCH_PLACEHOLDER}
+          name="help"
+          width="full"
+        />
+      </div>
 
-      <Disclosure>
+      {/*
+       * `sr-only` is `position: absolute`, so this is not a flex item and costs
+       * the sidebar no gap. It re-announces on every keystroke, which is what a
+       * filtered list owes a screen-reader user who cannot see it shrink.
+       *
+       * The empty wording differs from the visible empty state's on purpose:
+       * both are in the reading order, and identical strings would be spoken
+       * twice in a row as if the second were new information.
+       */}
+      <p role="status" className="sr-only">
+        {empty
+          ? "No topics match the current search."
+          : `${count} ${count === 1 ? "topic" : "topics"} shown.`}
+      </p>
+
+      <Disclosure open={browseOpen} onOpenChange={setBrowseOpen}>
         {({ open, triggerProps, panelProps }) => (
-          <>
+          /*
+           * The trigger and its panel are ONE flex item of the sidebar, not
+           * two. As siblings of the search field they each took a 40px gap, and
+           * below `lg` the collapsed panel is zero-height - so a closed sidebar
+           * carried 40px of dead space after the button. Grouping them puts the
+           * gap only where there is something to separate; the spacing the open
+           * panel needs is `pt-10` inside it, which collapses with the panel.
+           */
+          <div className="flex w-full min-w-0 flex-col">
             <button
               {...triggerProps}
               className={cn(
@@ -295,19 +460,46 @@ export function HelpSidebar({
                     : "invisible opacity-0 ease-in lg:visible lg:opacity-100",
                 )}
               >
-                <div className="flex w-full flex-col gap-7.5">
-                  {topics.map((group) => (
-                    <TopicGroup
-                      key={group.id}
-                      group={group}
-                      activeTopicId={activeTopicId}
-                      onSelectTopic={onSelectTopic}
-                    />
-                  ))}
+                {/* Groups sit 40 apart - `500:1744` -> `500:1745` -> `500:1759`
+                    measure 117 -> 157 and 344 -> 384. `pt-10` separates the
+                    tree from the "Browse topics" trigger below `lg` only; at
+                    `lg`+ the trigger is not rendered and the sidebar's own gap
+                    does that job. */}
+                <div className="flex w-full flex-col gap-10 pt-10 lg:pt-0">
+                  {empty ? (
+                    /* The design has no empty state - it cannot, it is one
+                       static composition. This is the minimum that is still
+                       useful: what happened, and the control that undoes it. */
+                    <div className="flex w-full flex-col items-start gap-3">
+                      <p className="text-sm-regular text-fg-muted">
+                        {HELP_SEARCH_EMPTY}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={clearSearch}
+                        className={cn(
+                          "rounded-sm text-sm-bold text-fg-brand",
+                          "transition-[color] duration-(--motion-fast) ease-out",
+                          "hoverable:text-link-hover focus-visible:text-link-hover",
+                        )}
+                      >
+                        {HELP_SEARCH_CLEAR_LABEL}
+                      </button>
+                    </div>
+                  ) : (
+                    visibleTopics.map((group) => (
+                      <TopicGroup
+                        key={group.id}
+                        group={group}
+                        activeTopicId={activeTopicId}
+                        onSelectTopic={onSelectTopic}
+                      />
+                    ))
+                  )}
                 </div>
               </div>
             </div>
-          </>
+          </div>
         )}
       </Disclosure>
     </nav>
