@@ -17,29 +17,39 @@
  * frame's FIRST question - the one shown open at rest. The other 14 questions
  * across the four sets have no answer copy anywhere in the design file.
  *
- * Those 14 carry `FAQ_ANSWER_PENDING`. They are NOT lorem and they are NOT
- * paraphrase: inventing product copy about KYC, supported currencies or OTC
- * services would be a factual claim on a regulated money product, made by an
- * implementer with no authority to make it. This follows the pattern already
- * ratified for the /help open state (D-027 item 2): ship a visible, obviously
- * provisional placeholder so the gap stays visible rather than disguised.
+ * HOW THAT GAP IS REPRESENTED HERE - BY ABSENCE, NOT BY A PLACEHOLDER STRING.
+ * ---------------------------------------------------------------------------
+ * `answer` is OPTIONAL. A question the design never answered simply omits it.
+ * This file holds authored copy and nothing else: there is no stand-in string
+ * to leak, because there is no stand-in string.
  *
- * `FaqAnswerPanel` stamps `data-answer-pending="true"` on every panel holding
- * the placeholder, so a Phase 3 auditor can count them without reading prose.
+ * An earlier revision stored a build-team-facing sentence ("Answer copy
+ * pending...") as the answer VALUE, and it was rendered verbatim to visitors on
+ * four public routes. Prose written for the build must never live in the
+ * content layer - the content layer is, by definition, the thing that ships.
+ * What a visitor sees while an answer is unwritten is a PRESENTATION decision
+ * and belongs to `FaqAnswerPanel`, which owns the holding copy.
+ *
+ * DO NOT FILL THESE IN BY INFERENCE. Inventing product copy about KYC,
+ * supported currencies, transfer limits, fees or OTC services would be a
+ * factual claim on a regulated money product, made by someone with no authority
+ * to make it. The answers must come from the design or from the client.
+ *
+ * TO FIND ALL 14: grep this file for `NO ANSWER IN SOURCE`, or query the served
+ * DOM for `[data-answer-pending="true"]` - `FaqAnswerPanel` stamps that marker
+ * on every panel with no authored answer.
  */
 
 export interface FaqItem {
   id: string;
   question: string;
-  answer: string;
+  /**
+   * The authored answer. OMITTED when the design file contains none - see the
+   * file header. `FaqAnswerPanel` renders neutral holding copy in its place and
+   * marks the panel `data-answer-pending="true"`.
+   */
+  answer?: string;
 }
-
-/**
- * The stand-in for a question the design never answered. Exported so the panel
- * can mark itself, and so one string change updates all 14 sites.
- */
-export const FAQ_ANSWER_PENDING =
-  "Answer copy pending. This question has no answer written in the source design.";
 
 /** `412:1554` - Main Landing. Rows `412:1562` / `1564` / `1566` / `1568` / `1570`. */
 export const FAQ_LANDING: readonly FaqItem[] = [
@@ -55,25 +65,25 @@ export const FAQ_LANDING: readonly FaqItem[] = [
     id: "landing-kyc",
     // 412:1565 - typo is in the source and is reproduced deliberately
     question: "Why should i doo KYC?",
-    answer: FAQ_ANSWER_PENDING,
+    // NO ANSWER IN SOURCE - the design file authors none. Do not invent one.
   },
   {
     id: "landing-local-currency-1",
     // 412:1567
     question: "Supported Local Currency?",
-    answer: FAQ_ANSWER_PENDING,
+    // NO ANSWER IN SOURCE - the design file authors none. Do not invent one.
   },
   {
     id: "landing-local-currency-2",
     // 412:1569 - duplicate of the row above, in the source
     question: "Supported Local Currency?",
-    answer: FAQ_ANSWER_PENDING,
+    // NO ANSWER IN SOURCE - the design file authors none. Do not invent one.
   },
   {
     id: "landing-local-currency-3",
     // 412:1571 - duplicate of the two rows above, in the source
     question: "Supported Local Currency?",
-    answer: FAQ_ANSWER_PENDING,
+    // NO ANSWER IN SOURCE - the design file authors none. Do not invent one.
   },
 ];
 
@@ -95,25 +105,25 @@ export const FAQ_CRYPTO_WALLET: readonly FaqItem[] = [
     id: "crypto-supported-chain",
     // 412:1768
     question: "Supported Chain on Azza?",
-    answer: FAQ_ANSWER_PENDING,
+    // NO ANSWER IN SOURCE - the design file authors none. Do not invent one.
   },
   {
     id: "crypto-kyc",
     // 412:1770 - same source typo as the landing set
     question: "Why should i doo KYC?",
-    answer: FAQ_ANSWER_PENDING,
+    // NO ANSWER IN SOURCE - the design file authors none. Do not invent one.
   },
   {
     id: "crypto-local-currency-1",
     // 412:1774
     question: "Supported Local Currency?",
-    answer: FAQ_ANSWER_PENDING,
+    // NO ANSWER IN SOURCE - the design file authors none. Do not invent one.
   },
   {
     id: "crypto-local-currency-2",
     // 412:1776 - duplicate of the row above, in the source
     question: "Supported Local Currency?",
-    answer: FAQ_ANSWER_PENDING,
+    // NO ANSWER IN SOURCE - the design file authors none. Do not invent one.
   },
 ];
 
@@ -131,25 +141,25 @@ export const FAQ_CROSS_BORDER: readonly FaqItem[] = [
     id: "cross-border-currencies",
     // 412:2007
     question: "What currencies can I send?",
-    answer: FAQ_ANSWER_PENDING,
+    // NO ANSWER IN SOURCE - the design file authors none. Do not invent one.
   },
   {
     id: "cross-border-recipient-account",
     // 412:2009
     question: "Do recipients need an Azza account?",
-    answer: FAQ_ANSWER_PENDING,
+    // NO ANSWER IN SOURCE - the design file authors none. Do not invent one.
   },
   {
     id: "cross-border-cost",
     // 412:2011
     question: "How much does it cost to send money internationally?",
-    answer: FAQ_ANSWER_PENDING,
+    // NO ANSWER IN SOURCE - the design file authors none. Do not invent one.
   },
   {
     id: "cross-border-suppliers",
     // 412:2013
     question: "Can I pay suppliers and contractors abroad?",
-    answer: FAQ_ANSWER_PENDING,
+    // NO ANSWER IN SOURCE - the design file authors none. Do not invent one.
   },
 ];
 
@@ -172,12 +182,12 @@ export const FAQ_BUSINESS: readonly FaqItem[] = [
     // 412:2644
     question:
       "Can businesses send and receive payments from international customers?",
-    answer: FAQ_ANSWER_PENDING,
+    // NO ANSWER IN SOURCE - the design file authors none. Do not invent one.
   },
   {
     id: "business-otc",
     // 412:2646
     question: "Do you offer OTC services for businesses?",
-    answer: FAQ_ANSWER_PENDING,
+    // NO ANSWER IN SOURCE - the design file authors none. Do not invent one.
   },
 ];

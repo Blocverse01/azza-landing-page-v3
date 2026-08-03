@@ -42,6 +42,22 @@ const ROVING_KEYS = new Set(["ArrowDown", "ArrowUp", "Home", "End"]);
  * resolves against the EXPLICIT grid, so on an implicit grid `2 / -1` would
  * silently collapse to a single row.
  *
+ * THE TRAILING 40px TRACK - THE DARK PANEL'S BOTTOM PADDING
+ * ---------------------------------------------------------
+ * The panel is a decorative CELL, so it has no children to pad against; its
+ * inset around the question list has to be produced by the grid instead. The
+ * top 40 comes from the negative top margin below. The bottom 40 comes from
+ * this extra, permanently empty track at the end of `grid-template-rows`: it
+ * pushes the grid's bottom edge - and therefore the panel's, which stretches to
+ * it - exactly 40px past the last question.
+ *
+ * Expressing it as a track rather than a bottom bleed is what makes the two
+ * edges independent. The panel's top overhangs the grid (bleed 40) and its
+ * bottom must NOT (bleed 0), because the card's own 24px bottom padding is what
+ * separates the panel from the card border. A symmetric `-my-10` gets the top
+ * right and overruns the card by 16px at the bottom, where `overflow-hidden`
+ * clips the panel's rounded corners off.
+ *
  * FOCUS RING. `data-surface="inverse"` switches `:focus-visible` to the
  * inverse ring token (theme.css). The default ring is the brand blue, which is
  * close to unreadable against the near-black question rows.
@@ -107,18 +123,27 @@ export function FaqQuestionList({
       className={cn(
         "relative grid grid-cols-1 p-3 sm:p-4",
         "lg:grid-cols-[447fr_393fr] lg:gap-x-15 lg:p-0",
-        "lg:[grid-template-rows:repeat(var(--faq-rows),auto)]",
+        // One auto row for QUESTIONS, one per question, then the empty 40px
+        // track that becomes the dark panel's bottom padding (see the header).
+        "lg:[grid-template-rows:repeat(var(--faq-rows),auto)_40px]",
       )}
       style={{ "--faq-rows": items.length + 1 } as CSSProperties}
     >
       {/* The dark panel `412:1560`. Absolute below `lg` so it backs the whole
        * accordion; a column-1 cell from `lg` up so it backs only the questions.
-       * The -40px block bleed reproduces the panel's inset around its content. */}
+       *
+       * The bleed is ASYMMETRIC, because the panel's two insets are produced by
+       * different things. Top: -40 lifts the panel above the card's 68px top
+       * padding to y=28, the design's value. Bottom: none - the panel stretches
+       * to the grid's bottom edge, which the trailing 40px track has already
+       * placed 40px below the last question, and which the card's `pb-6` then
+       * holds 24px clear of the card border. Design: panel 447x660 at (28,28)
+       * inside a 712-tall card, i.e. 24px of card below the panel. */}
       <div
         aria-hidden="true"
         className={cn(
           "pointer-events-none absolute inset-0 rounded-4xl bg-accordion-panel",
-          "lg:static lg:col-start-1 lg:row-span-full lg:-my-10 lg:rounded-5xl",
+          "lg:static lg:col-start-1 lg:row-span-full lg:-mt-10 lg:rounded-5xl",
         )}
       />
 

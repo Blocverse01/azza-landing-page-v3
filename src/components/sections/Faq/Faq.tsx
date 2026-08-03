@@ -22,6 +22,18 @@ export interface FaqProps {
  * `412:2633`. One component, four question sets; only the height differs, and
  * it is driven by the list (layout.md S5.3).
  *
+ * ON THE 712 IN layout.md S5.3 - IT IS A FIXED HEIGHT, NOT A RULE
+ * ---------------------------------------------------------------
+ * Three of the four dark panels (`412:1560`, `412:1765`, `412:2002`) are 660
+ * tall. Their content needs 535, 593 and 651. Only `412:2639`, the one the
+ * designer actually resized, is content-sized - and it is 505, which is exactly
+ * `40 + 62 (QUESTIONS) + 40 + 323 (list) + 40`. So the authored rule is a 40px
+ * bottom padding, matching the panel's 40 top and 40 left; the 660 is one fixed
+ * height copied across three frames, and the 9 / 67 / 125px of slack it leaves
+ * is residue, not breathing room. This component reproduces the 40 and lets the
+ * list drive the rest, which is both what S5.3 asks for and what makes the card
+ * survive a question count the design never drew.
+ *
  * This is the only file in the section carrying `"use client"`
  * (components.md S3): it owns which row is open. `FaqQuestionList` and
  * `FaqAnswerPanel` reach the client bundle by import and must not repeat the
@@ -57,9 +69,14 @@ export function Faq({ items, headingId }: FaqProps) {
         {/* 412:1556. Insets are 28 top / 28 left / 24 bottom / 59 right at the
          * design width - asymmetric on purpose, so the answer bubble reads as
          * optically centred against the off-centre backdrop (layout.md S1.4).
+         *
          * The top inset is 68 rather than 28 because the dark panel's own 40px
-         * padding is applied as a bleed on the backdrop cell, not as padding on
-         * a wrapper that cannot exist here. */}
+         * top padding is applied as a bleed on the backdrop cell, not as padding
+         * on a wrapper that cannot exist here. The BOTTOM stays 24: the panel's
+         * matching 40px bottom padding is a trailing grid track inside
+         * `FaqQuestionList`, so the panel's own bottom edge lands here, 24px
+         * clear of the card border, instead of overrunning it and being clipped
+         * by `overflow-hidden`. */}
         <div
           className={cn(
             "relative w-full overflow-hidden rounded-6xl bg-accordion-card",

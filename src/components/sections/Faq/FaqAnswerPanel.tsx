@@ -1,15 +1,36 @@
 import type { HTMLAttributes } from "react";
 
 import { cn } from "@/lib/cn";
-import { FAQ_ANSWER_PENDING } from "@/content/faq";
 
 export interface FaqAnswerPanelProps {
   /** Whether this row's answer is the one on show. */
   open: boolean;
   /** Spread verbatim from `Disclosure` - id, role, aria-labelledby, hidden. */
   panelProps: HTMLAttributes<HTMLDivElement>;
-  answer: string;
+  /** The authored answer, or `undefined` when the design authors none. */
+  answer?: string;
 }
+
+/**
+ * Shown to a visitor who opens a question the design never answered.
+ *
+ * Constraints this line has to satisfy, in order:
+ *
+ *   1. It is READ BY THE PUBLIC. It says nothing about Figma, the design file,
+ *      the backlog or the build. A visitor is not an audience for our process.
+ *   2. It makes NO product claim. AZZA is a regulated money product; a sentence
+ *      about limits, fees, currencies or compliance written by an implementer
+ *      is a liability, not a placeholder.
+ *   3. It is short and neutral, so an unanswered row reads as a small gap
+ *      rather than as a broken page.
+ *
+ * It lives here, not in `src/content/faq.ts`, on purpose: the content module
+ * carries authored copy only, so there is no build-facing string in the content
+ * layer that can be shipped by accident. That is exactly how the previous
+ * wording reached four public routes.
+ */
+const FAQ_ANSWER_UNAVAILABLE =
+  "We're preparing a detailed answer to this question. Please check back soon.";
 
 /**
  * One answer bubble - `412:1573` and its three siblings.
@@ -48,7 +69,7 @@ export function FaqAnswerPanel({
   panelProps,
   answer,
 }: FaqAnswerPanelProps) {
-  const pending = answer === FAQ_ANSWER_PENDING;
+  const pending = answer === undefined;
 
   return (
     <div
@@ -56,7 +77,9 @@ export function FaqAnswerPanel({
       hidden={undefined}
       inert={!open}
       /* Machine-readable marker for the 14 questions the design never answered.
-       * No visual effect - it exists so an audit can count them. */
+       * No visual effect and no visible text - it exists so an audit, or
+       * whoever writes the real copy, can find every one of them in the served
+       * DOM without reading prose. */
       data-answer-pending={pending ? "true" : undefined}
       className={cn(
         "relative grid px-3 sm:px-4",
@@ -99,7 +122,7 @@ export function FaqAnswerPanel({
               "text-base-answer text-accordion-answer-fg",
             )}
           >
-            {answer}
+            {answer ?? FAQ_ANSWER_UNAVAILABLE}
           </div>
         </div>
       </div>
