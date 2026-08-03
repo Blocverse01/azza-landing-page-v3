@@ -57,6 +57,50 @@ export interface HelpSidebarProps {
 const ROW =
   "flex min-h-12 w-full items-center justify-between gap-2 py-2.5 -my-2.5 lg:min-h-0";
 
+/*
+ * THE NO-JS COUNTERPART. Same shape as `layout.tsx`'s `.reveal` rescue,
+ * `TopNav.tsx`'s nav fallback and `CardDeck.tsx`'s deck rescue: a stylesheet
+ * that only a browser with scripting DISABLED ever applies.
+ *
+ * WHAT IT RESCUES. `browseOpen` starts `false` and, with no script, can never
+ * become anything else. The collapsed panel below carries `lg:grid-rows-[1fr]`
+ * and `lg:visible lg:opacity-100` - both escapes fire at >= 1024 and NEITHER
+ * fires below it. So on a phone with scripting off the entire topic tree is
+ * `grid-template-rows: 0px` + `visibility: hidden`, and the "Browse topics"
+ * button that would reveal it is a state setter that never runs. Measured at
+ * 390 x 900, scripting off: panel height 0, inner `visibility: hidden`,
+ * `opacity: 0`. At 1440 the same page looks fine, which is why this hid.
+ *
+ * A phone is this product's declared primary device, so that is the whole of
+ * `/help`'s in-page navigation gone on the device it was built for.
+ *
+ * WHAT IT DOES.
+ *   panel    forced open at every width. There is no disclosure without a
+ *            script, so the tree is simply the page.
+ *   inner    visible and opaque - the two properties the collapsed state uses.
+ *   tree     `pt-10` zeroed. That 40px exists to separate the tree from the
+ *            trigger; with the trigger gone it would double the sidebar's own
+ *            40px gap under the search field.
+ *   trigger  hidden. Its entire behaviour is a state setter, exactly as
+ *            `TopNav.tsx` records for its own menu button. A control that
+ *            visibly does nothing is worse than no control.
+ *
+ * Written as a string through `dangerouslySetInnerHTML` because once scripting
+ * is ENABLED the browser parses <noscript> content as raw text, so hydrating
+ * real element children against that text node is a mismatch (the hazard
+ * `TopNav.tsx` documents). Every selector is a `[data-help-topics-*]`
+ * attribute, so nothing outside this component is reachable. `!important`
+ * beats the utilities it overrides for the reason `layout.tsx` records:
+ * important always wins over normal, whatever the cascade layer.
+ */
+const NO_JS_STYLE =
+  "<style>" +
+  "[data-help-topics-panel]{grid-template-rows:1fr!important}" +
+  "[data-help-topics-inner]{visibility:visible!important;opacity:1!important}" +
+  "[data-help-topics-tree]{padding-top:0!important}" +
+  "[data-help-topics-trigger]{display:none!important}" +
+  "</style>";
+
 /**
  * The disclosure chevron.
  *
@@ -392,6 +436,22 @@ export function HelpSidebar({
         className,
       )}
     >
+      {/*
+       * The `hidden` ATTRIBUTE on the <noscript> itself. With scripting
+       * disabled a <noscript> renders as a normal inline box, and this <nav> is
+       * `flex flex-col gap-10` - so an unstyled one would become a flex item
+       * and open a 40px hole above the search field on exactly the browsers
+       * this block exists to serve.
+       *
+       * The attribute rather than the `hidden` utility, inverting the caveat
+       * `TopNav.tsx` records: preflight pins the attribute with `!important`,
+       * which is a problem only when something must later reveal the element.
+       * Nothing ever reveals this one, so unconditional wins is the property we
+       * want. `display: none` does not stop the <style> inside from applying -
+       * a stylesheet's effect is independent of its own box.
+       */}
+      <noscript hidden dangerouslySetInnerHTML={{ __html: NO_JS_STYLE }} />
+
       <div ref={searchRef} onInput={handleSearchInput} className="w-full">
         <SearchField
           label={HELP_SEARCH_LABEL}
@@ -429,6 +489,7 @@ export function HelpSidebar({
           <div className="flex w-full min-w-0 flex-col">
             <button
               {...triggerProps}
+              data-help-topics-trigger=""
               className={cn(
                 "flex h-14 w-full items-center justify-between gap-2 lg:hidden",
                 "rounded-2xl border border-field-border bg-field-surface px-4",
@@ -444,6 +505,7 @@ export function HelpSidebar({
 
             <div
               {...panelProps}
+              data-help-topics-panel=""
               hidden={undefined}
               className={cn(
                 "grid transition-[grid-template-rows]",
@@ -452,6 +514,7 @@ export function HelpSidebar({
               )}
             >
               <div
+                data-help-topics-inner=""
                 className={cn(
                   "min-h-0 overflow-hidden",
                   "transition-opacity duration-(--motion-fast)",
@@ -465,7 +528,10 @@ export function HelpSidebar({
                     tree from the "Browse topics" trigger below `lg` only; at
                     `lg`+ the trigger is not rendered and the sidebar's own gap
                     does that job. */}
-                <div className="flex w-full flex-col gap-10 pt-10 lg:pt-0">
+                <div
+                  data-help-topics-tree=""
+                  className="flex w-full flex-col gap-10 pt-10 lg:pt-0"
+                >
                   {empty ? (
                     /* The design has no empty state - it cannot, it is one
                        static composition. This is the minimum that is still

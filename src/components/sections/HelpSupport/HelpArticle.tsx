@@ -1,6 +1,6 @@
 import type { Ref } from "react";
 
-import { Prose, VisuallyHidden } from "@/components/ui";
+import { VisuallyHidden } from "@/components/ui";
 import { cn } from "@/lib/cn";
 
 import { helpArticleDomId, type HelpArticle as HelpArticleData } from "@/content/help";
@@ -10,38 +10,6 @@ export interface HelpArticleProps {
   /** Focus target for the open-state transition. Owned by `HelpSupport`. */
   containerRef?: Ref<HTMLElement | null>;
   className?: string;
-}
-
-/**
- * A body block whose copy does not exist.
- *
- * D-027 item 2: `500:2368`, `501:219`, `501:220`, `501:224`, `501:225`,
- * `501:233` and `501:234` are lorem ipsum in the source file, so the open state
- * has nothing to transcribe. The structure is built in full and the copy slot
- * is marked in the interface, visibly - NOT filled with invented prose and NOT
- * left as lorem, either of which would read as finished content.
- *
- * The dashed rule and the muted ink are the whole treatment. It is meant to be
- * obviously unfinished at a glance and unmistakable in a Phase 3 capture.
- */
-function PendingCopy({ children }: { children: string }) {
-  return (
-    <Prose step="md-prose" gap={20} measure={false}>
-      <p
-        className={cn(
-          // `line-divider`, not `line-placeholder`: the latter resolves to the
-          // exact same value as `surface-placeholder`, so the dashes vanished
-          // into the fill. Caught in a browser, not by reading token names.
-          // The fill is the palest surface so the dash is what carries the
-          // signal - a solid grey panel could be mistaken for a designed one.
-          "rounded-xl border border-dashed border-line-divider",
-          "bg-surface-subtle px-5 py-4 text-fg-muted",
-        )}
-      >
-        {children}
-      </p>
-    </Prose>
-  );
 }
 
 /**
@@ -63,6 +31,23 @@ function PendingCopy({ children }: { children: string }) {
  * announces with a name. Programmatic focus on a non-interactive element does
  * not match `:focus-visible`, so no outline is painted - the announcement is
  * the feedback.
+ *
+ * THERE IS NO BODY COPY, AND NOTHING STANDS IN FOR IT.
+ *
+ * Every body block the design draws (`500:2368`, `501:219`, `501:220`,
+ * `501:224`, `501:225`, `501:233`, `501:234`) is lorem ipsum. This component
+ * used to render a dashed-bordered panel reading "Copy for this section is not
+ * written yet. The source design uses placeholder text here." three times -
+ * build-team scaffolding served to the public on a live route. Inventing help
+ * copy is out of bounds and a note about the gap is worse than the gap, so the
+ * paragraph slot renders nothing at all. What survives is what the design
+ * actually authors: the two sub-headings.
+ *
+ * They are rendered as bare `<h2>`s rather than as `<section aria-labelledby>`
+ * regions. A `<section>` with an accessible name is a `region` landmark, and a
+ * landmark whose only content is its own heading is noise a screen-reader user
+ * has to step through for no return. When real copy arrives, the wrapper comes
+ * back with it.
  */
 export function HelpArticle({
   article,
@@ -84,23 +69,17 @@ export function HelpArticle({
         <h1 id={titleId}>{article.title}</h1>
       </VisuallyHidden>
 
-      {/* `501:221` - the intro block, three lorem paragraphs in the source. */}
-      <PendingCopy>{article.body}</PendingCopy>
+      {/* `501:221`, the intro block, is three lorem paragraphs in the source
+          and therefore has no counterpart here. */}
 
       {article.sections.map((section) => (
-        <section
+        <h2
           key={section.id}
-          aria-labelledby={`${domId}-${section.id}`}
-          className="flex w-full flex-col gap-8"
+          id={`${domId}-${section.id}`}
+          className="text-lg-h3 text-fg-primary"
         >
-          <h2
-            id={`${domId}-${section.id}`}
-            className="text-lg-h3 text-fg-primary"
-          >
-            {section.heading}
-          </h2>
-          <PendingCopy>{article.body}</PendingCopy>
-        </section>
+          {section.heading}
+        </h2>
       ))}
     </article>
   );

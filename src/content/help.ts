@@ -11,8 +11,10 @@ import type { IconName } from "@/components/ui";
  * Every string here is transcribed verbatim from its Figma node, INCLUDING the
  * source defects (see the notes at each site). The one thing that is NOT
  * transcribed is the article body: `500:2368`, `501:219`, `501:220`, `501:224`,
- * `501:225`, `501:233`, `501:234` are all lorem ipsum, and D-027 item 2 rules
- * that the open state ships a visible placeholder rather than invented copy.
+ * `501:225`, `501:233`, `501:234` are all lorem ipsum, so no body copy exists
+ * to carry. The open state therefore ships the authored sub-headings and NO
+ * body block at all - not invented prose, and not a placeholder describing the
+ * gap, which is a note to the build team and has no business on a public page.
  *
  * DEVIATIONS FROM THE components.md S7.5 CONTRACT - all additive, all forced by
  * a gap in the source design, all recorded in this agent's `findings`:
@@ -29,7 +31,8 @@ import type { IconName } from "@/components/ui";
  *   3. `HelpArticle` gains `topicId` and `sections`. `topicId` makes the
  *      sidebar-topic <-> article linkage explicit rather than matching on a
  *      display string; `sections` carries the two sub-headings the design DOES
- *      author (`501:223`, `501:232`), whose bodies are lorem.
+ *      author (`501:223`, `501:232`), whose bodies are lorem and therefore do
+ *      not ship at all.
  *   4. `HelpCrumb` is declared here rather than imported as `NavLink` from
  *      `src/content/navigation.ts`. It is structurally identical, so any
  *      consumer typed against `NavLink` accepts it, and this module gains no
@@ -71,10 +74,14 @@ export interface HelpArticle {
   title: string;
   breadcrumb: readonly HelpCrumb[];
   /**
-   * The visible placeholder that stands in for the source file's lorem body.
-   * D-027 item 2 - not article copy, and deliberately not written as if it were.
+   * The authored sub-headings, and ONLY those.
+   *
+   * There is deliberately no `body` field. Every body block in the source
+   * design (`500:2368`, `501:219`, `501:220`, `501:224`, `501:225`, `501:233`,
+   * `501:234`) is lorem ipsum, so there is no copy to carry - and the slot must
+   * not be filled with a note about that fact. See the block comment above
+   * `HELP_ARTICLES`.
    */
-  body: string;
   sections: readonly HelpArticleSection[];
 }
 
@@ -280,17 +287,18 @@ export const HELP_COMMUNITY: readonly HelpCommunityLink[] = [
  * `501:225`, `501:233` and `501:234` are lorem ipsum; the two sub-headings
  * `501:223` and `501:232` are real copy and are transcribed.
  *
- * D-027 item 2 and this agent's acceptance criterion 12: build the full
- * structure, mark the body an explicit visible placeholder, invent nothing.
+ * NO BODY COPY SHIPS, AND NO STAND-IN FOR IT EITHER.
+ *
+ * This module previously exported `HELP_ARTICLE_BODY_PLACEHOLDER` - "Copy for
+ * this section is not written yet. The source design uses placeholder text
+ * here." - and `HelpArticle.tsx` rendered it three times inside a dashed box.
+ * That string is a note to the build team, and it was being served to the
+ * public on a live route. It is removed rather than reworded: the design
+ * authors no body copy, inventing help content is out of bounds, and a visitor
+ * is better served by an absent paragraph than by an explanation of why the
+ * paragraph is absent. The two authored sub-headings still ship, because those
+ * ARE real transcribed copy.
  * ---------------------------------------------------------------------- */
-
-/**
- * The stand-in for every lorem block. Deliberately written as an interface
- * notice rather than as prose, so it can never be mistaken for article copy by
- * a reader, a crawler or a later agent.
- */
-export const HELP_ARTICLE_BODY_PLACEHOLDER =
-  "Copy for this section is not written yet. The source design uses placeholder text here.";
 
 export const HELP_ARTICLES: readonly HelpArticle[] = [
   {
@@ -303,7 +311,6 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
         href: `#${helpArticleDomId("getting-started-with-azza")}`,
       },
     ],
-    body: HELP_ARTICLE_BODY_PLACEHOLDER,
     sections: [
       { id: "create-account", heading: "Create account" },
       { id: "hitches-while-creating-one", heading: "Hitches while creating one?" },

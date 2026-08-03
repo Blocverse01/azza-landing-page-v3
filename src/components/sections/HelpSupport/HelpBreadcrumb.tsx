@@ -72,6 +72,43 @@ export function HelpBreadcrumb({
                       : undefined
                   }
                   className={cn(
+                    /*
+                     * responsive.md S6.1 - the 44px floor, and this crumb needs
+                     * it more than most: below `lg` the topic tree is behind
+                     * "Browse topics", so this anchor is the control a phone
+                     * user reaches for to close an opened article. It was the
+                     * bare 20.8px line box (`text-sm-crumb` = 16px x 1.3).
+                     *
+                     * `-my-3 py-3` is the same idiom `Footer.tsx` and
+                     * `TopNav.tsx` use, for the same reason: 12px of padding
+                     * either side of a 20.8px line box gives a 44.8px target,
+                     * and the equal negative margin cancels it out of the flow
+                     * so the margin box is still 20.8 and the trail does not
+                     * move by a pixel. `inline-flex` is load-bearing, not
+                     * cosmetic - vertical margins are ignored on a plain inline
+                     * box, so the cancellation only works on an atomic one.
+                     *
+                     * Padding, not the `::after` box `NavDropdown.tsx` uses:
+                     * nothing is painted on this element's padding box (no
+                     * fill, no border), so growing it is invisible, whereas
+                     * NavDropdown's hover pill fills its padding and had to
+                     * keep it small.
+                     *
+                     * `relative` IS PART OF THE FIX, not decoration. The trail
+                     * wraps at <= ~330px (108.8 + 6 + 181.5 does not fit a
+                     * 280px content box at 320), and `gap-y-1` puts the next
+                     * line 4px below this one - inside the 12px of padding
+                     * this rule just added. Without `relative` the wrapped
+                     * crumb's in-flow text paints over the bottom 8px of the
+                     * hit box and swallows the press: measured with
+                     * `elementFromPoint`, the bottom edge resolved to the
+                     * <span>, not the <a>. Positioning the anchor lifts it into
+                     * the positioned paint layer above its in-flow siblings, so
+                     * the whole 44.8px hit-tests as the link. Nothing else
+                     * moves - the sibling it now covers is the non-interactive
+                     * current-page crumb, so no target is stolen from anything.
+                     */
+                    "relative -my-3 inline-flex items-center py-3",
                     "rounded-sm no-underline",
                     // `transition-[color]`, not `transition-colors`: the latter
                     // includes `outline-color`, and components.md S10.7 forbids
