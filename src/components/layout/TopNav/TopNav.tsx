@@ -393,31 +393,67 @@ export function TopNav({ currentPath }: TopNavProps) {
               product's entire conversion action and burying it behind a
               hamburger would be a conversion regression. */}
           <div className="flex items-center gap-2">
-            <Button
-              variant="chat"
-              size="md"
-              href={NAV_CTA.href}
-              className="hidden xs:inline-flex"
-            >
-              {NAV_CTA.label}
-            </Button>
+            {/*
+             * THE DISPLAY SWITCH LIVES ON A WRAPPER, NOT ON `Button`.
+             *
+             * It used to be `className="hidden xs:inline-flex"` straight on the
+             * Button, and below 480 that rendered BOTH this pill and the icon
+             * button below it - two controls, same accessible name, two tab
+             * stops. `Button` sets `inline-flex` in its own base string and `cn`
+             * is a plain de-duplicating join with no Tailwind conflict
+             * resolution, so `hidden` and `inline-flex` BOTH reached the class
+             * attribute and the cascade - not the argument order - picked the
+             * winner. Tailwind v4 emits the display group alphabetically
+             * (`.contents .flex .grid .hidden .inline .inline-block
+             * .inline-flex`), so `.inline-flex` is written after `.hidden`, has
+             * equal specificity, and wins. The pill never hid.
+             *
+             * A wrapper fixes it at the source rather than out-shouting it: the
+             * <span> has no base display of its own, so `hidden` is unopposed
+             * below 480, and above it `xs:contents` wins because Tailwind
+             * GUARANTEES variant rules are emitted after unprefixed ones - a
+             * documented ordering, not an alphabetical accident.
+             *
+             * `contents` and not `block`/`inline-flex`: the wrapper then leaves
+             * no box behind, so the Button stays the direct flex item of this
+             * row and the >= 480 layout is byte-for-byte what it was.
+             *
+             * Do NOT collapse this back onto the Button, and do not "fix" it by
+             * teaching `cn` to merge - see the note in src/lib/cn.ts.
+             */}
+            <span className="hidden xs:contents">
+              <Button variant="chat" size="md" href={NAV_CTA.href}>
+                {NAV_CTA.label}
+              </Button>
+            </span>
 
             {/*
              * Below `xs` the same action collapses to a 44x44 icon button and
-             * the full-text CTA reappears as the first row of the sheet. The
-             * two `!` utilities override `size="sm"`'s own `px-4`/auto width to
-             * land exactly on 44x44; `cn` is a plain join, so without them the
-             * winner would be decided by stylesheet order rather than intent.
+             * the full-text CTA reappears as the first row of the sheet. Same
+             * wrapper treatment as the pill above, inverted: the icon's own
+             * `xs:hidden` happened to beat `Button`'s base `inline-flex`, but
+             * only by the same stylesheet-order luck, so the pair is made
+             * symmetric rather than left half-trapped.
+             *
+             * The two `!` utilities override `size="sm"`'s own `px-4`/auto width
+             * to land exactly on 44x44. `shrink-0` is what KEEPS it there: this
+             * row is a flex container, `flex-shrink` defaults to 1, and at 320
+             * the row's content exceeded the 280px container and compressed both
+             * this control and the trigger below it to 32.7px wide - under the
+             * responsive.md S6.1 44px floor. A declared hit target that a parent
+             * can renegotiate is not a hit target.
              */}
-            <Button
-              variant="chat"
-              size="sm"
-              href={NAV_CTA.href}
-              aria-label={NAV_CTA.label}
-              className="w-11! px-0! xs:hidden"
-            >
-              <Icon name="social-whatsapp" size="sm" />
-            </Button>
+            <span className="contents xs:hidden">
+              <Button
+                variant="chat"
+                size="sm"
+                href={NAV_CTA.href}
+                aria-label={NAV_CTA.label}
+                className="w-11! shrink-0 px-0!"
+              >
+                <Icon name="social-whatsapp" size="sm" />
+              </Button>
+            </span>
 
             <button
               ref={triggerRef}
@@ -428,7 +464,10 @@ export function TopNav({ currentPath }: TopNavProps) {
               aria-label={open ? "Close menu" : "Open menu"}
               onClick={() => (open ? close(true) : setOpen(true))}
               className={cn(
-                "inline-flex size-11 cursor-pointer items-center justify-center",
+                // `shrink-0` for the reason given on the icon CTA above: this
+                // is a flex item, so without it `size-11` is only an opening
+                // offer and a crowded row at 320 shaved it to 32.7px wide.
+                "inline-flex size-11 shrink-0 cursor-pointer items-center justify-center",
                 "rounded-2xl text-nav-fg lg:hidden",
                 "transition-colors duration-(--motion-fast) ease-out",
                 "motion-reduce:transition-none",
