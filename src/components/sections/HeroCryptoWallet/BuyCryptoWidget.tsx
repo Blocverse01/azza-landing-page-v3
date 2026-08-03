@@ -87,7 +87,29 @@ export function BuyCryptoWidget() {
   const groupName = `${uid}-direction`;
 
   return (
-    <div className="relative mx-auto w-full max-w-[580px]">
+    /*
+     * `flow-root` is load-bearing, not cosmetic. The card below carries
+     * `md:mt-[36.897%]` (214px at 580) and is this box's first in-flow child -
+     * the art stage is `absolute` and therefore out of flow. Without a block
+     * formatting context here (`relative` does NOT create one) that margin is
+     * adjoining to this box's own top margin and collapses out of it, moving
+     * THIS box down by 214px and carrying the `absolute ... top-0` art stage
+     * with it, so the stage landed exactly on the card and the banknotes were
+     * unreachable behind an opaque surface.
+     *
+     * `flow-root` is geometry-neutral: the collapsed margin already stops at
+     * the grid item in `HeroCryptoWallet` (grid items establish an independent
+     * formatting context), so containing it here only moves the 214px from
+     * this box's margin into its height. Measured identical card and inner-card
+     * positions at 390/768/1024/1280/1440/1920 before and after.
+     *
+     * Not `overflow-hidden`/`overflow-clip`: they would also make a BFC but
+     * would crop the rotated banknote, which overhangs this box by ~50px on
+     * the right at 1440. Not `pt-[36.897%]` here: percentage padding resolves
+     * against the CONTAINING BLOCK's width, and at `md` that is the 688px grid
+     * item rather than this 580px box - 254px instead of 214px.
+     */
+    <div className="relative mx-auto flow-root w-full max-w-[580px]">
       {/*
        * The decorative stage - back plate 412:1627 and the naira banknote at
        * its two placements, 412:1630 and 412:1636.
