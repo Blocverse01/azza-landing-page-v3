@@ -12,9 +12,11 @@ export interface QrBadgeProps {
  * The WhatsApp QR badge - `412:884`, `511:464`, `412:1990`, `412:2602`.
  *
  * A 120x174 floating card, not a full-width band (DECISIONS D-013). It
- * self-positions `absolute right-[82px] top-[488px]` inside its hero's
- * positioning context, which is the contract in components.md S6; the four hero
- * owners supply the `relative` ancestor and pass nothing.
+ * self-positions `absolute top-[488px]` at a right inset of 82 measured from
+ * the 1440 design frame inside its hero's positioning context, which is the
+ * contract in components.md S6; the four hero owners supply the `relative`
+ * ancestor and pass nothing. See the note on the placement classes for why the
+ * inset is anchored to the frame rather than to the viewport.
  *
  * Geometry is layout.md S5.4's reconciliation of the four disagreeing
  * placements, restated in components.md S6:
@@ -41,8 +43,46 @@ export default function QrBadge({ className }: QrBadgeProps) {
     <a
       href={WHATSAPP_CHAT_URL}
       className={cn(
-        // Placement - components.md S6. The hero owns the positioning context.
-        "absolute top-[488px] right-[82px]",
+        /*
+         * Placement - components.md S6. The hero owns the positioning context,
+         * and that context is the FULL-WIDTH hero box on all four call sites.
+         *
+         * WHAT THE 82 IS MEASURED FROM. layout.md S5.4 and S9 both prescribe the
+         * literal `right: 82px` and neither says from which edge, because at
+         * 1440 the viewport and the design frame coincide and the question could
+         * not arise during extraction. Taken literally against a full-width
+         * containing block it means "82 from the VIEWPORT", which made this the
+         * one element in the build that does not obey responsive.md S3.3 - "the
+         * container pins at 1200 (reached at 1360) and gutters grow. Nothing
+         * scales fluidly above 1440. Applied without exception." Measured in a
+         * browser before this change: at 1440 the badge sat at x 1238 and
+         * overlapped every hero composition as designed; at 1920 it sat at x
+         * 1718 and cleared the content by 319 / 188 / 158 / 118px on
+         * `/`, crypto-wallet, cross-border and for-business respectively - it
+         * floated alone in the empty right gutter.
+         *
+         * RESOLUTION, decided against the Figma file. What the design fixes is
+         * the badge's position RELATIVE TO THE HERO COMPOSITION, not its
+         * distance from the browser edge: `511:464` sits at x 1259 and
+         * `412:1990` / `412:2602` at x 1239 inside a 1440 frame, each a fixed
+         * inset from that frame - and layout.md S9 classifies the floater as
+         * `fixed`, never fluid. So the 82 is measured from the right edge of the
+         * 1440 DESIGN FRAME, and above 1440 that frame centres and the surplus
+         * goes to the gutters, exactly as `.azza-container` does for content:
+         *
+         *     min(100%, 90rem)          the design frame, clamped to the viewport
+         *     (100% - that) / 2         one gutter's share of the surplus
+         *     + 82px                    the design's own inset
+         *
+         * At and below 1440 the first term is 0 and this is byte-for-byte the
+         * previous `right: 82px`, so nothing at or under the design width moves
+         * - including the `xl` collision gates the two product heroes carry.
+         * Above 1440 the badge keeps its exact designed relationship to the
+         * content: it still overlaps the crypto-wallet container by 52px, the
+         * cross-border container by 82px and the for-business card by 122px, and
+         * still clears the landing column by 79px, at every width.
+         */
+        "absolute top-[488px] right-[calc((100%_-_min(100%,90rem))_/_2_+_82px)]",
         // Hidden below lg: a QR code cannot be scanned by the device rendering
         // it. `display: none` also takes it out of the a11y tree, so a static
         // aria-hidden would be redundant below lg and wrong at lg and above.

@@ -18,11 +18,39 @@ const HEADING_ID = "crypto-wallet-hero-heading";
  *   base-sm   one column, copy then widget, widget full width
  *   md        still one column, widget capped at 580 and centred, art at 50%
  *   lg        two columns, minmax(0, 429fr) / 40px / minmax(0, 580fr)
- *   xl/2xl    as designed - the widget sits 76px above the copy, QR appears
+ *   xl/2xl    as designed - the widget sits 70px above the copy, QR appears
  *
- * The 76px lift is the design's own offset (widget top 127, section content top
- * 203 under the standard rhythm) and is applied only where the two-column
- * composition is at its designed measure.
+ * VERTICAL PLACEMENT - corrected 2026-08-02. Every y below is FRAME-RELATIVE to
+ * `412:1587`, which itself starts at page y 123 under the nav:
+ *
+ *   frame 412:1587   1440 x 972
+ *   copy  412:1615   429 x 596 @ y 197   ->  bottom 793, 179 clear below
+ *   widget 412:1626  580 x 650 @ y 127   ->  70 above the copy
+ *
+ * The previous build derived the widget lift as "widget top 127, section content
+ * top 203" and shipped 76. 203 is PAGE-ABSOLUTE (123 nav + 80 padding) while 127
+ * is frame-relative, so the two coordinate systems were subtracted from each
+ * other. Two consequences, both measured in a browser: the lift was 6px too
+ * large, and - far larger - the whole composition sat on the `standard` 80px
+ * padding, putting the copy at y 80 (-117) and the widget at y 4 (-123). With
+ * `xl:min-h-[972px]` holding the section at its designed height, the deficit
+ * came out as ~120px of dead gradient below the CTA.
+ *
+ * `HeroCrossBorder` derives its identical-looking composition from `items-center`
+ * with no magic numbers, and that was checked here first. It does not transfer:
+ * in `412:1854` both columns are centred on the frame midline (367), whereas
+ * here the copy centres on 495, the widget on 452 and the frame on 486 - three
+ * different values. No `items-*` rule reproduces 197/127; the frame genuinely
+ * stacks the two columns at absolute offsets. So the numbers below are the
+ * design's own, snapped to the 4px scale in the idiom `HeroLanding` already uses
+ * for its 173/97:
+ *
+ *   pt  197 -> `xl:pt-49` (196)      pb  179 -> `xl:pb-45` (180)
+ *   lift 70 -> `xl:-mt-17.5`         196 + 596 + 180 = 972, the frame height
+ *
+ * The `lg:py-24` step is responsive.md S4.3's ramp (56/64/72/80/96/design),
+ * which `standard` stops carrying at 80 because 80 is ITS design value; a
+ * section whose design value is larger picks the ramp back up itself.
  *
  * No `Reveal` anywhere in here. This is the route's above-the-fold hero and its
  * <h1> is the LCP element - components.md S10.4 forbids an entrance on both.
@@ -36,7 +64,7 @@ export function HeroCryptoWallet() {
       gap={0}
       clip
       aria-labelledby={HEADING_ID}
-      className="relative xl:min-h-[972px]"
+      className="relative lg:py-24 xl:min-h-[972px] xl:pt-49 xl:pb-45"
     >
       <div className="grid w-full grid-cols-1 items-start gap-y-12 lg:grid-cols-[minmax(0,429fr)_minmax(0,580fr)] lg:gap-x-10 xl:gap-x-[131px]">
         {/* 412:1615 - V, gap 40 */}
@@ -87,8 +115,15 @@ export function HeroCryptoWallet() {
           </Button>
         </div>
 
-        {/* 412:1626 */}
-        <div className="xl:-mt-19">
+        {/*
+         * 412:1626. The 70px lift is `412:1615`.y - `412:1626`.y = 197 - 127,
+         * both frame-relative - the design's own offset between the two columns
+         * and nothing else. It is a negative margin on a grid item under
+         * `items-start`, so it also shrinks the widget's contribution to the row
+         * (650 - 70 = 580 < the copy's 596): the row still measures 596 and the
+         * section still closes at the designed 972.
+         */}
+        <div className="xl:-mt-17.5">
           <BuyCryptoWidget />
         </div>
       </div>

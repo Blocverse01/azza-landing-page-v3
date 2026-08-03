@@ -51,6 +51,36 @@ export default function UseAzzaToday() {
        * linear-gradient(180deg, gradient.cta-from 0%, gradient.cta-to 100%).
        */
       background="bg-linear-to-b from-gradient-cta-from to-gradient-cta-to"
+      /*
+       * THIS SECTION'S PADDING IS NOT 80/80 - corrected 2026-08-02.
+       *
+       * `412:1233` is 1440 x 1128 and both ends are measured, not assumed:
+       * the "START NOW" pill `412:1292` sits at y 112, so padding-top is 112;
+       * the art `412:1234` starts at y 467.002 and is 615.403 tall, so it ends
+       * at 1082.405 and padding-bottom is 1128 - 1082.405 = 45.6. layout.md
+       * S4.3 records exactly those two numbers for this node.
+       *
+       * `rhythm="standard"` alone gives 80/80, which measured -32 at the top and
+       * +34.4 at the bottom in a browser: the whole closing composition sat 32px
+       * high in its band with 34px of empty gradient under the coin art. The
+       * override idiom is `HeroLanding`'s, which does the same for its 173/97.
+       *
+       * `lg:pt-24` is responsive.md S4.3's ramp (56/64/72/80/96/design) picked
+       * back up for the top, whose design value is above 80. The BOTTOM's design
+       * value is below 80, so the ramp has nothing left to climb and the
+       * `standard` steps stand below `xl` - the art wants that room on a phone.
+       *
+       * 112 is `pt-28` exactly. 45.6 is off the 4px scale and lands on the
+       * nearest step, 44 (`pb-11`), per the same policy `HeroLanding` applies to
+       * 173 -> 172 and 97 -> 96.
+       *
+       * NOTE FOR THE NEXT READER: layout.md S10.3 assertion 2 lists an allowed
+       * section-padding set that would make 112/45.6 illegal, contradicting
+       * S4.3's own measurement of this very node. The two halves of the artifact
+       * disagree; the Figma file is the tiebreaker and says 112/45.6. The
+       * assertion is incomplete - reported, not worked around.
+       */
+      className="lg:pt-24 xl:pt-28 xl:pb-11"
     >
       {/*
        * One entrance verb site-wide: fade up 16px (components.md S10.4). The
