@@ -5,6 +5,7 @@ import { useId, useState } from "react";
 import { Button, Icon, SelectPill } from "@/components/ui";
 import { cn } from "@/lib/cn";
 
+import bankCardAsset from "@design-system/assets/illustration/bank-card-yellow.svg";
 import banknoteAsset from "@design-system/assets/illustration/banknote-naira.svg";
 
 /**
@@ -12,6 +13,7 @@ import banknoteAsset from "@design-system/assets/illustration/banknote-naira.svg
  * override it. Narrow it once, here, rather than letting `any` spread.
  */
 const BANKNOTE_SRC: string = banknoteAsset.src;
+const BANK_CARD_SRC: string = bankCardAsset.src;
 
 type Direction = "buy" | "sell";
 
@@ -128,6 +130,29 @@ export function BuyCryptoWidget() {
       >
         {/* 412:1627 - 580x436 at y 162, radius 48 */}
         <div className="absolute inset-x-0 top-[24.923%] h-[67.077%] rounded-7xl bg-surface-accent-orchid-dim" />
+
+        {/*
+         * 412:1628 "Vector 2156" - the yellow bank card with the black magnetic
+         * stripe, tucked behind the widget. 358 x 116.558 at (32, 120), so
+         * 18.4615% / 5.5172% / 61.7241% against the 580 x 650 stage. Painted
+         * after the back plate and before the banknotes, per the file's own
+         * child order.
+         *
+         * Only the top ~94px clears the card at y 214; the rest is covered.
+         * The export is the node's tight bounding box - rounded 22.7px top
+         * corners, square bottom - so no transform is needed here.
+         *
+         * `opacity-50 lg:opacity-100` matches its two sibling art vectors.
+         * responsive.md S7.3.1 names only 412:1629/412:1635 for the 50%-at-md
+         * treatment because its inventory omits this node altogether - the same
+         * omission that left it unbuilt. It is background art on the same
+         * stage, and leaving it at full strength would put a saturated yellow
+         * band at 100% over banknotes at 50%.
+         */}
+        <div
+          className="absolute top-[18.4615%] left-[5.5172%] aspect-[358/116.558] w-[61.7241%] bg-contain bg-center bg-no-repeat opacity-50 lg:opacity-100"
+          style={{ backgroundImage: `url(${BANK_CARD_SRC})` }}
+        />
 
         {/*
          * 412:1630 - the exported SVG is the group's own bounding box, so the
