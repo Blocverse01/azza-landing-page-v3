@@ -46,7 +46,14 @@ export function HelpResourceGrid({
   className,
 }: HelpResourceGridProps) {
   return (
+    /*
+     * `role="list"` for the reason WhyAzzaSteps.tsx and WhyAzzaCrossBorder.tsx
+     * already record: Tailwind's preflight sets `list-style: none` on every
+     * <ul>, and Safari/VoiceOver drops list semantics from an un-marked list.
+     * `display: grid` below is a second, independent trigger for the same loss.
+     */
     <ul
+      role="list"
       className={cn(
         "grid w-full grid-cols-1 gap-x-6 gap-y-6",
         "md:grid-cols-2 md:gap-y-10 xl:gap-x-7",

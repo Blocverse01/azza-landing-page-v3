@@ -214,7 +214,17 @@ export function HelpSupport({ topics, article }: HelpSupportProps) {
                  * from the nav's and the blog's - do not reconcile it.
                  */}
                 <Reveal index={1}>
-                  <ul className="grid grid-cols-1 gap-10 xs:grid-cols-2 md:grid-cols-3">
+                  {/*
+                   * `role="list"` for the reason WhyAzzaSteps.tsx and
+                   * WhyAzzaCrossBorder.tsx already record: Tailwind's preflight
+                   * sets `list-style: none` on every <ul>, and Safari/VoiceOver
+                   * drops list semantics from an un-marked list. `display: grid`
+                   * is a second, independent trigger for the same loss.
+                   */}
+                  <ul
+                    role="list"
+                    className="grid grid-cols-1 gap-10 xs:grid-cols-2 md:grid-cols-3"
+                  >
                     {HELP_COMMUNITY.map((item) => (
                       <li key={item.id} className="flex min-w-0 gap-3">
                         <span className="flex size-8 shrink-0 items-center justify-center text-fg-body">

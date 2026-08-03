@@ -133,18 +133,41 @@ export function ShareRow({ title, variant = "inline", className }: ShareRowProps
   }`;
 
   const cluster = (
+    /*
+     * `role="list"` IS LOAD-BEARING HERE, not a nicety. Tailwind's preflight
+     * sets `list-style: none` - which the `list-none` below re-declares - and
+     * that makes WebKit drop the implicit `list` role. A <ul> stripped of that
+     * role maps to `generic`, which PROHIBITS an accessible name, so BOTH
+     * naming attributes below would be inert and an axe `aria-prohibited-attr`
+     * violation, exactly as Disclosure.tsx records for a bare `aria-labelledby`
+     * on a <div>. In the inline variant that `aria-label` is the only thing
+     * identifying this cluster as the share controls. The role and the name
+     * ship together or not at all. `display: flex` is a second, independent
+     * trigger for the same loss.
+     */
     <ul
+      role="list"
       aria-label={variant === "inline" ? CONTROL_LABEL : undefined}
       aria-labelledby={variant === "footer" ? labelId : undefined}
       className="flex list-none items-center gap-2 lg:-me-1.5 lg:gap-0"
     >
       <li>
-        {/* 352:3695 / 352:3729 - the filled X tile. */}
+        {/*
+         * 352:3695 / 352:3729 - the filled X tile.
+         *
+         * THE ONLY CONTROL IN THIS CLUSTER THAT OPENS A NEW TAB. The warning
+         * `ArticleBody.tsx`'s `ProseLink` already ships is folded into the
+         * `aria-label` rather than appended as a second `<VisuallyHidden>`
+         * node, because this control's whole name IS the label - appending
+         * would leave the label winning and the note unread. Its three siblings
+         * are <button>s that open the OS share sheet or write the clipboard;
+         * they change no browsing context and must not claim to.
+         */}
         <a
           href={xHref}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="Share on X"
+          aria-label="Share on X (opens in a new tab)"
           className={cn(CONTROL, INK, "no-underline")}
         >
           <Icon name="share-x" size="md" />

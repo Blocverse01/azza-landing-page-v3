@@ -118,7 +118,15 @@ export default function Testimonials() {
         </DisplayHeading>
       </Reveal>
 
+      {/*
+       * `role="list"` for the reason WhyAzzaSteps.tsx and
+       * WhyAzzaCrossBorder.tsx already record. The explicit `list-none` below
+       * makes it doubly required rather than redundant: it re-declares the very
+       * `list-style: none` that makes Safari/VoiceOver drop list semantics, and
+       * `display: grid` is a second, independent trigger for the same loss.
+       */}
       <ul
+        role="list"
         className={cn(
           "mt-10 grid w-full list-none grid-cols-1 items-start justify-items-center gap-5",
           "sm:mt-12 md:grid-cols-2 lg:mt-16 lg:grid-cols-3",

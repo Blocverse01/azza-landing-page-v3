@@ -40,7 +40,19 @@ export function HelpBreadcrumb({
 
   return (
     <nav aria-label="Breadcrumb" className={cn("w-full", className)}>
-      <ol className="flex flex-wrap items-center gap-x-1 gap-y-1 text-sm-crumb text-fg-muted">
+      {/*
+       * `role="list"` for the reason WhyAzzaSteps.tsx and
+       * WhyAzzaCrossBorder.tsx already record: Tailwind's preflight sets
+       * `list-style: none` on every <ol>, and Safari/VoiceOver drops list
+       * semantics from an un-marked list. `display: flex` is a second,
+       * independent trigger for the same loss. A trail whose list role is gone
+       * is just two adjacent strings - the "2 items" and the position are the
+       * whole of what makes it read as a trail rather than a heading and a link.
+       */}
+      <ol
+        role="list"
+        className="flex flex-wrap items-center gap-x-1 gap-y-1 text-sm-crumb text-fg-muted"
+      >
         {items.map((item, index) => {
           const isCurrent = index === lastIndex;
 

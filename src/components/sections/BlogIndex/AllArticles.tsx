@@ -233,8 +233,19 @@ export function AllArticles({ posts }: AllArticlesProps) {
           </div>
         </div>
       ) : (
+        /*
+         * `role="list"` for the reason WhyAzzaSteps.tsx and
+         * WhyAzzaCrossBorder.tsx already record: Tailwind's preflight sets
+         * `list-style: none` on every <ul>, and Safari/VoiceOver drops list
+         * semantics from an un-marked list. `display: grid` is a second,
+         * independent trigger for the same loss. This is the nine-card blog
+         * grid, where the cost is concrete: without the role there is no
+         * "list, 9 items" boundary and no "3 of 9" position, so a screen-reader
+         * user has nothing to orient against while walking the results.
+         */
         <ul
           ref={gridRef}
+          role="list"
           className={cn(
             "grid w-full grid-cols-1 gap-x-6 gap-y-10",
             // 1 / 2 / 2 / 2 / 3 / 3 columns at base/xs/sm/md/lg/xl,

@@ -9,7 +9,7 @@ import {
   type KeyboardEvent,
 } from "react";
 
-import { Icon } from "@/components/ui";
+import { Icon, VisuallyHidden } from "@/components/ui";
 import type { NavDropdownItem } from "@/content/navigation";
 import { cn } from "@/lib/cn";
 
@@ -214,7 +214,15 @@ export function NavDropdown({ label, items, currentPath }: NavDropdownProps) {
             : "pointer-events-none -translate-y-1.5 opacity-0 duration-(--motion-fast) ease-in",
         )}
       >
-        <ul className="flex flex-col gap-5">
+        {/*
+         * `role="list"` for the reason WhyAzzaSteps.tsx and
+         * WhyAzzaCrossBorder.tsx already record: Tailwind's preflight sets
+         * `list-style: none` on every <ul>, and Safari/VoiceOver drops list
+         * semantics from an un-marked list. This panel's whole job is to be a
+         * bounded set of destinations, and the count is what tells a
+         * screen-reader user when the panel ends.
+         */}
+        <ul role="list" className="flex flex-col gap-5">
           {items.map((item) => {
             const isCurrent =
               item.href.startsWith("/") && currentPath === item.href;
@@ -284,6 +292,16 @@ export function NavDropdown({ label, items, currentPath }: NavDropdownProps) {
                     className={className}
                   >
                     {body}
+                    {/*
+                     * The same treatment `ArticleBody.tsx`'s `ProseLink` already
+                     * ships, for the same reason it states: a new tab that opens
+                     * with no warning is the classic unannounced context change.
+                     * Every row in the Socials panel is one. The note is a
+                     * sibling of `body`'s two spans and inherits the row's
+                     * `flex`, so it lays out as a zero-width sr-only box and the
+                     * painted row is unchanged.
+                     */}
+                    <VisuallyHidden> (opens in a new tab)</VisuallyHidden>
                   </a>
                 ) : (
                   <Link

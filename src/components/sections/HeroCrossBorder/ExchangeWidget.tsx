@@ -101,7 +101,14 @@ export function ExchangeWidget({ className }: ExchangeWidgetProps) {
 
         {/* 412:1892 - two benefit rows. The glyphs carry no information the
             adjacent text does not, so they stay decorative. */}
-        <ul className="flex flex-col gap-5">
+        {/*
+         * `role="list"` for the reason WhyAzzaSteps.tsx and
+         * WhyAzzaCrossBorder.tsx already record: Tailwind's preflight sets
+         * `list-style: none` on every <ul>, and Safari/VoiceOver drops list
+         * semantics from an un-marked list. `display: flex` is a second,
+         * independent trigger for the same loss.
+         */}
+        <ul role="list" className="flex flex-col gap-5">
           <MetaRow icon="bolt">Arrives in seconds</MetaRow>
           <MetaRow icon="receipt">Total fees included in NGN amount</MetaRow>
         </ul>

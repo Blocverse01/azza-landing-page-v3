@@ -89,7 +89,14 @@ export function FeatureList({
   className,
 }: FeatureListProps) {
   return (
+    /*
+     * `role="list"` for the reason WhyAzzaSteps.tsx and WhyAzzaCrossBorder.tsx
+     * already record: Tailwind's preflight sets `list-style: none` on every
+     * <ul>, and Safari/VoiceOver drops list semantics from an un-marked list.
+     * `display: grid` below is a second, independent trigger for the same loss.
+     */
     <ul
+      role="list"
       className={cn(
         /*
          * The left rail. layout.md S8.2: the marker sits on the 1200 container's

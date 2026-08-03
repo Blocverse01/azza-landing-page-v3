@@ -170,7 +170,16 @@ export function Footer({ className, currentPath }: FooterProps) {
                      * is correct on every one of the seven routes.
                      */}
                     <h3 className="text-base-bold text-fg-on-inverse">{column.heading}</h3>
-                    <ul className="flex flex-col gap-6">
+                    {/*
+                     * `role="list"` for the reason WhyAzzaSteps.tsx and
+                     * WhyAzzaCrossBorder.tsx already record: Tailwind's
+                     * preflight sets `list-style: none` on every <ul>, and
+                     * Safari/VoiceOver drops list semantics from an un-marked
+                     * list. Without it these four columns are announced as
+                     * loose links with no "list, N items" boundary and no
+                     * position, under a heading that promises a group.
+                     */}
+                    <ul role="list" className="flex flex-col gap-6">
                       {column.links.map((link) => {
                         const external = isExternalHref(link.href);
 

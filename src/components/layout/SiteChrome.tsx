@@ -49,12 +49,39 @@ export function SiteChrome({ children }: SiteChromeProps) {
 
   return (
     <>
-      <SkipLink />
+      {/*
+       * The wrapper exists so `TopNav`'s mobile-sheet isolation can reach the
+       * skip link. When the sheet opens, `TopNav` marks <main> and <footer>
+       * `inert` + `aria-hidden`; the skip link renders BEFORE <header>, so it
+       * was in neither set. The Tab cycle cannot reach it, but a virtual cursor
+       * or the links rotor still meets "Skip to main content", and activating
+       * it focuses the now-inert <main> - a no-op. The wrapper carries the
+       * `data-azza-skip-link` hook `TopNav` queries, alongside main and footer.
+       *
+       * It costs no layout: `SkipLink` is `sr-only` (position: absolute) at
+       * rest and `fixed` when focused, so it is out of flow in both states and
+       * this <div> renders zero-height between <body> and <header>.
+       *
+       * The hook is an attribute on a wrapper rather than a prop on `SkipLink`
+       * because `SkipLinkProps` is a shared `components/ui` contract with one
+       * member (`href`), and widening a shared primitive from here is out of
+       * bounds.
+       */}
+      <div data-azza-skip-link="">
+        <SkipLink />
+      </div>
       <TopNav currentPath={pathname} />
       <main id="main" tabIndex={-1}>
         {children}
       </main>
-      <Footer />
+      {/*
+       * `currentPath` was implemented in `Footer` behind an optional prop and
+       * never passed, so `aria-current={currentPath === link.href ? ...}` was
+       * `undefined` on every route and the attribute was emitted nowhere.
+       * responsive.md S6.4 row 9 asks for it on the footer links as well as the
+       * nav ones, and `pathname` is already in hand two lines above.
+       */}
+      <Footer currentPath={pathname} />
     </>
   );
 }

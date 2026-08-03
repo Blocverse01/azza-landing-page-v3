@@ -82,7 +82,17 @@ export function RelatedArticles({ posts }: RelatedArticlesProps) {
          * `md`, three at `lg` (responsive.md S7.5), on S4.3's card-gap ramp
          * 20/24/28/32/40/40.
          */}
-        <ul className="xs:gap-6 grid grid-cols-1 gap-5 sm:gap-7 md:grid-cols-2 md:gap-8 lg:grid-cols-3 lg:gap-10">
+        {/*
+         * `role="list"` for the reason WhyAzzaSteps.tsx and
+         * WhyAzzaCrossBorder.tsx already record: Tailwind's preflight sets
+         * `list-style: none` on every <ul>, and Safari/VoiceOver drops list
+         * semantics from an un-marked list. `display: grid` is a second,
+         * independent trigger for the same loss.
+         */}
+        <ul
+          role="list"
+          className="xs:gap-6 grid grid-cols-1 gap-5 sm:gap-7 md:grid-cols-2 md:gap-8 lg:grid-cols-3 lg:gap-10"
+        >
           {posts.map((post, index) => (
             <Reveal key={post.slug} as="li" index={index + 1} className="flex min-w-0">
               <ArticleCard post={post} variant="grid" className="w-full" />

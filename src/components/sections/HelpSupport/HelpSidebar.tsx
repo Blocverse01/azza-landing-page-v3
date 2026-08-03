@@ -265,7 +265,9 @@ function TopicRow({
                    * which is exactly the +84 layout.md S4.10 measures on
                    * `500:1745` -> `500:2314` when this panel opens.
                    */}
-                  <ul className="flex w-full flex-col gap-5 pt-5">
+                  {/* `role="list"` - same preflight/WebKit reason as the group
+                      list in `TopicGroup` below. */}
+                  <ul role="list" className="flex w-full flex-col gap-5 pt-5">
                     {children.map((child) => (
                       <li key={child.id}>
                         <div className={cn(ROW, "text-base text-fg-secondary")}>
@@ -306,7 +308,21 @@ function TopicGroup({
       {children.length > 0 ? (
         /* Rows are 22 tall on a 42 pitch, so the declared gap is the 20 the
            design draws - the row's touch padding is cancelled by `-my-2.5`. */
-        <ul aria-labelledby={labelId} className="flex w-full flex-col gap-5">
+        /*
+         * `role="list"` IS LOAD-BEARING HERE, not a nicety. Tailwind's preflight
+         * sets `list-style: none`, which makes WebKit drop the implicit `list`
+         * role - and a <ul> stripped of that role maps to `generic`, which
+         * PROHIBITS an accessible name. The `aria-labelledby` would then be both
+         * inert and an axe `aria-prohibited-attr` violation, exactly as
+         * Disclosure.tsx records for a bare `aria-labelledby` on a <div>. The
+         * <p> above is deliberately not a heading, so this label is the only
+         * thing naming the group: the two ship together or not at all.
+         */
+        <ul
+          role="list"
+          aria-labelledby={labelId}
+          className="flex w-full flex-col gap-5"
+        >
           {children.map((topic) => (
             <TopicRow
               key={topic.id}

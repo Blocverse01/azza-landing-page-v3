@@ -11,7 +11,7 @@ import {
   type KeyboardEvent,
 } from "react";
 
-import { Button, Container, Icon, Logo } from "@/components/ui";
+import { Button, Container, Icon, Logo, VisuallyHidden } from "@/components/ui";
 import { NAV_CTA, PRIMARY_NAV } from "@/content/navigation";
 import { cn } from "@/lib/cn";
 
@@ -173,6 +173,23 @@ export function TopNav({ currentPath }: TopNavProps) {
    * `inert` on <main> and <footer> is what isolates the sheet without lying
    * about the content type the way `role="dialog"` would. Both are owned by
    * SiteChrome (wave 2D) and may not exist yet, hence the null guards.
+   *
+   * THE SKIP LINK IS THE THIRD MEMBER OF THAT SET, and it was missing.
+   * `SkipLink` renders in SiteChrome BEFORE <header>, so it is neither inside
+   * the trap nor inside anything this effect used to reach. The Tab cycle
+   * cannot get to it - `focusableWithin(headerRef)` never leaves the header -
+   * but a screen reader's virtual cursor and its links rotor both still meet
+   * "Skip to main content" while the sheet is open, and activating it calls
+   * `focus()` on the <main> this effect has just made inert, which is a no-op.
+   * The visible state and the assistive state have to agree, so it joins the
+   * isolated set and regains its role the moment the sheet closes.
+   *
+   * Matched on `[data-azza-skip-link]`, the hook SiteChrome puts on the skip
+   * link's wrapper, and NOT on `a[href="#main"]`: `SkipLinkProps.href` is an
+   * overridable prop, so an href-based selector would silently miss a skip link
+   * whose target was customised - the failure would be invisible and would
+   * reproduce exactly this defect. Same `data-azza-*` contract every other
+   * cross-file hook in this component already uses.
    */
   useEffect(() => {
     if (!open) return;
@@ -194,6 +211,7 @@ export function TopNav({ currentPath }: TopNavProps) {
     const isolated = [
       document.querySelector("main"),
       document.querySelector("footer"),
+      document.querySelector("[data-azza-skip-link]"),
     ].filter((element): element is HTMLElement => element !== null);
 
     for (const element of isolated) {
@@ -339,8 +357,18 @@ export function TopNav({ currentPath }: TopNavProps) {
               className="-my-3 py-3"
             />
 
+            {/*
+             * `role="list"` for the reason WhyAzzaSteps.tsx and
+             * WhyAzzaCrossBorder.tsx already record: Tailwind's preflight sets
+             * `list-style: none` on every <ul>, and Safari/VoiceOver drops list
+             * semantics from an un-marked list. `display: flex` on the same
+             * element is a second, independent trigger for the same loss. This
+             * is the site's primary destination list; without the role it is
+             * announced as loose links with no "list, N items" boundary.
+             */}
             <ul
               data-azza-nav-links=""
+              role="list"
               className="hidden items-center gap-8 lg:flex"
             >
               {PRIMARY_NAV.map((item) => {
@@ -555,7 +583,19 @@ export function TopNav({ currentPath }: TopNavProps) {
                   <p className="text-xs text-nav-dropdown-fg-muted">
                     {item.label}
                   </p>
-                  <ul aria-label={item.label}>
+                  {/*
+                   * `role="list"` IS LOAD-BEARING HERE, not a nicety. Tailwind's
+                   * preflight sets `list-style: none`, which makes WebKit drop
+                   * the implicit `list` role - and a <ul> stripped of that role
+                   * maps to `generic`, which PROHIBITS an accessible name. The
+                   * `aria-label` above would then be both inert and an axe
+                   * `aria-prohibited-attr` violation, exactly as Disclosure.tsx
+                   * records for a bare `aria-labelledby` on a <div>. Since the
+                   * <p> above deliberately is not a heading, this label is the
+                   * ONLY thing grouping these rows: the two ship together or
+                   * not at all.
+                   */}
+                  <ul role="list" aria-label={item.label}>
                     {children.map((child) => {
                       const external = !child.href.startsWith("/");
 
@@ -569,6 +609,17 @@ export function TopNav({ currentPath }: TopNavProps) {
                             className={FALLBACK_ROW}
                           >
                             {child.label}
+                            {/*
+                             * The same treatment `ArticleBody.tsx`'s `ProseLink`
+                             * already ships, for the same reason it states: a
+                             * new tab that opens with no warning is the classic
+                             * unannounced context change. The codebase was
+                             * handling one situation two ways; this is the half
+                             * that was missing.
+                             */}
+                            {external ? (
+                              <VisuallyHidden> (opens in a new tab)</VisuallyHidden>
+                            ) : null}
                           </a>
                         </li>
                       );

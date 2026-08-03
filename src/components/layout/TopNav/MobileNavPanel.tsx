@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { RefObject } from "react";
 
-import { Button, Disclosure, Icon } from "@/components/ui";
+import { Button, Disclosure, Icon, VisuallyHidden } from "@/components/ui";
 import { NAV_CTA, PRIMARY_NAV, type NavDropdownItem } from "@/content/navigation";
 import { cn } from "@/lib/cn";
 
@@ -69,6 +69,14 @@ function SubRow({
           className={className}
         >
           {body}
+          {/*
+           * The same treatment `ArticleBody.tsx`'s `ProseLink` already ships,
+           * for the same reason it states: a new tab that opens with no warning
+           * is the classic unannounced context change. These are the mobile
+           * Socials rows - the same destinations `NavDropdown` serves above `lg`
+           * - so the two surfaces now say the same thing.
+           */}
+          <VisuallyHidden> (opens in a new tab)</VisuallyHidden>
         </a>
       ) : (
         <Link
@@ -162,7 +170,15 @@ export function MobileNavPanel({
           </Button>
         </div>
 
-        <ul className="flex flex-col py-2">
+        {/*
+         * `role="list"` for the reason WhyAzzaSteps.tsx and
+         * WhyAzzaCrossBorder.tsx already record: Tailwind's preflight sets
+         * `list-style: none` on every <ul>, and Safari/VoiceOver drops list
+         * semantics from an un-marked list. Below `lg` this sheet IS the site's
+         * navigation, so losing the "list, N items" boundary loses the only cue
+         * that tells a screen-reader user how long the menu is.
+         */}
+        <ul role="list" className="flex flex-col py-2">
           {PRIMARY_NAV.map((item) => {
             const children = item.items;
 
@@ -201,7 +217,10 @@ export function MobileNavPanel({
                           )}
                         >
                           <div className="min-h-0 overflow-hidden">
+                            {/* `role="list"` - same preflight/WebKit reason as
+                                the outer list above. */}
                             <ul
+                              role="list"
                               className={cn(
                                 "flex flex-col transition-opacity ease-out",
                                 "motion-reduce:transition-none",
