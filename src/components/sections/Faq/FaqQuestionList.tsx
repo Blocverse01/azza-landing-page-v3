@@ -15,6 +15,69 @@ export interface FaqQuestionListProps {
 
 const ROVING_KEYS = new Set(["ArrowDown", "ArrowUp", "Home", "End"]);
 
+/*
+ * THE NO-JS COUNTERPART. Same shape as `layout.tsx`'s `.reveal` rescue,
+ * `TopNav.tsx`'s nav fallback, `CardDeck.tsx`'s deck rescue and
+ * `HelpSidebar.tsx`'s topic-tree rescue: a stylesheet only a browser with
+ * scripting DISABLED ever applies.
+ *
+ * WHAT IT RESCUES. Which row is open is React state in `Faq.tsx`. With no
+ * script it is set once - `items[0]` - and can never change again, so every
+ * other answer is collapsed forever. Measured on the four FAQ routes with
+ * `java_script_enabled=False`: one readable answer per route, at 390 and at
+ * 1440 alike. This is not a breakpoint-gated collapse; it is total.
+ *
+ * THE PRESENTATION CHOSEN: a plain Q&A list.
+ * An accordion without a script is not an accordion - it is a list of
+ * questions with a control on each that does nothing. So every answer is
+ * opened, and the chrome that encodes a CHOICE the visitor can no longer make
+ * is suppressed. The question text itself is NOT suppressed: unlike
+ * `HelpSidebar`'s "Browse topics" trigger, which is pure affordance and is
+ * hidden outright, the FAQ trigger carries the question, and hiding it would
+ * leave answers with nothing to answer.
+ *
+ * WHAT IT DOES.
+ *   panel    opened on all three of the axes that collapse it. All three are
+ *            needed: the 0fr track clips it, `visibility` keeps it out of the
+ *            accessibility tree, and at `lg`+ opacity alone still hides it.
+ *            Fixing fewer than three leaves the content unreachable by
+ *            whichever route was missed.
+ *   answer   the inner crossfade wrapper, opaque.
+ *   trigger  `cursor: default`, because it no longer does anything, and the
+ *            open-row fill neutralised - with every answer showing, a single
+ *            highlighted row marks a selection that no longer exists. One
+ *            declaration also lands the hover fill, which is normal-weight.
+ *   lg+      each answer re-placed on its own question's row. This is the one
+ *            rule that is not a simple revert: at `lg` every panel is
+ *            deliberately placed in ONE shared cell in column 2, which is
+ *            correct when exactly one is open and is a pile of superimposed
+ *            text when all of them are. `--faq-row` is carried by the panel
+ *            for this and only this. `grid-row: auto` is NOT an option - the
+ *            backdrop occupies column 1 for the full row span, and grid
+ *            auto-placement refuses an occupied cell, so it would push every
+ *            answer past the end of the panel (see the header).
+ *
+ * Written as a string through `dangerouslySetInnerHTML` because once scripting
+ * is ENABLED the browser parses <noscript> content as raw text, so hydrating
+ * real element children against that text node is a mismatch. Every selector
+ * is a `[data-faq-*]` attribute, so nothing outside this section is reachable.
+ * `!important` beats the utilities it overrides for the reason `layout.tsx`
+ * records: important always wins over normal, whatever the cascade layer.
+ *
+ * 64rem is `lg`. theme.css overrides only `xs` and `2xl`, so `lg` is Tailwind's
+ * default and this media query and the `lg:` utilities switch together.
+ */
+const NO_JS_STYLE =
+  "<style>" +
+  "[data-faq-panel]{grid-template-rows:1fr!important;visibility:visible!important;" +
+  "opacity:1!important;pointer-events:auto!important}" +
+  "[data-faq-answer]{opacity:1!important}" +
+  "[data-faq-trigger]{cursor:default!important;" +
+  "background-color:var(--color-accordion-row)!important}" +
+  "@media(min-width:64rem){[data-faq-panel]{grid-row:var(--faq-row)!important;" +
+  "margin-top:0!important}}" +
+  "</style>";
+
 /**
  * The question column and, interleaved with it, the answer panels.
  *
@@ -129,6 +192,17 @@ export function FaqQuestionList({
       )}
       style={{ "--faq-rows": items.length + 1 } as CSSProperties}
     >
+      {/*
+       * The `hidden` ATTRIBUTE on the <noscript> itself, exactly as
+       * `HelpSidebar.tsx` records. With scripting disabled a <noscript> renders
+       * as a normal inline box, and this element is a grid container - so an
+       * unstyled one would become a grid item and take a cell, on precisely the
+       * browsers this block exists to serve. `display: none` does not stop the
+       * <style> inside from applying; a stylesheet's effect is independent of
+       * its own box.
+       */}
+      <noscript hidden dangerouslySetInnerHTML={{ __html: NO_JS_STYLE }} />
+
       {/* The dark panel `412:1560`. Absolute below `lg` so it backs the whole
        * accordion; a column-1 cell from `lg` up so it backs only the questions.
        *
@@ -210,6 +284,9 @@ export function FaqQuestionList({
                 open={open}
                 panelProps={panelProps}
                 answer={item.answer}
+                /* The same line its question sits on above. Used only by the
+                 * no-JS stylesheet; see `row` on FaqAnswerPanelProps. */
+                row={index + 2}
               />
             </>
           )}

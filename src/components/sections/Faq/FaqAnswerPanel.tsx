@@ -1,4 +1,4 @@
-import type { HTMLAttributes } from "react";
+import type { CSSProperties, HTMLAttributes } from "react";
 
 import { cn } from "@/lib/cn";
 
@@ -9,6 +9,17 @@ export interface FaqAnswerPanelProps {
   panelProps: HTMLAttributes<HTMLDivElement>;
   /** The authored answer, or `undefined` when the design authors none. */
   answer?: string;
+  /**
+   * This answer's grid row at `lg`+ - the same line its question sits on,
+   * i.e. `index + 2`.
+   *
+   * It has NO effect on the scripted path, where every panel deliberately
+   * shares one cell (see below). It exists solely so the no-JS stylesheet in
+   * `FaqQuestionList` can re-place each answer beside its own question: with
+   * scripting off every panel is open at once, and a stack of open panels in a
+   * single shared cell is a pile of superimposed text.
+   */
+  row: number;
 }
 
 /**
@@ -41,12 +52,46 @@ const FAQ_ANSWER_UNAVAILABLE =
  * while S10.5 mandates the panel animate `grid-template-rows: 0fr -> 1fr`.
  * `hidden` computes to `display: none`, which cannot transition, so the two
  * cannot both hold. The ruling: spread `panelProps`, override
- * `hidden={undefined}`, and mark the collapsed panel `inert`.
+ * `hidden={undefined}`, and take the collapsed subtree out of the focus order
+ * and the accessibility tree by another means.
  *
  * Dropping `hidden` on its own would be the worse defect - it leaves a 0fr row
  * whose children are still in the focus order, so Tab would land on invisible
- * content. `inert` takes the subtree out of both the focus order and the
- * accessibility tree while leaving it laid out, painted and animatable.
+ * content.
+ *
+ * WHY THAT MEANS IS `visibility`, NOT `inert`
+ * -------------------------------------------
+ * D-030 names `inert`, and this file used it. `inert` is a CONTENT ATTRIBUTE,
+ * and no stylesheet can reach it - which made the collapsed answer permanently
+ * unreachable for a reader with scripting disabled. `open` here is React state
+ * that, with no script, can never change: `Faq` opens `items[0]` and nothing
+ * else ever opens, so 14 of the 19 answers on the four FAQ routes were in the
+ * DOM and absent from the accessibility tree, at every width, forever. The
+ * `<noscript>` counterpart in `FaqQuestionList` can force `grid-template-rows`
+ * and `opacity`; it could not have forced `inert` off.
+ *
+ * `visibility: hidden` is the substitute, and it is the codebase's own
+ * precedent, not an invention: `HelpSidebar` records that its collapsed browse
+ * panel "uses `visibility` rather than `inert` precisely because visibility can
+ * carry an `lg:` override and `inert` cannot ... Both mechanisms remove the
+ * subtree from the tab order, which is the property D-030 actually requires."
+ * A `<noscript>` stylesheet is the same kind of CSS-reachable escape hatch as
+ * an `lg:` override. `Disclosure` deliberately leaves this choice to the
+ * consumer for exactly this reason, so nothing shared changes.
+ *
+ * Equivalence on the scripted path, property by property:
+ *   layout          `visibility` and `inert` are both non-layout. Geometry
+ *                   cannot move, and measurement confirms it does not.
+ *   a11y tree       both remove the subtree.
+ *   tab order       both remove the subtree. (Nothing in here is focusable
+ *                   anyway - the panel holds one text node.)
+ *   find-in-page    both exclude it.
+ *   animation       `visibility` is in the transition list below, and CSS
+ *                   interpolates it so that visible->hidden stays VISIBLE for
+ *                   the whole duration and flips only at the end. The
+ *                   close animation is therefore unchanged; by the time it
+ *                   flips, the 0fr track and `overflow-hidden` have already
+ *                   clipped the box to nothing. hidden->visible flips at once.
  *
  * TWO PRESENTATIONS, ONE ELEMENT (responsive.md S7.2.5, components.md S10.5)
  * -------------------------------------------------------------------------
@@ -68,6 +113,7 @@ export function FaqAnswerPanel({
   open,
   panelProps,
   answer,
+  row,
 }: FaqAnswerPanelProps) {
   const pending = answer === undefined;
 
@@ -75,7 +121,12 @@ export function FaqAnswerPanel({
     <div
       {...panelProps}
       hidden={undefined}
-      inert={!open}
+      /* The two hooks the no-JS stylesheet in `FaqQuestionList` needs: an
+       * attribute selector it can target, and this row's line number so it can
+       * be re-placed beside its own question at `lg`+. Neither has any effect
+       * while scripting is on. */
+      data-faq-panel=""
+      style={{ "--faq-row": row } as CSSProperties}
       /* Machine-readable marker for the 14 questions the design never answered.
        * No visual effect and no visible text - it exists so an audit, or
        * whoever writes the real copy, can find every one of them in the served
@@ -84,9 +135,11 @@ export function FaqAnswerPanel({
       className={cn(
         "relative grid px-3 sm:px-4",
         // <lg: the accordion height animation. S10.5 - never max-height.
-        "transition-[grid-template-rows] duration-(--motion-base) ease-in-out",
+        // `visibility` rides the same duration - see the header for why it is
+        // here rather than `inert`, and why it does not alter the animation.
+        "transition-[grid-template-rows,visibility] duration-(--motion-base) ease-in-out",
         "motion-reduce:transition-none",
-        open ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+        open ? "visible grid-rows-[1fr]" : "invisible grid-rows-[0fr]",
         // lg+: every panel stacks in column 2, spanning the question rows, and
         // the height is pinned so only the crossfade moves.
         "lg:col-start-2 lg:row-start-2 lg:[grid-row-end:-1] lg:self-start",
@@ -94,7 +147,7 @@ export function FaqAnswerPanel({
         // itself, so -8 here lands the bubble 20px above the first question -
         // the offset measured on 412:1573 (top 150) against 412:1562 (top 170).
         "lg:-mt-2 lg:grid-rows-[1fr] lg:px-0",
-        "lg:transition-opacity lg:ease-out",
+        "lg:transition-[opacity,visibility] lg:ease-out",
         open ? "lg:opacity-100" : "lg:pointer-events-none lg:opacity-0",
       )}
     >
@@ -102,6 +155,7 @@ export function FaqAnswerPanel({
        * content height - without it the 0fr track has no effect at all. */}
       <div className="min-h-0 overflow-hidden">
         <div
+          data-faq-answer=""
           className={cn(
             // The 12px gap to the question above lives INSIDE the animated box,
             // so a closed panel contributes exactly zero height.

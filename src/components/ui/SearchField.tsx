@@ -55,11 +55,35 @@ export function SearchField({
           : ({ width: `${width}px`, maxWidth: "100%" } as CSSProperties)
       }
     >
-      <label htmlFor={id}>
-        <VisuallyHidden>{label}</VisuallyHidden>
-      </label>
-
-      <div
+      {/*
+       * THE VISIBLE BOX IS THE <label>, not a <div> wrapping one.
+       *
+       * This element is the whole control the user sees - 360x60 on /blog,
+       * 300x60 in the /help sidebar - but only the 26px-tall <input> inside it
+       * used to accept a click: the 16px `p-4` inset all round was inert, so
+       * 57% of the control's height did nothing. The <label> was a separate
+       * sibling holding only `sr-only` text, and `sr-only` clips to 1px - so
+       * the label named the input but gave it essentially no activation area.
+       *
+       * Measured on /help before the change: control 300x60, input 234x26;
+       * `elementFromPoint` returned the wrapper <div> for 5 of 9 sample heights
+       * and real clicks at 8%/25%/75%/92% of the control height all failed to
+       * focus. After, on both routes: 9 of 9 sample heights resolve inside the
+       * label and all 7 sampled clicks (5%..95% of the height) focus the input,
+       * each firing exactly ONE click event on it.
+       *
+       * The accessible name is unchanged and is NOT nested: there is exactly
+       * one <label> now, and `VisuallyHidden` is its text content rather than a
+       * second labelling element. `htmlFor` is kept alongside the wrapping so
+       * the association stays explicit; per the HTML label activation steps a
+       * click whose target is already the labeled control is not re-dispatched,
+       * so wrapping plus `for` does not double-fire.
+       *
+       * `sr-only` is `position:absolute`, so it takes no part in this flex row
+       * and consumes none of the `gap-3`.
+       */}
+      <label
+        htmlFor={id}
         className={cn(
           "flex w-full items-center gap-3 rounded-2xl p-4",
           "bg-field-surface text-field-fg",
@@ -84,6 +108,7 @@ export function SearchField({
           "has-[input:focus-visible]:outline-focus-ring",
         )}
       >
+        <VisuallyHidden>{label}</VisuallyHidden>
         <Icon name="search" size="sm" className="text-fg-placeholder" />
         <input
           id={id}
@@ -97,7 +122,7 @@ export function SearchField({
             "outline-none",
           )}
         />
-      </div>
+      </label>
     </div>
   );
 }
