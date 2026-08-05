@@ -30,12 +30,12 @@ import { WHATSAPP_CHAT_URL } from "@/content/navigation";
  *
  * VERTICAL RHYTHM
  * ---------------
- * The hero is the one section whose padding is not a `SectionRhythm` value:
- * 173 / 97 rather than 80 / 80. `rhythm="standard"` supplies the stepped ramp
- * from base to `md` (56/64/72/80, responsive.md S4.3) and the two classes here
- * carry it on to 96 at `lg` and to the design value at `xl`. 173 and 97 are off
- * the 4px scale, so they land on the nearest steps - 172 (`pt-43`) and 96
- * (`pb-24`). Reported rather than hard-coded as arbitrary pixels.
+ * The frame draws 173 / 97, but the drawn 173 was judged too tall in the built
+ * page (operator request, 2026-08-04): the ramp now caps at 96 (`lg:py-24`)
+ * instead of continuing to 172 at `xl`. `rhythm="standard"` supplies the
+ * stepped ramp from base to `md` (56/64/72/80, responsive.md S4.3) and
+ * `lg:py-24` carries both sides to 96 from `lg` up. 97 is off the 4px scale,
+ * so the bottom lands on its nearest step, 96 - unchanged from the frame.
  *
  * MOTION
  * ------
@@ -65,7 +65,7 @@ export default function HeroLanding() {
       container={878}
       gap={0}
       background="bg-surface-page"
-      className="relative lg:py-24 xl:pt-43 xl:pb-24"
+      className="relative lg:py-24"
     >
       <div className="flex w-full flex-col items-center gap-8">
         <HeroHeadline id={HEADING_ID} />
@@ -78,12 +78,31 @@ export default function HeroLanding() {
          * responsive.md S7.2.1: full width to `sm`, auto width and centred from
          * `md`. `Button`'s own `fullWidth` is a boolean, so the responsive pair
          * is expressed here.
+         *
+         * THE 182 IS AUTHORED, NOT DERIVED - which is why it lives here and not
+         * in `Button`'s `md` step.
+         *
+         * 412:1367 is the ONLY CTA in the file whose frame is
+         * `layoutSizingHorizontal: "FIXED"`. Its padding is 12px, well under
+         * `md`'s px-5, and its label measures 86 - so hugging it would give
+         * 12 + 86 + 12 = 110, not the drawn 182. The designer pinned the width
+         * and let 36px of slack fall either side of a centred label. Every
+         * other CTA in the file HUGS: the nav CTA is 144x43 = 16 + 112 + 16,
+         * and "View More" is 129x46 = 16 + 97 + 16. So `md`'s padding is not
+         * wrong for its other seven consumers and must not be widened to chase
+         * this one node - `w-[182px]` reproduces an authored width, which is
+         * what it actually is.
+         *
+         * Measured before: 124.52 x 48, centred on x=720. Of the 57.5px gap,
+         * ~1.5px is font substitution (the label renders 84.52 against the
+         * file's 86) and the remaining ~56px was the missing fixed width.
+         * The 48 vs 51 height is `md`'s shared h-12 step and is left alone.
          */}
         <Button
           href={WHATSAPP_CHAT_URL}
           variant="primary"
           size="md"
-          className="w-full md:w-auto"
+          className="w-full md:w-[182px]"
         >
           {CTA_LABEL}
         </Button>
