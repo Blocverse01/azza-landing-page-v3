@@ -20,7 +20,17 @@ const SCREEN_LEFT = "4.99%";
 const SCREEN_TOP = "1.86%";
 const SCREEN_WIDTH = "90.6%";
 const SCREEN_HEIGHT = "96.1%";
-const SCREEN_RADIUS = "12.59%"; // of the screen width
+/*
+ * The Figma corner is CIRCULAR: 12.59% of the SCREEN WIDTH on both axes.
+ * A bare `border-radius: 12.59%` is NOT that - a single percentage resolves
+ * per axis (width horizontally, height vertically), and this screen is ~2.17x
+ * taller than wide, so every corner rendered as a tall ellipse: the screenshot
+ * peeled away from the bezel in a long vertical sweep on all four mockups
+ * site-wide. The slash syntax pins both radii to the same physical length:
+ * the vertical share is 12.59% x (907.812 / 1968.128 intrinsic screen box)
+ * = 5.807% of the height.
+ */
+const SCREEN_RADIUS = "12.59% / 5.807%";
 
 export interface PhoneMockupProps {
   /**

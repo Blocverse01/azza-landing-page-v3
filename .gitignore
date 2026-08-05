@@ -40,5 +40,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Playwright MCP browser-session artifacts
+/.playwright-mcp/
+
 # Quarantined: contains live-looking banking data (DECISIONS D-019)
 phone-screen-whatsapp-business.webp

@@ -74,8 +74,8 @@
     var(--font-inter, "Inter"), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, sans-serif;
   --font-display:
-    var(--font-bebas-neue, "Bebas Neue"), "Oswald", "Arial Narrow", system-ui,
-    sans-serif;
+    var(--font-lemon, "Lemon"), "Bebas Neue", "Oswald", "Arial Narrow",
+    system-ui, sans-serif;
   --font-accent:
     var(--font-poppins, "Poppins"), "Century Gothic", system-ui, sans-serif;
   --font-brand:
@@ -109,19 +109,21 @@
   --text-*: initial;
 
   /* --- Display ramp (font-display). Always paired with `uppercase`. ---------
-   * Bebas Neue serves weight 400 only (typography.md S2.1, D-011). The design's
-   * three Lemon weights collapse to one; the roles are differentiated by size
-   * and tracking, which the ramp already varies. Emitting 600/700 here would
-   * produce browser-synthesised faux-bold. */
-  --text-display-hero: clamp(2.5rem, 0.2857rem + 11.0714vw, 10.25rem); /* 164 */
+   * Set in Lemon, the design's own face (operator installed the licence,
+   * 2026-08-04, retiring D-011's Bebas substitution). The three drawn weights
+   * are back: Regular 400 / Semi Bold 600 / Bold 700 per typography.md S3.1,
+   * and layout.tsx serves exactly those three files. */
+  /* Scaled to 75% of the drawn 164px (operator request, 2026-08-04): the ramp
+   * keeps the same 320->1440 stops, every term multiplied by 0.75. */
+  --text-display-hero: clamp(1.875rem, 0.2143rem + 8.3036vw, 7.6875rem); /* 123 */
   --text-display-hero--line-height: 0.82;
   --text-display-hero--letter-spacing: -0.01em;
-  --text-display-hero--font-weight: 400;
+  --text-display-hero--font-weight: 700;
 
   --text-display-1: clamp(2.375rem, 0.5536rem + 9.1071vw, 8.75rem); /* 140 */
   --text-display-1--line-height: 0.96;
   --text-display-1--letter-spacing: -0.01em;
-  --text-display-1--font-weight: 400;
+  --text-display-1--font-weight: 600;
 
   --text-display-2: clamp(2.25rem, 0.4643rem + 8.9286vw, 8.5rem); /* 136 */
   --text-display-2--line-height: 0.91;
@@ -131,22 +133,22 @@
   --text-display-3: clamp(2.25rem, 0.6071rem + 8.2143vw, 8rem); /* 128 */
   --text-display-3--line-height: 1;
   --text-display-3--letter-spacing: -0.01em;
-  --text-display-3--font-weight: 400;
+  --text-display-3--font-weight: 600;
 
   --text-display-3-bold: clamp(2.25rem, 0.6071rem + 8.2143vw, 8rem); /* 128 */
   --text-display-3-bold--line-height: 1;
   --text-display-3-bold--letter-spacing: -0.01em;
-  --text-display-3-bold--font-weight: 400;
+  --text-display-3-bold--font-weight: 700;
 
   --text-display-4: clamp(2.125rem, 0.9464rem + 5.8929vw, 6.25rem); /* 100 */
   --text-display-4--line-height: 1.1;
   --text-display-4--letter-spacing: -0.01em;
-  --text-display-4--font-weight: 400;
+  --text-display-4--font-weight: 700;
 
   --text-display-4-tight: clamp(2.125rem, 0.9464rem + 5.8929vw, 6.25rem);
   --text-display-4-tight--line-height: 0.95;
   --text-display-4-tight--letter-spacing: -0.01em;
-  --text-display-4-tight--font-weight: 400;
+  --text-display-4-tight--font-weight: 600;
 
   --text-display-5: clamp(2.125rem, 1.0179rem + 5.5357vw, 6rem); /* 96 */
   --text-display-5--line-height: 1.2;
@@ -474,8 +476,12 @@
   --container-narrow: 41.3125rem; /*  661 - 570:435, 553:290 */
   --container-centered: 39.6875rem; /*  635 - 412:1284 */
 
-  /* Fixed chrome - layout.md S10.1 */
-  --height-nav: 123px;
+  /* Fixed chrome - layout.md S10.1.
+   * --height-nav: the drawn 123px bar was judged too bulky (operator request,
+   * 2026-08-04). The bar now hugs its content with 20px vertical padding, and
+   * this token mirrors the result at `xs`+: 48px CTA + 2x20 = 88. TopNav's
+   * `--azza-nav-h` ladder and this value must move together. */
+  --height-nav: 88px;
   --height-footer: 764px;
 
   /* -------------------------------------------------------------------------

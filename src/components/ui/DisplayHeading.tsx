@@ -45,9 +45,8 @@ const SWAP_WEIGHT_CLASS: Record<
 export interface DisplayHeadingProps {
   /**
    * The COMPLETE, verbatim source string, in its original case - e.g.
-   * "Your mONEY", not "YOUR MONEY". Uppercasing happens in CSS and in the font
-   * (Bebas Neue is uppercase-only). Screen readers and copy/paste must get the
-   * authored string.
+   * "Your mONEY", not "YOUR MONEY". Uppercasing happens in CSS. Screen readers
+   * and copy/paste must get the authored string.
    */
   children: string;
   /**

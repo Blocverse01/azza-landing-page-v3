@@ -69,9 +69,9 @@ function focusableWithin(root: HTMLElement | null): HTMLElement[] {
  * reachable. `!important` beats the utilities it overrides for the reason
  * `layout.tsx` records: important always wins over normal, whatever the layer.
  *
- *   header    static + auto height. The bar is `sticky` at a FIXED 64/72/123px;
- *             the fallback lives inside it and would otherwise overflow that
- *             box AND pin a full-height panel to the top of the viewport.
+ *   header    static + auto height. The bar is `sticky`; the fallback lives
+ *             inside it and would otherwise pin a full-height panel to the
+ *             top of the viewport.
  *   bar links hidden. At >= 1024 they would duplicate the fallback, and their
  *             two dropdown siblings cannot open without a script - so at every
  *             width the fallback is the complete list and the bar row is a
@@ -106,9 +106,11 @@ const FALLBACK_ROW = cn(
  * The island is deliberately NOT aligned to any content container; do not
  * "fix" it to 1200 (layout.md S3, flagged twice).
  *
- * HEIGHT steps 64 (base) / 72 (`xs`-`md`) / 123 (`lg`+). It is published as
- * `--azza-nav-h` on the <header> so the sheet below can offset itself against
- * whichever step is live, without duplicating the media queries.
+ * HEIGHT hugs the content with 20px vertical padding (operator request,
+ * 2026-08-04; the drawn 123px was judged too bulky). The resulting height -
+ * 84 below `xs`, 88 from `xs` up - is still published as `--azza-nav-h` on
+ * the <header> so the sheet below can offset itself against whichever step is
+ * live, without duplicating the media queries.
  *
  * The desktop dropdowns are replaced wholesale below `lg` (1024) rather than at
  * the width where the island geometrically breaks - hover-opened dropdowns have
@@ -324,19 +326,24 @@ export function TopNav({ currentPath }: TopNavProps) {
       data-azza-nav=""
       onKeyDownCapture={onKeyDownCapture}
       className={cn(
-        // The one place the bar height is declared. Everything else reads it.
-        "[--azza-nav-h:64px] xs:[--azza-nav-h:72px] lg:[--azza-nav-h:var(--height-nav)]",
-        "sticky top-0 z-50 h-(--azza-nav-h)",
+        // The bar HUGS its content: no height here, the Container below sets
+        // `py-5` (operator request, 2026-08-04). `--azza-nav-h` is still
+        // published for the sheet's offset and MUST mirror the hugged result:
+        // tallest bar control + 40. Below `xs` that is the 44px icon CTA
+        // (44 + 40 = 84); from `xs` the 48px pill CTA (48 + 40 = 88), which
+        // is also what `--height-nav` records for the sticky offsets elsewhere.
+        "[--azza-nav-h:84px] xs:[--azza-nav-h:88px] lg:[--azza-nav-h:var(--height-nav)]",
+        "sticky top-0 z-50",
         // The design has no bottom border (color.md D-6); nav and page are both
         // white, so the bar dissolves against content on scroll without one.
         // `nav.border` is the token derived for exactly this.
         "border-b border-nav-border bg-nav-surface",
       )}
     >
-      <nav aria-label="Primary" className="h-full">
+      <nav aria-label="Primary">
         <Container
           width="nav"
-          className="flex h-full items-center justify-between gap-4"
+          className="flex items-center justify-between gap-4 py-5"
         >
           {/* Left cluster. `items-end` reproduces the design's MAX cross-axis
               alignment - the 20px logo and the 19px link row are baseline

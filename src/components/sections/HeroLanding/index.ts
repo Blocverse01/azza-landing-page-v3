@@ -1,3 +1,8 @@
 export { default as HeroLanding } from "./HeroLanding";
 export { HeroHeadline, type HeroHeadlineProps } from "./HeroHeadline";
-export { HeroCoin, type HeroCoinName, type HeroCoinProps } from "./HeroOrnaments";
+export {
+  HeroCoinLetter,
+  type HeroCoinGate,
+  type HeroCoinName,
+  type HeroCoinLetterProps,
+} from "./HeroOrnaments";

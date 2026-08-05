@@ -1,6 +1,4 @@
-import { DisplayHeading } from "@/components/ui";
-
-import { HeroCoin } from "./HeroOrnaments";
+import { HeroCoinLetter } from "./HeroOrnaments";
 
 /**
  * The landing <h1> - 412:786 + 412:860.
@@ -17,51 +15,37 @@ import { HeroCoin } from "./HeroOrnaments";
  * wedge the flag coins into it. The complete sentence is reassembled here -
  * "Your mONEY should work anywhere." - because assets.md S4.1 requires the <h1>
  * to carry the whole string; a screen reader must never hear "sh uld w rk", and
- * neither must anyone who copies the headline.
+ * neither must anyone who copies the headline. `HeroCoinLetter` keeps each
+ * replaced "o" as real, transparent text inside the coin's slot, so both hold.
  *
  * The mixed case of "mONEY" is the AUTHORED string and is preserved on purpose
- * (components.md S4.10). Uppercasing happens in CSS, and again in Bebas Neue,
- * which has no lowercase. Normalising it here would lose the source.
+ * (components.md S4.10). Uppercasing happens in CSS. Normalising it here would
+ * lose the source.
  *
  * THE O-SWAP
  * ----------
- * `swapIndices = [1]` - the lowercase "o" of "Your".
- * Y0 o1 u2 r3 _4 m5 O6 N7 E8 Y9.
+ * S4.10's accent-face swap on this headline sits on the "o" of "Your" - the
+ * same letter the Nigeria coin replaces. With the coin standing in the slot the
+ * glyph is transparent, so no `font-accent` span is rendered: painting an
+ * invisible letter in a different face is unobservable, and the coin IS the
+ * device on this row. Lines 2 and 3 never carried the swap: 412:787 is on
+ * S4.10's explicit do-not-swap list, and line 2's Os are the coins themselves.
  *
- * This was built as [6] first, because components.md S4.10 said [6]. The agent
- * that built it checked the source anyway and reported the disagreement: the
- * Figma node's middle segment is `font-['Subjectivity:Bold']` around the "o" of
- * "Your", and typography.md S5 says "the 1st `o`" and shows the worked example
- * `Y<span class="font-accent">o</span>ur mONEY`. Both agree on index 1.
- *
- * The orchestrator adjudicated to the file and corrected S4.10 (which had now
- * been wrong twice on this row: [5], then [6]). The device is explicitly NOT
- * automatic - S5 states that - so the index is whatever the node's own segment
- * split puts on the accent face, never the nearest "O".
- *
- * Lines 2 and 3 carry no `swapIndices`: 412:787 is on S4.10's explicit
- * do-not-swap list, and line 2's Os are coin ornaments, not accent glyphs.
- *
- * THE ORNAMENT LAYER
- * ------------------
- * Each line is wrapped in its own positioned <span>, so a coin's `top-1/2` is
- * the centre of that exact line box rather than an approximation of it. This
- * matters: line 1's box is ~8px taller than lines 2 and 3 at 1440 because the
- * accent-face swap span carries different vertical metrics, so splitting the
- * heading box into three equal rows would put every coin a few pixels low.
+ * THE LETTER SLOTS
+ * ----------------
+ * Each coin "O" is a `HeroCoinLetter`: the real letter rendered transparent in
+ * a fixed-width inline slot, with the coin art centred on it. The slot widths
+ * are the designer's own letter gaps measured off the Figma fragments - see
+ * HeroOrnaments for the numbers and the drift argument for why the coins are
+ * anchored to slots rather than offset from the line centre.
  *
  * PROGRESSIVE DISCLOSURE
  * ----------------------
  * responsive.md S7.2.1 drops the collage on small screens and restores it in
- * steps. Honoured as a count: base-sm shows the Nigeria disc only, `md` adds the
- * Kenya coin, `lg` restores all three. The artifact reaches that by relocating
- * discs to inline-blocks beside other words; that mechanic is not reproduced -
- * see the report's findings.
+ * steps. Honoured as a count: base-sm shows the Nigeria disc only, `md` adds
+ * the Kenya coin, `lg` restores all three. Below its breakpoint a coin's
+ * letter simply paints as type, so the words stay whole at every width.
  */
-
-const LINE_YOUR_MONEY = "Your mONEY";
-const LINE_SHOULD_WORK = "should work";
-const LINE_ANYWHERE = "anywhere.";
 
 export interface HeroHeadlineProps {
   /** Wired to the section's aria-labelledby. */
@@ -70,31 +54,25 @@ export interface HeroHeadlineProps {
 
 export function HeroHeadline({ id }: HeroHeadlineProps) {
   return (
-    <h1 id={id} className="w-full text-center font-display text-display-hero text-fg-primary">
-      <span className="relative block">
-        <DisplayHeading
-          as="span"
-          step="display-hero"
-          swapIndices={[1]}
-          swapWeight="bold"
-          className="block"
-        >
-          {LINE_YOUR_MONEY}
-        </DisplayHeading>
-        <HeroCoin name="nigeria" />
+    <h1
+      id={id}
+      className="w-full text-center font-display text-display-hero uppercase text-fg-primary"
+    >
+      <span className="block">
+        Y<HeroCoinLetter name="nigeria">o</HeroCoinLetter>ur mONEY
       </span>
-
-      <span className="relative block">
-        <DisplayHeading as="span" step="display-hero" className="block">
-          {LINE_SHOULD_WORK}
-        </DisplayHeading>
-        <HeroCoin name="ghana" className="hidden lg:block" />
-        <HeroCoin name="kenya" className="hidden md:block" />
+      <span className="block">
+        sh
+        <HeroCoinLetter name="ghana" from="lg">
+          o
+        </HeroCoinLetter>
+        uld w
+        <HeroCoinLetter name="kenya" from="md">
+          o
+        </HeroCoinLetter>
+        rk
       </span>
-
-      <DisplayHeading as="span" step="display-hero" className="block">
-        {LINE_ANYWHERE}
-      </DisplayHeading>
+      <span className="block">anywhere.</span>
     </h1>
   );
 }

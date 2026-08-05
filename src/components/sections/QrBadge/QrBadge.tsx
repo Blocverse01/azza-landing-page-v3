@@ -82,7 +82,18 @@ export default function QrBadge({ className }: QrBadgeProps) {
          * cross-border container by 82px and the for-business card by 122px, and
          * still clears the landing column by 79px, at every width.
          */
-        "absolute top-[488px] right-[calc((100%_-_min(100%,90rem))_/_2_+_82px)]",
+        /*
+         * VERTICAL: centred on the viewport (operator request, 2026-08-04),
+         * replacing the drawn `top: 488px`. The hero box this positions inside
+         * starts flush under the sticky bar, whose height is `--height-nav` at
+         * every width this badge is visible (`lg`+), so viewport centre in
+         * hero-local coordinates is `50vh - nav`. The remaining 87px is half
+         * the badge's own 174px height - it CANNOT be a `-translate-y-1/2`
+         * because the hover lift below animates the standalone `translate`
+         * property, and its `-translate-y-1` would replace a centring
+         * translation wholesale, teleporting the badge up 86px on hover.
+         */
+        "absolute top-[calc(50vh-var(--height-nav)-87px)] right-[calc((100%_-_min(100%,90rem))_/_2_+_82px)]",
         // Hidden below lg: a QR code cannot be scanned by the device rendering
         // it. `display: none` also takes it out of the a11y tree, so a static
         // aria-hidden would be redundant below lg and wrong at lg and above.

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Bebas_Neue, Inter, Poppins } from "next/font/google";
+import { Inter, Poppins } from "next/font/google";
+import localFont from "next/font/local";
 
 import { SiteChrome } from "@/components/layout/SiteChrome";
 import { SITE } from "@/lib/site";
@@ -35,20 +36,23 @@ const inter = Inter({
 });
 
 /**
- * The display face - operator directive, 2026-08-01 (D-011): Bebas Neue
- * replaces `Lemon`, and it is a decision rather than a stopgap.
+ * The display face - Lemon, the family the design was actually set in.
  *
- * WEIGHT 400 AND ONLY 400. The family serves one weight. The design used Lemon
- * at three, so the hierarchy collapses to one weight and is carried by size and
- * tracking instead - which `theme.css` already varies, pinning every
- * `--text-display-*--font-weight` to 400. Asking for 600/700 anywhere on this
- * family gets browser-synthesised faux-bold, which is why the request here is a
- * single-element array.
+ * D-011 substituted Bebas Neue while no Lemon licence existed; the operator
+ * installed the licensed family on 2026-08-04 (webfonts + EULA live in
+ * `src/app/fonts/`), which retires that substitution. The design uses exactly
+ * three weights - Regular 400 (`display-2`), Semi Bold 600, Bold 700
+ * (typography.md S3.1) - so exactly those three are served and the
+ * `--text-display-*--font-weight` tokens in `theme.css` carry the drawn
+ * hierarchy again instead of the Bebas-era flat 400.
  */
-const bebasNeue = Bebas_Neue({
-  subsets: ["latin"],
-  weight: ["400"],
-  variable: "--font-bebas-neue",
+const lemon = localFont({
+  src: [
+    { path: "./fonts/Lemon-Regular.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/Lemon-SemiBold.woff2", weight: "600", style: "normal" },
+    { path: "./fonts/Lemon-Bold.woff2", weight: "700", style: "normal" },
+  ],
+  variable: "--font-lemon",
   display: "swap",
 });
 
@@ -106,7 +110,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${bebasNeue.variable} ${poppins.variable}`}
+      className={`${inter.variable} ${lemon.variable} ${poppins.variable}`}
     >
       <body>
         {/*
