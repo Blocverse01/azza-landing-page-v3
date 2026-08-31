@@ -136,6 +136,52 @@ export function TopNav({ currentPath }: TopNavProps) {
   const restoreFocusRef = useRef(true);
   const wasOpenRef = useRef(false);
 
+  /*
+   * --- Overlay mode. -------------------------------------------------------
+   * 734:373 draws this bar INSIDE the hero frame, over the blue, with white
+   * links and no surface of its own. Only a route whose hero is built to be sat
+   * on wants that, so the hero opts in by marking itself
+   * `data-azza-hero-overlay` and this reads the hook rather than testing the
+   * pathname - a route list here would go stale the moment a second painted
+   * hero ships.
+   *
+   * `overlaid` is "there is such a hero on this page AND it is still behind me".
+   * The second half matters: the bar is sticky, so once the stage has scrolled
+   * past, a transparent bar with white links would sit on white page content and
+   * become invisible.
+   *
+   * The observer's root is the viewport shrunk from the TOP by the bar's own
+   * height, so `isIntersecting` answers exactly "does the stage still reach below
+   * the bottom edge of the bar" - it flips false at the instant the stage's
+   * bottom passes under the bar, which is the instant white content appears
+   * behind it. Shrinking the BOTTOM instead would hold the transparent state
+   * until the stage left the viewport entirely, leaving the bar unreadable for
+   * the last screenful. No scroll listener and no hard-coded hero height.
+   *
+   * Both states are painted, so no-JS is safe either way: `NO_JS_STYLE` already
+   * makes the header `position: static`, which means without a script the bar
+   * scrolls away with the stage it is painted on and never reaches white
+   * content.
+   */
+  const [overlaid, setOverlaid] = useState(false);
+
+  useEffect(() => {
+    const stage = document.querySelector("[data-azza-hero-overlay]");
+    const header = headerRef.current;
+    if (!stage || !header) {
+      setOverlaid(false);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => setOverlaid(entries[0]?.isIntersecting ?? false),
+      { rootMargin: `-${header.offsetHeight}px 0px 0px 0px`, threshold: 0 },
+    );
+
+    observer.observe(stage);
+    return () => observer.disconnect();
+  }, [pathname]);
+
   const close = useCallback((restoreFocus = true) => {
     restoreFocusRef.current = restoreFocus;
     setOpen(false);
@@ -327,20 +373,50 @@ export function TopNav({ currentPath }: TopNavProps) {
       onKeyDownCapture={onKeyDownCapture}
       className={cn(
         // The bar HUGS its content: no height here, the Container below sets
-        // `py-5` (operator request, 2026-08-04). `--azza-nav-h` is still
-        // published for the sheet's offset and MUST mirror the hugged result:
-        // tallest bar control + 40. Below `xs` that is the 44px icon CTA
-        // (44 + 40 = 84); from `xs` the 48px pill CTA (48 + 40 = 88), which
-        // is also what `--height-nav` records for the sticky offsets elsewhere.
-        "[--azza-nav-h:84px] xs:[--azza-nav-h:88px] lg:[--azza-nav-h:var(--height-nav)]",
+        // `py-5` (operator request, 2026-08-04). The height the hug produces is
+        // published as `--azza-nav-h` on `:root` in theme.css - NOT here - so
+        // that the landing hero, which has to pull itself up behind this bar,
+        // can read the same number. See the ladder's comment there.
         "sticky top-0 z-50",
         // The design has no bottom border (color.md D-6); nav and page are both
         // white, so the bar dissolves against content on scroll without one.
         // `nav.border` is the token derived for exactly this.
-        "border-b border-nav-border bg-nav-surface",
+        //
+        // OVERLAY: over a painted hero the bar has no surface of its own
+        // (734:373). The colours cross-fade at `--motion-fast` so the swap at the
+        // bottom of the stage is not a hard cut; it is a scroll-driven change, so
+        // it stays at the short end of the ramp and honours reduced motion.
+        "transition-[background-color,border-color] duration-(--motion-fast) ease-out",
+        "motion-reduce:transition-none",
+        overlaid
+          ? "border-transparent bg-transparent"
+          : "border-nav-border bg-nav-surface",
+        "border-b",
       )}
     >
-      <nav aria-label="Primary">
+      {/*
+       * THE OVERLAY FOREGROUND IS A VARIABLE SWAP, NOT A SECOND SET OF CLASSES.
+       *
+       * `text-nav-fg` and its hover/current siblings compile to
+       * `color: var(--color-nav-fg)`, so redefining those three custom
+       * properties here re-colours every destination, both dropdown triggers and
+       * the hamburger in one place - no prop threaded into `NavDropdown`, no
+       * parallel class list to keep in sync, and the hover and aria-current
+       * states keep working because they are the same variables.
+       *
+       * IT IS ON THIS <nav>, NOT ON THE <header>. `MobileNavPanel` is also a
+       * child of the header and paints `text-nav-fg` rows on a WHITE sheet; an
+       * override up there would inherit straight into it and render the whole
+       * mobile menu white on white. The dropdown panels inside this subtree are
+       * safe because they use the separate `nav-dropdown-*` tokens.
+       */}
+      <nav
+        aria-label="Primary"
+        className={cn(
+          overlaid &&
+            "[--color-nav-fg:var(--color-fg-on-brand)] [--color-nav-fg-current:var(--color-fg-on-brand)] [--color-nav-fg-hover:var(--color-fg-on-inverse-muted)]",
+        )}
+      >
         <Container
           width="nav"
           className="flex items-center justify-between gap-4 py-5"

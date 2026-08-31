@@ -71,16 +71,14 @@
   --font-*: initial;
 
   --font-sans:
-    var(--font-inter, "Inter"), ui-sans-serif, system-ui, -apple-system,
-    "Segoe UI", Roboto, sans-serif;
+    var(--font-inter, "Inter"), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    sans-serif;
   --font-display:
-    var(--font-lemon, "Lemon"), "Bebas Neue", "Oswald", "Arial Narrow",
-    system-ui, sans-serif;
-  --font-accent:
-    var(--font-poppins, "Poppins"), "Century Gothic", system-ui, sans-serif;
+    var(--font-lemon, "Lemon"), "Bebas Neue", "Oswald", "Arial Narrow", system-ui, sans-serif;
+  --font-accent: var(--font-poppins, "Poppins"), "Century Gothic", system-ui, sans-serif;
   --font-brand:
-    var(--font-cal-sans, "Cal Sans"), var(--font-inter, "Inter"), ui-sans-serif,
-    system-ui, sans-serif;
+    var(--font-cal-sans, "Cal Sans"), var(--font-inter, "Inter"), ui-sans-serif, system-ui,
+    sans-serif;
 
   /*
    * Re-declared explicitly. `--font-*: initial` clears the whole `--font-`
@@ -115,6 +113,24 @@
    * and layout.tsx serves exactly those three files. */
   /* Scaled to 75% of the drawn 164px (operator request, 2026-08-04): the ramp
    * keeps the same 320->1440 stops, every term multiplied by 0.75. */
+  /*
+   * 178.81 - the blog masthead "CATCH THE LATEST WITH AZZA" (802:832, the
+   * 2026-08 operator revision of /blog). Lemon Semi Bold at leading 1.1 and
+   * zero tracking, drawn to fill the 1280 column on ONE line at 1440. The
+   * largest step in the ramp; nothing else uses it.
+   *
+   * THE MAX IS 176, NOT THE DRAWN 178.81. Browser Lemon measures the string a
+   * few px wider than Figma renders it - at 178.81 the line comes out ~1281px
+   * against the 1280 column and "AZZA" wraps, which is the one thing the
+   * masthead must never do. 176 keeps the drawn single line with ~19px of
+   * slack; the 1.6% size loss is invisible and the intent (fill the column,
+   * one line) is what the frame authors. Verified in a browser at 1440.
+   */
+  --text-display-masthead: clamp(2.5rem, 0.0714rem + 12.1429vw, 11rem);
+  --text-display-masthead--line-height: 1.1;
+  --text-display-masthead--letter-spacing: 0em;
+  --text-display-masthead--font-weight: 600;
+
   --text-display-hero: clamp(1.875rem, 0.2143rem + 8.3036vw, 7.6875rem); /* 123 */
   --text-display-hero--line-height: 0.82;
   --text-display-hero--letter-spacing: -0.01em;
@@ -160,6 +176,26 @@
   --text-display-6--letter-spacing: 0em;
   --text-display-6--font-weight: 400;
 
+  /*
+   * 56 - the cross-border converter's card title (782:609), which now reads
+   * "Send money abroad" rather than the frame's own "PAYMENT CONVERTER".
+   *
+   * A genuinely new size in the display family rather than a near-miss of an
+   * existing step: the ramp runs 140/136/128/100/96/64 and the frame draws 56 in
+   * `Lemon Bold` at leading 1 with -0.56px of tracking (= -0.01em, the same
+   * relative tracking every other display step carries). `accent-3` is also 56px
+   * and is NOT a substitute - it is the accent family (Poppins) at weight 900
+   * with -0.08em, which is a different typeface and a much tighter fit.
+   *
+   * Clamped on the ramp's own 320 -> 1440 basis, floor 32: the card is 580 wide
+   * at `lg` and up but shrinks to the viewport below `md`, where 56px would wrap
+   * a 17-character title onto three lines.
+   */
+  --text-display-7: clamp(2rem, 1.5714rem + 2.14286vw, 3.5rem); /* 56 */
+  --text-display-7--line-height: 1;
+  --text-display-7--letter-spacing: -0.01em;
+  --text-display-7--font-weight: 700;
+
   /* --- Accent ramp (font-accent) ----------------------------------------- */
   --text-accent-watermark: clamp(3rem, 0.375rem + 13.125vw, 12.1875rem); /* 195 */
   --text-accent-watermark--line-height: 1.03;
@@ -186,9 +222,27 @@
   --text-accent-4--letter-spacing: -0.08em;
   --text-accent-4--font-weight: 900;
 
+  /*
+   * The exchange widgets' figures - the amount field and the converted output.
+   *
+   * TRACKING IS -0.02em, NOT THE DESIGN'S -0.08em, at the operator's request.
+   * The frame draws these in `Subjectivity Bold` with -3.6px/-2.8px of tracking
+   * at 40px (about -0.09em/-0.07em, averaged to -0.08 here). The project has no
+   * licence for Subjectivity and substitutes `font-accent` (Poppins), which is a
+   * geometric face with wider side bearings and much shallower kerning - so the
+   * tracking that merely tightens Subjectivity actively COLLIDES glyphs in
+   * Poppins. Measured at 40px: -0.08em is -3.2px per gap, and the currency
+   * symbol overlapped the first digit outright ("₦138,700" rendered with the ₦
+   * crossing the 1; "FRw144,000" the same). -0.02em is -0.8px, which clears the
+   * symbol/digit junction - the worst pair, since the symbol can be up to three
+   * characters - and still reads as a tight display numeral rather than body copy.
+   *
+   * This is a substitution artefact, not a rejection of the design's intent: the
+   * value to restore if Subjectivity is ever licensed is -0.08em.
+   */
   --text-accent-num: clamp(1.75rem, 1.5357rem + 1.0714vw, 2.5rem); /* 40 */
   --text-accent-num--line-height: 1.03;
-  --text-accent-num--letter-spacing: -0.08em;
+  --text-accent-num--letter-spacing: -0.02em;
   --text-accent-num--font-weight: 700;
 
   --text-accent-step: 1.5rem; /* 24 - below 32, does not clamp */
@@ -237,6 +291,29 @@
   --text-sm-regular--line-height: 1.21;
   --text-sm-regular--letter-spacing: -0.02em;
   --text-sm-regular--font-weight: 400;
+
+  /* 16 Medium at -2%, lh 1.3 - the featured article's category chip on /blog
+   * (802:841), the 16px sibling of the 14px `text-xs` grid chip. */
+  --text-sm-tag: 1rem;
+  --text-sm-tag--line-height: 1.3;
+  --text-sm-tag--letter-spacing: -0.02em;
+  --text-sm-tag--font-weight: 500;
+
+  /* 16 Medium at -3%, lh 1.3 - the featured article's date and the "Read
+   * Article" label (802:843 / 802:845). Tracks -3% where `text-sm` tracks -2%;
+   * both are authored, on sibling nodes. */
+  --text-sm-meta: 1rem;
+  --text-sm-meta--line-height: 1.3;
+  --text-sm-meta--letter-spacing: -0.03em;
+  --text-sm-meta--font-weight: 500;
+
+  /* 16 Medium at -4%, lh 1.2 - the section eyebrow pill on the business
+   * narrative (800:396). The -4% is authored: every other 16px style tracks
+   * -2%, this one chip tracks -0.64px. */
+  --text-sm-eyebrow: 1rem;
+  --text-sm-eyebrow--line-height: 1.2;
+  --text-sm-eyebrow--letter-spacing: -0.04em;
+  --text-sm-eyebrow--font-weight: 500;
 
   --text-sm-bold: 1rem;
   --text-sm-bold--line-height: 1.21;
@@ -340,6 +417,14 @@
   --text-lg-standfirst--letter-spacing: -0.03em;
   --text-lg-standfirst--font-weight: 500;
 
+  /* The blog masthead's standfirst (802:835) - the one Inter Light role in the
+   * file. A separate token rather than a reweighted `lg-standfirst` because the
+   * article hero (352:3686) still carries the Medium original. */
+  --text-lg-standfirst-light: 1.5rem;
+  --text-lg-standfirst-light--line-height: 1.3;
+  --text-lg-standfirst-light--letter-spacing: -0.03em;
+  --text-lg-standfirst-light--font-weight: 300;
+
   --text-lg-h3: 1.5rem;
   --text-lg-h3--line-height: 1.33;
   --text-lg-h3--letter-spacing: -0.03em;
@@ -376,9 +461,11 @@
   --text-2xl-section--letter-spacing: -0.03em;
   --text-2xl-section--font-weight: 500;
 
+  /* -4% tracking is the 2026-08 revision's value (802:839, -1.28px on 32);
+   * the step's one consumer is the featured blog card. */
   --text-2xl-feature: clamp(1.5rem, 1.3571rem + 0.7143vw, 2rem);
   --text-2xl-feature--line-height: 1.3;
-  --text-2xl-feature--letter-spacing: -0.03em;
+  --text-2xl-feature--letter-spacing: -0.04em;
   --text-2xl-feature--font-weight: 600;
 
   --text-2xl-prose: clamp(1.5rem, 1.3571rem + 0.7143vw, 2rem);
@@ -548,6 +635,39 @@
     }
   }
 
+  /*
+   * The nav-height ladder - the bar's REAL box height, hairline included.
+   *
+   * `TopNav` hugs its content with 20px of padding, so the content box is the
+   * tallest control in the bar plus 40: 44 (the icon CTA) + 40 = 84 below `xs`,
+   * and 48 (the pill CTA) + 40 = 88 from `xs` up. The bar also carries a 1px
+   * `border-b`, and because that hairline is part of the element's box the value
+   * published here is 85 / 89, not 84 / 88. Anything that offsets against the
+   * bar wants the box, not the content: the hero pulls itself up by exactly this
+   * to land on y=0, and the mobile sheet pins its top to it. Publishing the
+   * content height instead left every one of them a pixel out.
+   *
+   * `--height-nav` is the separate DESIGN token (88) and stays as it is; it feeds
+   * `scroll-padding-top` and the two sticky offsets, where a pixel is noise.
+   *
+   * IT LIVES ON `:root`, NOT ON THE <header>. It was declared as a utility on the
+   * header, which meant only the header's own descendants could see it - and the
+   * landing hero has to pull itself up by exactly this height to put its blue
+   * behind the bar (734:338 draws the nav inside the hero frame). A sibling of
+   * <header> reading `var(--azza-nav-h)` got nothing and the negative margin
+   * silently resolved to zero. Anything on the page may read it from here; the
+   * bar and the stage cannot drift apart.
+   */
+  :root {
+    --azza-nav-h: 85px;
+  }
+
+  @media (width >= 30rem) {
+    :root {
+      --azza-nav-h: 89px;
+    }
+  }
+
   html {
     /* Unconditional - anchor targets must clear the sticky nav regardless of
      * motion preference. components.md S10.8. */
@@ -578,6 +698,16 @@
     outline-offset: 2px;
   }
 
+  /*
+   * NOTE for anyone marking a new surface: this switches the ring for the WHOLE
+   * subtree, and a light popover nested inside an inverse surface would inherit a
+   * white ring it must not have. There is deliberately no `data-surface="page"`
+   * reset rule, because nothing needs one yet - `SelectPillPicker`'s white menu is
+   * the one such case in the codebase and its rows already suppress their outline
+   * (`focus:outline-none`) in favour of a fill highlight, the convention every
+   * native menu uses. Add the reset when something actually draws a ring on a
+   * light panel inside a dark one, not before.
+   */
   [data-surface="inverse"] :focus-visible {
     outline-color: var(--color-focus-ring-inverse);
   }
@@ -600,10 +730,7 @@
    * holds and the gutters absorb the surplus.
    */
   .azza-container {
-    width: min(
-      var(--azza-container-w, var(--container-default)),
-      100% - 2 * var(--gutter)
-    );
+    width: min(var(--azza-container-w, var(--container-default)), 100% - 2 * var(--gutter));
     margin-inline: auto;
     min-width: 0;
   }
@@ -657,6 +784,145 @@
     .azza-media {
       aspect-ratio: var(--azza-media-ratio-lg);
     }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * HERO ORNAMENT FLOAT - the landing hero's authored motion (734:338).
+ *
+ * Read off the Figma motion timeline with `get_motion_context`. Four ornaments
+ * share ONE 3.1s looping timeline (cohort root 734:337, loopMode "loop"): each
+ * rises, tips a few degrees and settles back, and the four are offset from each
+ * other purely by where their keyframes sit in that shared 3.1s - not by
+ * animation-delay. So every element here runs the SAME duration with NO delay,
+ * and the stagger comes from the percentages below. Do not "simplify" this into
+ * one shared keyframe plus delays; the ornaments would then move in lockstep.
+ *
+ * VALUES ARE VERBATIM FROM THE TIMELINE. Figma reports each node's ABSOLUTE
+ * rotation, and two of these ornaments rest at a non-zero angle:
+ *
+ *   734:359 Ghana coin  rests at -14.692deg, peaks at -17.692  -> delta -3
+ *   734:372 right notes rests at  51.693deg, peaks at  54.693  -> delta +3
+ *
+ * Their resting angle is already baked into the exported artwork (the coin) or
+ * carried by a static inner wrapper (the notes), so the keyframes below animate
+ * the DELTA from rest. Writing the absolute angle here would apply the rest
+ * rotation twice and leave both ornaments visibly over-rotated.
+ *
+ * `times` -> keyframe percentages, and each segment's easing is declared on the
+ * keyframe it STARTS from. Figma's "easeInOut" is the CSS `ease-in-out` keyword
+ * (cubic-bezier(0.42,0,0.58,1)), NOT this file's `--ease-in-out` token, which is
+ * a deliberately stronger curve for UI state changes. The authored curve wins.
+ *
+ * REDUCED MOTION: the whole block is gated on `no-preference`, so a reduced
+ * motion user gets no animation at all rather than the global floor's 0.01ms
+ * snap. Every track returns to rest at 100%, so the un-animated element already
+ * sits exactly where the design draws it.
+ * ------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  .azza-float {
+    animation-duration: 3100ms;
+    animation-iteration-count: infinite;
+  }
+
+  /* 734:350 - times [0, .0968, .5484, 1], rotate [0,0,2,0], y [0,0,-10,0] */
+  .azza-float--coin-kenya {
+    animation-name: azza-float-coin-kenya;
+  }
+
+  /* 734:359 - times [0, .3871, .7742, 1], rotate delta [0,-3,0,0], y [0,-12,0,0] */
+  .azza-float--coin-ghana {
+    animation-name: azza-float-coin-ghana;
+  }
+
+  /* 734:371 - times [0, .1935, .5484, .9032, 1], rotate [0,0,-4,0,0], y [0,0,-14,0,0] */
+  .azza-float--notes-left {
+    animation-name: azza-float-notes-left;
+  }
+
+  /* 734:372 - times [0, .0484, .4677, .8871, 1], rotate delta [0,0,3,0,0], y [0,0,-11,0,0] */
+  .azza-float--notes-right {
+    animation-name: azza-float-notes-right;
+  }
+}
+
+@keyframes azza-float-coin-kenya {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    animation-timing-function: linear;
+  }
+  9.68% {
+    transform: translateY(0) rotate(0deg);
+    animation-timing-function: ease-in-out;
+  }
+  54.84% {
+    transform: translateY(-10px) rotate(2deg);
+    animation-timing-function: ease-in-out;
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+@keyframes azza-float-coin-ghana {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    animation-timing-function: ease-in-out;
+  }
+  38.71% {
+    transform: translateY(-12px) rotate(-3deg);
+    animation-timing-function: ease-in-out;
+  }
+  77.42% {
+    transform: translateY(0) rotate(0deg);
+    animation-timing-function: linear;
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+@keyframes azza-float-notes-left {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    animation-timing-function: linear;
+  }
+  19.35% {
+    transform: translateY(0) rotate(0deg);
+    animation-timing-function: ease-in-out;
+  }
+  54.84% {
+    transform: translateY(-14px) rotate(-4deg);
+    animation-timing-function: ease-in-out;
+  }
+  90.32% {
+    transform: translateY(0) rotate(0deg);
+    animation-timing-function: linear;
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+@keyframes azza-float-notes-right {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    animation-timing-function: linear;
+  }
+  4.84% {
+    transform: translateY(0) rotate(0deg);
+    animation-timing-function: ease-in-out;
+  }
+  46.77% {
+    transform: translateY(-11px) rotate(3deg);
+    animation-timing-function: ease-in-out;
+  }
+  88.71% {
+    transform: translateY(0) rotate(0deg);
+    animation-timing-function: linear;
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
   }
 }
 

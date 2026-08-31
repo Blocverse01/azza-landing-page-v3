@@ -3,6 +3,8 @@ import type { ElementType, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
 type DisplayStep =
+  /** 178.81 - the blog masthead (802:832). The largest step in the ramp. */
+  | "display-masthead"
   | "display-hero"
   | "display-1"
   | "display-2"
@@ -11,13 +13,16 @@ type DisplayStep =
   | "display-4"
   | "display-4-tight"
   | "display-5"
-  | "display-6";
+  | "display-6"
+  /** 56 - the cross-border converter's card title (782:609). */
+  | "display-7";
 
 /*
  * Static class names - Tailwind must see the literal string to emit the
  * utility, so a template literal like `text-${step}` would produce nothing.
  */
 const STEP_CLASS: Record<DisplayStep, string> = {
+  "display-masthead": "text-display-masthead",
   "display-hero": "text-display-hero",
   "display-1": "text-display-1",
   "display-2": "text-display-2",
@@ -27,16 +32,14 @@ const STEP_CLASS: Record<DisplayStep, string> = {
   "display-4-tight": "text-display-4-tight",
   "display-5": "text-display-5",
   "display-6": "text-display-6",
+  "display-7": "text-display-7",
 };
 
 /*
  * The Subjectivity weight is chosen to balance the display weight
  * (typography.md S5): Bold -> Bold, Semi Bold -> Medium, Regular -> Light.
  */
-const SWAP_WEIGHT_CLASS: Record<
-  NonNullable<DisplayHeadingProps["swapWeight"]>,
-  string
-> = {
+const SWAP_WEIGHT_CLASS: Record<NonNullable<DisplayHeadingProps["swapWeight"]>, string> = {
   light: "font-light",
   medium: "font-medium",
   bold: "font-bold",
@@ -87,14 +90,7 @@ export function DisplayHeading({
   const Element: ElementType = Tag;
 
   return (
-    <Element
-      id={id}
-      className={cn(
-        "font-display uppercase",
-        STEP_CLASS[step],
-        className,
-      )}
-    >
+    <Element id={id} className={cn("font-display uppercase", STEP_CLASS[step], className)}>
       {renderSegments(children, swapIndices, SWAP_WEIGHT_CLASS[swapWeight])}
     </Element>
   );

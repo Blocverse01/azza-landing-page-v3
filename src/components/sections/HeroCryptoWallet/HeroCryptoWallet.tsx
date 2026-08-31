@@ -1,11 +1,10 @@
-import { QrBadge } from "@/components/sections/QrBadge";
 import { Button, DisplayHeading, Pill, Section } from "@/components/ui";
+import { getRateTable } from "@/server/rates";
 
 import { BuyCryptoWidget } from "./BuyCryptoWidget";
 import { WHATSAPP_CHAT_URL } from "@/content/navigation";
 
 const HEADING_ID = "crypto-wallet-hero-heading";
-
 
 /**
  * `/products/crypto-wallet` hero - 412:1587.
@@ -18,7 +17,8 @@ const HEADING_ID = "crypto-wallet-hero-heading";
  *   base-sm   one column, copy then widget, widget full width
  *   md        still one column, widget capped at 580 and centred, art at 50%
  *   lg        two columns, minmax(0, 429fr) / 40px / minmax(0, 580fr)
- *   xl/2xl    as designed - the widget sits 70px above the copy, QR appears
+ *   xl/2xl    the widget sits 70px above the copy (no QR badge - see the note
+ *             at the foot of this component)
  *
  * VERTICAL PLACEMENT - corrected 2026-08-02. Every y below is FRAME-RELATIVE to
  * `412:1587`, which itself starts at page y 123 under the nav:
@@ -48,14 +48,45 @@ const HEADING_ID = "crypto-wallet-hero-heading";
  *   pt  197 -> `xl:pt-49` (196)      pb  179 -> `xl:pb-45` (180)
  *   lift 70 -> `xl:-mt-17.5`         196 + 596 + 180 = 972, the frame height
  *
- * The `lg:py-24` step is responsive.md S4.3's ramp (56/64/72/80/96/design),
- * which `standard` stops carrying at 80 because 80 is ITS design value; a
- * section whose design value is larger picks the ramp back up itself.
+ * THE FRAME'S 197/179/972 NO LONGER SHIP - CAPPED AT 96, at the operator's
+ * request ("too much space between the nav bar and the content"). Measured
+ * before: 196px of clear air between the nav's bottom edge and the eyebrow pill
+ * at every width >= 1280, against 96px at `lg`. The `xl` step DOUBLED the gap,
+ * which is what read as a void.
+ *
+ * It was faithful, and it stopped being right when the navbar changed. The frame
+ * puts the copy 197 below a 123px-tall bar; this project's bar is now hug-height
+ * at 89 (`--azza-nav-h`), so the same 197 no longer sits under enough visual mass
+ * to justify itself - and the composition it was holding up, 972 tall, then ran
+ * past the fold on any viewport shorter than ~880.
+ *
+ * 96 is not a new number: `lg:py-24` already carried it one breakpoint below, and
+ * `HeroLanding` capped its own hero padding at 96 in 79ab214 for the same reason.
+ * So this is three utilities DELETED rather than a fourth magic number invented,
+ * and the ramp finally runs monotonically - 56/64/72/80/96, stop.
+ *
+ * `xl:min-h-[972px]` had to go WITH the padding, not after it. Its 972 is exactly
+ * 196 + 596 + 180; leaving it while cutting 100px off the top would have held the
+ * section at 972 and, under `align="start"`, dumped the whole 100px back out as
+ * dead space below the CTA - the identical defect this docblock describes two
+ * paragraphs up. The section is content-height now: 96 + 596 + 96.
+ *
+ * `xl:-mt-17.5` STAYS. The 70px lift is the relationship BETWEEN the two columns,
+ * not the section's padding, and nothing about the nav or the fold changes it.
  *
  * No `Reveal` anywhere in here. This is the route's above-the-fold hero and its
  * <h1> is the LCP element - components.md S10.4 forbids an entrance on both.
+ *
+ * ASYNC, because the widget's rate table is resolved server-side and handed
+ * down as a prop. That keeps the figures correct in the very first byte of HTML -
+ * no loading state and no post-hydration correction inside the LCP element - and
+ * it keeps `src/server/rates.ts` (which reads `process.env` and holds the admin
+ * override) out of the client bundle entirely. `getRateTable` never throws and
+ * never blocks on a third party for more than 2.5s; see its own notes.
  */
-export function HeroCryptoWallet() {
+export async function HeroCryptoWallet() {
+  const rates = await getRateTable();
+
   return (
     <Section
       rhythm="standard"
@@ -64,7 +95,7 @@ export function HeroCryptoWallet() {
       gap={0}
       clip
       aria-labelledby={HEADING_ID}
-      className="relative lg:py-24 xl:min-h-[972px] xl:pt-49 xl:pb-45"
+      className="relative lg:py-24"
     >
       <div className="grid w-full grid-cols-1 items-start gap-y-12 lg:grid-cols-[minmax(0,429fr)_minmax(0,580fr)] lg:gap-x-10 xl:gap-x-[131px]">
         {/* 412:1615 - V, gap 40 */}
@@ -96,9 +127,9 @@ export function HeroCryptoWallet() {
                * make that a design defect, not an implementation one, and a
                * local fix here would be invisible drift.
                */}
-              <p className="text-sm text-fg-body-muted">
-                Deposit, withdraw, buy, sell, swap, and spend &#8212; all in one
-                place. No apps. No switching platforms. Just WhatsApp.
+              <p className="text-fg-body-muted text-sm">
+                Deposit, withdraw, buy, sell, swap, and spend &#8212; all in one place. No apps. No
+                switching platforms. Just WhatsApp.
               </p>
             </div>
           </div>
@@ -124,31 +155,21 @@ export function HeroCryptoWallet() {
          * section still closes at the designed 972.
          */}
         <div className="xl:-mt-17.5">
-          <BuyCryptoWidget />
+          <BuyCryptoWidget rates={rates} />
         </div>
       </div>
 
       {/*
-       * 511:464. Self-positions against the nearest positioned ancestor, which
-       * is why this <section> carries `relative`, and hides itself below `lg` -
-       * a QR code cannot be scanned by the device rendering it.
-       */}
-      {/*
-       * Gated to `xl`, matching HeroCrossBorder. `responsive.md` S7.3.1 rules
-       * that on THIS hero the badge appears at `xl`/`2xl` - unlike the landing
-       * hero, where S7.2.1 rules `lg` and no collision occurs.
+       * NO QR BADGE ON THIS ROUTE - removed at the operator's request.
        *
-       * Measured at 1024 in a browser before the guard: the badge box (x
-       * 807-927) overlapped the "Select the currency you pay with" button by
-       * 103px and WON the hit test - elementFromPoint at the overlap centre
-       * returned the badge, so that control was partly unclickable. The badge
-       * anchors `right-[82px]` to the section while the widget sits in a
-       * container shrunk to `100% - 2*gutter`, so the two walk toward each
-       * other as the viewport narrows.
+       * `relative` stays on the <Section> above. It was originally there as the
+       * badge's positioning context, but it is also what `clip` sits on, and every
+       * other hero carries it. Dropping it would be an unrelated change to this
+       * route's layout. (`HeroCrossBorder` DID drop its own `relative` with its
+       * badge - it had no `clip` and nothing else positioned against it.)
+       *
+       * The other two heroes (landing, business) keep theirs.
        */}
-      <div className="hidden xl:block">
-        <QrBadge />
-      </div>
     </Section>
   );
 }

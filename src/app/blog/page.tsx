@@ -4,10 +4,10 @@ import { AllArticles, BlogHero } from "@/components/sections/BlogIndex";
 import { BLOG_POSTS } from "@/content/blog";
 
 /**
- * Copy is the blog hero's own standfirst (`352:3587`), verbatim. The title is
- * the `<h1>` string (`352:3586`) in sentence case - the design sets it
- * uppercase through `textCase: UPPER` and the display face, not through the
- * characters (typography.md S0.3), and a `<title>` is not styled type.
+ * Copy is the blog hero's own standfirst (`802:835`), verbatim. The `<title>`
+ * keeps "The Azza Blog": the revised `<h1>` is the masthead slogan "CATCH THE
+ * LATEST WITH AZZA" (`802:832`), which names a mood, not the document - and a
+ * `<title>` is what tabs, bookmarks and search results show.
  */
 export const metadata: Metadata = {
   title: "The Azza Blog",
@@ -17,18 +17,17 @@ export const metadata: Metadata = {
 };
 
 /**
- * `/blog` - Figma `281:56` "Blog".
+ * `/blog` - Figma `802:569` "Blog", the 2026-08 operator revision of `281:56`.
  *
  * Two sections between the nav and the footer, in the frame's own order:
- * the hero `352:3582` at y 123, then "All Articles" `500:2197` at y 1149.
+ * the masthead hero `802:774` at y 123, then "All Articles" `802:627`.
  * Site chrome is `layout.tsx` + `SiteChrome`; nothing here repeats it.
  *
- * THE SEAM BETWEEN THE TWO SECTIONS IS DELIBERATE AND ASYMMETRIC.
- * `BlogHero` is `rhythm="standard"` (80/80) and `AllArticles` is
- * `rhythm="final"` (pt-0 pb-30) - components.md S4.1 states the reason in one
- * line: "the blog hero's 80 supplies the seam". Adding any wrapper, gap or
- * padding here would double it, and sections abut at 0px (layout.md S10.3,
- * assertion 1). Hence the fragment.
+ * THE SEAM IS 160 NOW, AND BOTH SECTIONS OWN HALF. The original grid section
+ * had no top padding and leaned on the hero's 80; the revision gives `802:627`
+ * its own 80 on top of the hero's (the `final` rhythm carries it), so the two
+ * paddings meet at the designed 160. Sections still abut at 0px (layout.md
+ * S10.3, assertion 1). Hence the fragment.
  *
  * ONE FEATURED POST, NINE IN THE GRID, TEN RECORDS.
  * `BLOG_POSTS` holds ten: index 0 is the hero's featured card (`352:3588`) and

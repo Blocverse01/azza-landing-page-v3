@@ -12,27 +12,27 @@ export interface StretchedLinkProps {
 
 /**
  * A link whose hit area is the whole of its nearest positioned ancestor -
- * pair it with `<Card interactive>`.
+ * pair it with a `relative` card (or `<Card interactive>` where the lift is
+ * wanted).
  *
  * The visible text stays the accessible name, so the card announces as one
  * link rather than three. Only ONE StretchedLink may live inside a given
  * positioned ancestor; a second would sit underneath the first and be
  * unreachable by pointer.
+ *
+ * NO HOVER STATE, deliberately (operator request, 2026-08-22: "remove the
+ * hover effects on the blog posts" - this primitive's one consumer is the
+ * blog card). The link paints nothing on hover; `:focus-visible` keeps the
+ * global 2px ring plus an INSTANT `link.hover` tint on the text - unanimated,
+ * because a focus signal that fades in reads as lag (components.md S10.7).
+ * A consumer that wants a hover treatment on the text brings it in through
+ * `className` - the grid blog card's underline sweep (ArticleCard.tsx,
+ * `TITLE_SWEEP`, 2026-08-23) is the one that does.
  */
-export function StretchedLink({
-  href,
-  children,
-  className,
-}: StretchedLinkProps) {
+export function StretchedLink({ href, children, className }: StretchedLinkProps) {
   const classes = cn(
     "no-underline after:absolute after:inset-0 after:content-['']",
-    // `transition-[color]`, NOT `transition-colors` - the latter's property
-    // list includes `outline-color`, which made the :focus-visible ring fade in
-    // from currentColor over 160ms. components.md S10.7: the focus indicator is
-    // never transitioned. Measured rgb(53,53,53) at t=0 against a token colour
-    // of rgb(52,48,233). Text colour is the only thing this link animates.
-    "transition-[color] duration-(--motion-fast) ease-out",
-    "hoverable:text-link-hover focus-visible:text-link-hover",
+    "focus-visible:text-link-hover",
     className,
   );
 

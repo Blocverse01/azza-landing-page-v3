@@ -2,6 +2,7 @@ import Image from "next/image";
 
 import deviceFrame from "@design-system/assets/product/device-frame-phone.webp";
 import deviceShadow from "@design-system/assets/product/device-frame-phone-shadow.webp";
+import whatsappBusiness from "@design-system/assets/product/phone-screen-whatsapp-business.webp";
 import whatsappTransfer from "@design-system/assets/product/phone-screen-whatsapp-transfer.webp";
 import { cn } from "@/lib/cn";
 
@@ -55,22 +56,24 @@ export interface PhoneMockupProps {
 /**
  * The phone mockup.
  *
- * THE QUARANTINE (DECISIONS D-019). `phone-screen-whatsapp-business.webp`
- * contains a legible real Nigerian account number, account name and bank name.
- * It is NOT in the repository and is .gitignore'd by filename. So:
+ * THE QUARANTINE, RESOLVED (DECISIONS D-019, closed by D-060 on 2026-08-22).
+ * The business chat screenshot originally carried a legible real account
+ * number, account name and bank name, so the file was .gitignore'd and this
+ * component shipped a redacted panel in its place. The committed
+ * `phone-screen-whatsapp-business.webp` is now a SCRUBBED export of the
+ * operator's revised design (800:424): the bottom 25% of the bitmap - the
+ * region carrying the three account-detail rows, which sits entirely below the
+ * crop `WhyAzzaSteps` renders - is painted over with the chat wallpaper
+ * colour. Nothing visible changed; the sensitive rows no longer exist in the
+ * shipped bytes. If this asset is ever re-exported from Figma, scrub it the
+ * same way BEFORE committing - the source frame still contains the real rows.
  *
- *   - `screen` defaults to "redacted", which renders a flat surface.placeholder
- *     panel at the screen geometry. The panel is `aria-hidden`: it is
- *     decorative, and the build status behind it is not page content. It ships
- *     without the asset.
- *   - `screen="whatsapp-business"` must not be passed by any Phase 2 agent. It
- *     exists so that dropping a scrubbed screenshot at
- *     design-system/assets/product/phone-screen-whatsapp-business.webp and
- *     changing one prop is the entire fix. Until that file exists it renders
- *     the redacted panel, because a static import of a missing file would break
- *     the build for everyone.
- *   - `screen="whatsapp-transfer"` is the real, safe asset and serves all four
- *     other mockups (507:764, 570:465, 553:298, 553:304 - one file, md5-verified).
+ *   - `screen` still defaults to "redacted" (a flat surface.placeholder panel,
+ *     `aria-hidden`), so no consumer shows a chat screen it did not ask for.
+ *   - `screen="whatsapp-business"` renders the scrubbed business-onboarding
+ *     chat. Its one consumer is `WhyAzzaSteps` (800:421).
+ *   - `screen="whatsapp-transfer"` serves all four other mockups
+ *     (507:764, 570:465, 553:298, 553:304 - one file, md5-verified).
  */
 export function PhoneMockup({
   screen = "redacted",
@@ -80,17 +83,16 @@ export function PhoneMockup({
   priority = false,
   className,
 }: PhoneMockupProps) {
-  const showTransfer = screen === "whatsapp-transfer";
+  const screenSrc =
+    screen === "whatsapp-transfer"
+      ? whatsappTransfer
+      : screen === "whatsapp-business"
+        ? whatsappBusiness
+        : null;
 
   return (
-    <div
-      className={cn("relative", className)}
-      style={{ width: `${width}px`, maxWidth: "100%" }}
-    >
-      <div
-        className="relative w-full"
-        style={{ aspectRatio: DEVICE_ASPECT }}
-      >
+    <div className={cn("relative", className)} style={{ width: `${width}px`, maxWidth: "100%" }}>
+      <div className="relative w-full" style={{ aspectRatio: DEVICE_ASPECT }}>
         {rasterShadow ? (
           <Image
             src={deviceShadow}
@@ -143,15 +145,21 @@ export function PhoneMockup({
             borderRadius: SCREEN_RADIUS,
           }}
         >
-          {showTransfer ? (
+          {screenSrc ? (
             <Image
-              src={whatsappTransfer}
+              src={screenSrc}
               alt={screenAlt ?? ""}
               fill
               priority={priority}
               loading={priority ? undefined : "lazy"}
-              sizes="(max-width:767px) 70vw, 363px"
-              className="object-cover object-[center_42%]"
+              sizes="(max-width:767px) 70vw, 421px"
+              className={cn(
+                "object-cover",
+                // The 42% crop centre is the transfer screenshot's own framing
+                // (507:764); the business screen (800:424) sits at the design's
+                // near-top placement, which plain `cover` reproduces.
+                screen === "whatsapp-transfer" && "object-[center_42%]",
+              )}
             />
           ) : (
             /*
@@ -166,10 +174,7 @@ export function PhoneMockup({
              * section reading exactly as it does for a sighted user, who is
              * likewise told nothing about a pending screenshot.
              */
-            <div
-              aria-hidden="true"
-              className="h-full w-full bg-surface-placeholder"
-            />
+            <div aria-hidden="true" className="bg-surface-placeholder h-full w-full" />
           )}
         </div>
       </div>

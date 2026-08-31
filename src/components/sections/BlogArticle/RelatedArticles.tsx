@@ -44,8 +44,11 @@ export function RelatedArticles({ posts }: RelatedArticlesProps) {
             </h2>
 
             {/*
-             * 521:572 / 521:573 - a 129x46 `action.quiet` pill. The design
-             * gives it no destination; /blog is the only page that lists
+             * 521:572 / 521:573 - a 129-wide OUTLINED pill: `surface.page`
+             * fill, `line.cta` hairline, `fg.body` label (the 2026-08 revision
+             * of 282:803, re-read 2026-08-23 - it was an `action.quiet` lavender
+             * fill before; `Button variant="outline"` was added for it). The
+             * design gives it no destination; /blog is the only page that lists
              * articles. Recorded in open_questions.
              *
              * `text-md!` is the label token 521:573 is authored in - Inter
@@ -56,22 +59,20 @@ export function RelatedArticles({ posts }: RelatedArticlesProps) {
              * reason BlogHero.tsx:84 documents - `cn` does not resolve
              * conflicts, so without it Tailwind's emission order would decide.
              *
-             * The box already agrees with the design at this token: a 20px
-             * Medium "View More" measures ~89px, and 89 + px-5 either side is
-             * the authored 129. Only the height differs (h-12 = 48 against the
-             * drawn 46), which is the 44px floor being kept.
+             * The box follows the label, not the authored 129: Chrome sets a
+             * 20px Medium "View More" at ~96px where Figma draws the same
+             * token at ~85, so the rendered pill is ~138 wide at the `md`
+             * step's px-5 (the frame's own 25px inset would only widen it
+             * further). The height is h-12 = 48 against the drawn 44-46, the
+             * 44px floor being kept. Neither is a fidelity defect; both are the
+             * type rendering and the ladder.
              *
              * `Button` is kept rather than `Pill variant="cta"` - which carries
              * `text-md` natively - because this is an internal destination and
              * `Button` routes it through next/link. `Pill`'s href path emits a
              * bare <a>, which would cost a full document navigation.
              */}
-            <Button
-              variant="quiet"
-              size="md"
-              href="/blog"
-              className="text-md!"
-            >
+            <Button variant="outline" size="md" href="/blog" className="text-md!">
               View More
             </Button>
           </div>

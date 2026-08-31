@@ -4,9 +4,44 @@ import { Media, VisuallyHidden } from "@/components/ui";
 import { WHATSAPP_CHAT_URL } from "@/content/navigation";
 import { cn } from "@/lib/cn";
 
+/**
+ * Which hero is hosting the badge. Both values pin it inside the hero's own
+ * positioning context; they differ only in where.
+ *
+ *   "float"   the three original heroes - vertically centred on the viewport
+ *             at a right inset of 82 (see the placement note below)
+ *   "landing" the redesigned landing hero - vertically centred on the viewport
+ *             (operator request 2026-08-11, replacing 734:396's drawn top 517)
+ *             at the frame's own right inset of 120
+ */
+export type QrBadgePlacement = "float" | "landing";
+
 export interface QrBadgeProps {
+  /** Default "float", which is every hero except the redesigned landing one. */
+  placement?: QrBadgePlacement;
   className?: string;
 }
+
+/*
+ * The `min(100%, 90rem)` term in both is the same frame arithmetic: at and below
+ * 1440 it resolves to the design's own inset from the viewport edge, and above
+ * 1440 the design frame centres and the surplus goes to the gutters, so the
+ * badge keeps its drawn relationship to the composition instead of drifting out
+ * into an empty gutter.
+ */
+const PLACEMENT_CLASS: Record<QrBadgePlacement, string> = {
+  float:
+    "top-[calc(50vh-var(--height-nav)-87px)] right-[calc((100%_-_min(100%,90rem))_/_2_+_82px)]",
+  /*
+   * `50vh - 87px`, NOT float's `50vh - nav - 87px`: the landing hero pulls
+   * itself up under the sticky bar with `-mt-(--azza-nav-h)`, so its box
+   * starts at the viewport's own top and hero-local 50vh IS viewport centre.
+   * The 87 is half the badge's 174 height, subtracted as arithmetic rather
+   * than a `-translate-y-1/2` for the hover-lift reason in the VERTICAL note.
+   */
+  landing:
+    "top-[calc(50vh-87px)] right-[calc((100%_-_min(100%,90rem))_/_2_+_120px)]",
+};
 
 /**
  * The WhatsApp QR badge - `412:884`, `511:464`, `412:1990`, `412:2602`.
@@ -38,7 +73,10 @@ export interface QrBadgeProps {
  * accessibility tree outright (responsive.md S7.1.2). The action survives as the
  * nav's "Chat with Azza" CTA, which is the modality-appropriate form on a phone.
  */
-export default function QrBadge({ className }: QrBadgeProps) {
+export default function QrBadge({
+  placement = "float",
+  className,
+}: QrBadgeProps) {
   return (
     <a
       href={WHATSAPP_CHAT_URL}
@@ -83,17 +121,21 @@ export default function QrBadge({ className }: QrBadgeProps) {
          * still clears the landing column by 79px, at every width.
          */
         /*
-         * VERTICAL: centred on the viewport (operator request, 2026-08-04),
-         * replacing the drawn `top: 488px`. The hero box this positions inside
-         * starts flush under the sticky bar, whose height is `--height-nav` at
-         * every width this badge is visible (`lg`+), so viewport centre in
-         * hero-local coordinates is `50vh - nav`. The remaining 87px is half
-         * the badge's own 174px height - it CANNOT be a `-translate-y-1/2`
-         * because the hover lift below animates the standalone `translate`
-         * property, and its `-translate-y-1` would replace a centring
-         * translation wholesale, teleporting the badge up 86px on hover.
+         * VERTICAL, "float": centred on the viewport (operator request,
+         * 2026-08-04), replacing the drawn `top: 488px`. The hero box this
+         * positions inside starts flush under the sticky bar, whose height is
+         * `--height-nav` at every width this badge is visible (`lg`+), so
+         * viewport centre in hero-local coordinates is `50vh - nav`. The
+         * remaining 87px is half the badge's own 174px height - it CANNOT be a
+         * `-translate-y-1/2` because the hover lift below animates the
+         * standalone `translate` property, and its `-translate-y-1` would
+         * replace a centring translation wholesale, teleporting the badge up
+         * 86px on hover. The same reasoning is why "landing" - viewport-centred
+         * too since 2026-08-11 - also subtracts its 87px as `top` arithmetic
+         * rather than centring with a transform.
          */
-        "absolute top-[calc(50vh-var(--height-nav)-87px)] right-[calc((100%_-_min(100%,90rem))_/_2_+_82px)]",
+        "absolute",
+        PLACEMENT_CLASS[placement],
         // Hidden below lg: a QR code cannot be scanned by the device rendering
         // it. `display: none` also takes it out of the a11y tree, so a static
         // aria-hidden would be redundant below lg and wrong at lg and above.

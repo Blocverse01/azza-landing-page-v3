@@ -20,19 +20,23 @@ import { ShareRow } from "./ShareRow";
  * components.md S4.11 gives `Prose` a two-value gap register, 20 or 60, and
  * documents 60 as "the article body (352:3707)". 60 is that frame's OWN gap -
  * the distance from the prose block to the share footer - not the distance
- * between paragraphs, which the design authors at 32 (352:3708, 352:3710,
- * 352:3712), 48 (352:3711), 16 (352:3718) and 20 (352:3721). None of those is
+ * between paragraphs, which the design authors at 48 (352:3708, 352:3710,
+ * 352:3711, 352:3712), 16 (352:3718) and 32 (352:3721). None of those is
  * reachable through the prop. The contract is passed as written and the
  * authored rhythm is composed inside a single child, where the gap has nothing
  * to space. Reported as a finding rather than resolved by widening the union.
+ *
+ * THE 2026-08 REVISION OF 282:803 (re-read 2026-08-23) opened the rhythm up:
+ * the three nested 32s are 48 now - one paragraph pitch from the intro to the
+ * disclaimer - and the sign-off block's 20 is 32. "Final Words" keeps its 16.
  */
 
 /** The reading rhythm, straight off the Figma auto-layout frames. */
 const RHYTHM = {
-  block: "flex flex-col gap-8", // 32 - 352:3708 / 352:3710 / 352:3712
+  block: "flex flex-col gap-12", // 48 - 352:3708 / 352:3710 / 352:3712
   sections: "flex flex-col gap-12", // 48 - 352:3711
   finalWords: "flex flex-col gap-4", // 16 - 352:3718
-  disclaimer: "flex flex-col gap-5", // 20 - 352:3721
+  disclaimer: "flex flex-col gap-8", // 32 - 352:3721
 } as const;
 
 /**

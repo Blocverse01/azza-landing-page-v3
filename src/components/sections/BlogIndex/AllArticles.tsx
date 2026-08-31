@@ -3,20 +3,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 
-import {
-  ArticleCard,
-  Button,
-  Reveal,
-  SearchField,
-  Section,
-  type BlogPost,
-} from "@/components/ui";
+import { ArticleCard, Button, Reveal, SearchField, Section, type BlogPost } from "@/components/ui";
 import { cn } from "@/lib/cn";
 
-import {
-  ArticleFilters,
-  type CategoryFilter,
-} from "./ArticleFilters";
+import { ArticleFilters, type CategoryFilter } from "./ArticleFilters";
 
 const HEADING_ID = "all-articles-heading";
 
@@ -30,7 +20,9 @@ const HEADING_ID = "all-articles-heading";
 const INITIAL_VISIBLE = 6;
 
 /**
- * The label token for this section's two `action.quiet` pills.
+ * The label token for this section's two outlined pills (operator ruling,
+ * 2026-08-23: every lavender `action.quiet` pill on the site became the white
+ * `line.cta`-hairlined pill - `Button variant="outline"`).
  *
  * `Button`'s `md` step is `text-sm-btn` (16 / 1.21 / -0.02em / 600), which is
  * correct for a button and is not to be widened - `sm/md/lg` are 14/16/16 Semi
@@ -65,10 +57,17 @@ export interface AllArticlesProps {
 }
 
 /**
- * `/blog` article grid - Figma 500:2197.
+ * `/blog` article grid - Figma 802:627, the 2026-08 operator revision of
+ * 500:2197.
  *
- * Toolbar (500:2201) of search (500:2202) and category filters (500:2207), a
- * 3x3 grid of 360-wide cards (500:2213), and "View More" (507:477).
+ * Toolbar (802:629) of category filters (802:630) and search (802:636), a
+ * 3x3 grid of 360-wide cards (802:641), and "View More" (802:708).
+ *
+ * WHAT THE REVISION CHANGED HERE: the toolbar swapped sides - filters lead on
+ * the LEFT and the 360 search field closes the row on the right, the mirror of
+ * the original 500:2201 - the section grew its own 80px top padding (the
+ * `final` rhythm carries it now), and the grid's row gap tightened 56 -> 48
+ * against the unchanged 40 column gap.
  *
  * WHY THIS IS A CLIENT COMPONENT: category filter state and the base-breakpoint
  * expand state (components.md S3). Search state is not named there because the
@@ -89,10 +88,7 @@ export function AllArticles({ posts }: AllArticlesProps) {
   const gridRef = useRef<HTMLUListElement>(null);
   const focusAfterExpand = useRef(false);
 
-  const articles = useMemo(
-    () => posts.filter((post) => !post.featured),
-    [posts],
-  );
+  const articles = useMemo(() => posts.filter((post) => !post.featured), [posts]);
 
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -141,9 +137,7 @@ export function AllArticles({ posts }: AllArticlesProps) {
    */
   const handleReset = useCallback(() => {
     const input =
-      toolbarRef.current?.querySelector<HTMLInputElement>(
-        'input[type="search"]',
-      ) ?? null;
+      toolbarRef.current?.querySelector<HTMLInputElement>('input[type="search"]') ?? null;
     if (input) input.value = "";
 
     setQuery("");
@@ -168,13 +162,7 @@ export function AllArticles({ posts }: AllArticlesProps) {
   const empty = visible.length === 0;
 
   return (
-    <Section
-      rhythm="final"
-      container="grid"
-      align="start"
-      gap={48}
-      aria-labelledby={HEADING_ID}
-    >
+    <Section rhythm="final" container="grid" align="start" gap={48} aria-labelledby={HEADING_ID}>
       {/*
         The design gives this section no visible heading (500:2197 opens
         straight into the toolbar). A named region with no heading leaves a hole
@@ -199,10 +187,20 @@ export function AllArticles({ posts }: AllArticlesProps) {
           "xl:flex-row xl:items-center xl:justify-between",
         )}
       >
-        <div
-          onInput={handleSearchInput}
-          className="w-full xl:w-90 xl:shrink-0"
-        >
+        {/* 802:630 is `self-stretch` against the 50px search field, so its
+            cells run the toolbar's full height and the selected cell's bottom
+            rule sits on the toolbar's baseline. Only meaningful once the two
+            share a row. */}
+        <ArticleFilters
+          active={category}
+          onChange={handleCategoryChange}
+          className="xl:self-stretch"
+        />
+
+        {/* 802:636 - 360 wide, closing the row. In the DOM the filters lead,
+            matching the frame's own order, so the stacked sub-xl layout reads
+            filters-then-search too. */}
+        <div onInput={handleSearchInput} className="w-full xl:w-90 xl:shrink-0">
           <SearchField
             label="Search for articles"
             placeholder="Search for articles"
@@ -210,12 +208,6 @@ export function AllArticles({ posts }: AllArticlesProps) {
             width="full"
           />
         </div>
-
-        <ArticleFilters
-          active={category}
-          onChange={handleCategoryChange}
-          className="xl:justify-end"
-        />
       </div>
 
       {empty ? (
@@ -223,11 +215,9 @@ export function AllArticles({ posts }: AllArticlesProps) {
           {/* The design has no empty state - it cannot, it is one static
               composition. This is the minimum that is still useful: what
               happened, and the one control that undoes it. */}
-          <p className="text-md text-fg-subtle">
-            No articles match that search.
-          </p>
+          <p className="text-md text-fg-subtle">No articles match that search.</p>
           <div className="w-fit" onClick={handleReset}>
-            <Button variant="quiet" size="md" className={PILL_LABEL}>
+            <Button variant="outline" size="md" className={PILL_LABEL}>
               Show all articles
             </Button>
           </div>
@@ -249,10 +239,11 @@ export function AllArticles({ posts }: AllArticlesProps) {
           className={cn(
             "grid w-full grid-cols-1 gap-x-6 gap-y-10",
             // 1 / 2 / 2 / 2 / 3 / 3 columns at base/xs/sm/md/lg/xl,
-            // gaps 32 at lg and the designed 40 x 56 from xl. responsive.md S7.4.
+            // gaps 32 at lg and the designed 40 x 48 from xl (802:641 - the
+            // revision tightened the 56 row gap to 48). responsive.md S7.4.
             "xs:grid-cols-2",
             "lg:grid-cols-3 lg:gap-x-8 lg:gap-y-12",
-            "xl:gap-x-10 xl:gap-y-14",
+            "xl:gap-x-10 xl:gap-y-12",
           )}
         >
           {visible.map((post, index) => (
@@ -265,9 +256,7 @@ export function AllArticles({ posts }: AllArticlesProps) {
                 // The base-only six-card limit. `display: none` also takes the
                 // card out of the tab order and the accessibility tree, which
                 // is what "not shown yet" has to mean.
-                index >= INITIAL_VISIBLE && !expanded
-                  ? "hidden xs:block"
-                  : undefined,
+                index >= INITIAL_VISIBLE && !expanded ? "xs:block hidden" : undefined,
               )}
             >
               <ArticleCard post={post} />
@@ -276,11 +265,14 @@ export function AllArticles({ posts }: AllArticlesProps) {
         </ul>
       )}
 
-      {/* 507:477. Only reachable at base, and only while something is hidden. */}
+      {/* 802:708. Only reachable at base, and only while something is hidden.
+          The revised frame still draws the pill under the grid at 1440 and
+          D-056 still governs: the blog links all ten posts, so at desktop the
+          control would perform nothing. Base-only it stays. */}
       {!empty && !expanded && visible.length > INITIAL_VISIBLE ? (
-        <div className="w-fit self-center xs:hidden" onClick={handleViewMore}>
+        <div className="xs:hidden w-fit self-center" onClick={handleViewMore}>
           <Button
-            variant="quiet"
+            variant="outline"
             size="md"
             aria-label="View more articles"
             className={PILL_LABEL}

@@ -9,7 +9,7 @@ import type { IconName } from "@/components/ui";
  * Copy is transcribed verbatim from the Figma nodes:
  *   bar          412:2066  (Products / Socials / Blog / About Us / Chat with Azza)
  *   Products     94:850    (three rows, title + description)
- *   Socials      63:350    (three rows, label only)
+ *   Socials      765:340   (three rows, label only) - supersedes 63:350
  */
 
 export interface NavLink {
@@ -43,6 +43,19 @@ export interface NavDropdownItem extends NavLink {
    */
   icon?: IconName;
   description?: string;
+  /**
+   * The row's hover glyph - `771:303` (Products) and `776:464` (Socials), which
+   * supersede the tinted-row design and its `accent` field. Every row now draws
+   * a white bordered tile whose glyph is a grey OUTLINE at rest and this filled,
+   * coloured mark on hover/focus - the connected hover states in the component
+   * prototypes. Which filled mark a row swaps to is not derivable from its
+   * label or href, so it is content, exactly as the accent was.
+   *
+   * Optional for the same D-023 reason `icon` is: a row missing either half of
+   * the pair renders whichever half exists, statically, rather than inventing
+   * artwork.
+   */
+  iconFilled?: IconName;
 }
 
 export interface NavItem extends Omit<NavLink, "href"> {
@@ -86,18 +99,20 @@ const SOCIAL_HANDLE = {
   youtube: "",
 } as const;
 
-/** Products - 94:850. Hrefs follow the D-002 route map.
+/** Products - REDESIGNED, now `771:303` (was `94:850`). Same three rows, same
+ * copy verbatim; the tinted rows are gone and each row hover-swaps its outline
+ * glyph for the filled, coloured one - see `NavDropdownItem.iconFilled`.
  *
- * Icons landed after wave 2B: the r2 icon sweep exported the three glyphs this
- * dropdown draws (507:820 / 507:835 / 507:840), which the first pass missed
- * because it traversed only the 672:246 FOR BUILD section. Slots reserved here
- * under D-023 are now filled. */
+ * The outline glyphs are unchanged: `771:303` re-exports the identical artwork
+ * the r2 icon sweep already transcribed (507:820 / 507:835 / 507:840), verified
+ * path-for-path. Hrefs follow the D-002 route map. */
 const PRODUCT_ITEMS: readonly NavDropdownItem[] = [
   {
     label: "Crypto Wallet",
     description: "Crypto made accessible.",
     href: "/products/crypto-wallet",
     icon: "wallet",
+    iconFilled: "wallet-filled",
   },
   {
     label: "Cross-Border Payments",
@@ -106,42 +121,59 @@ const PRODUCT_ITEMS: readonly NavDropdownItem[] = [
     // 507:835. The design's own glyph for this row carries a YEN mark - see
     // DECISIONS D-036. Shipped verbatim; swapping a currency symbol on an
     // Africa-corridor product is the operator's call, not an implementer's.
+    // Its filled counterpart (775:331) draws the same mark.
     icon: "money-bag",
+    iconFilled: "money-bag-filled",
   },
   {
     label: "Azza Business",
     description: "Set up your business account.",
     href: "/products/for-business",
     icon: "briefcase",
+    iconFilled: "briefcase-filled",
   },
 ];
 
 /**
- * Socials - 63:350. `social-x` and `social-instagram` are the exported Fluent
- * outline glyphs and match the design's marks. The YouTube glyph (507:864) was
- * added by the r2 icon sweep after wave 2B, so this row no longer reserves an
- * empty slot.
+ * Socials - REDESIGNED AGAIN, now `776:464` (supersedes `765:340`, which
+ * superseded the flat `63:350`). Same three destinations; the labels are new
+ * copy, transcribed verbatim ("Follow on ..." / "Subscribe to ..."), and the
+ * full-colour brand marks moved from the resting state to the HOVER state.
+ *
+ * At rest each row draws a grey Fluent outline. These are the design's own
+ * 24px `_regular` exports (776:449 / 776:451 / 776:459), which are NOT the
+ * existing `social-*` entries - those are 22- and 16-viewBox drawings with
+ * different optical insets, still used by the Help page and blog share row.
+ * On hover the outline swaps to the filled mark: X's block is the existing
+ * `brand-x` artwork (identical paths, verified), while Instagram and YouTube
+ * draw NEW flat marks (#FF0069 / #FF4040) - not `brand-instagram`'s gradient
+ * squircle or `brand-youtube`'s red lozenge, so those two get their own
+ * `-filled` entries and the `brand-*` pair joins `social-youtube` as recorded,
+ * deliberate orphans.
  *
  * NOTE (DECISIONS D-037): the design contains THREE disagreeing social sets -
  * nav = X/Instagram/YouTube, Help = X/Instagram/WhatsApp, blog share =
- * X/Instagram/TikTok/link - and the footer has none. This list is the nav's,
- * transcribed from 63:350. Do not reconcile it against the others here.
+ * X/Instagram/TikTok/link - and the footer has none. This list is the nav's.
+ * Do not reconcile it against the others here.
  */
 const SOCIAL_ITEMS: readonly NavDropdownItem[] = [
   {
-    label: "X (Twitter)",
+    label: "Follow on X (Twitter)",
     href: `https://x.com/${SOCIAL_HANDLE.x}`,
-    icon: "social-x",
+    icon: "social-x-regular",
+    iconFilled: "brand-x",
   },
   {
-    label: "Instagram",
+    label: "Follow on Instagram",
     href: `https://www.instagram.com/${SOCIAL_HANDLE.instagram}`,
-    icon: "social-instagram",
+    icon: "social-instagram-regular",
+    iconFilled: "social-instagram-filled",
   },
   {
-    label: "YouTube",
+    label: "Subscribe to YouTube",
     href: `https://www.youtube.com/${SOCIAL_HANDLE.youtube}`,
-    icon: "social-youtube",
+    icon: "social-youtube-regular",
+    iconFilled: "social-youtube-filled",
   },
 ];
 

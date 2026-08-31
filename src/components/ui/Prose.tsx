@@ -9,10 +9,10 @@ export interface ProseProps {
    */
   step?: "md-prose" | "2xl-prose";
   /**
-   * Paragraph gap. 60px in the article body (352:3707), 20px in the business
-   * narrative (412:2520).
+   * Paragraph gap. 60px in the article body (352:3707), 48px in the business
+   * narrative (800:397, widened from 20 in the 2026-08 operator revision).
    */
-  gap?: 20 | 60;
+  gap?: 20 | 48 | 60;
   /**
    * Body ink. Defaults to whichever the design gives the chosen `step`:
    * `md-prose` -> `prose` (352:3708), `2xl-prose` -> `body`
@@ -33,6 +33,7 @@ const STEP_CLASS: Record<NonNullable<ProseProps["step"]>, string> = {
 
 const GAP_CLASS: Record<NonNullable<ProseProps["gap"]>, string> = {
   20: "gap-5",
+  48: "gap-12",
   60: "gap-15",
 };
 
@@ -49,10 +50,7 @@ const TONE_CLASS: Record<NonNullable<ProseProps["tone"]>, string> = {
  * resolve against the pinned class (D7). The explicit `tone` prop is the
  * override.
  */
-const STEP_TONE: Record<
-  NonNullable<ProseProps["step"]>,
-  NonNullable<ProseProps["tone"]>
-> = {
+const STEP_TONE: Record<NonNullable<ProseProps["step"]>, NonNullable<ProseProps["tone"]>> = {
   "md-prose": "prose",
   "2xl-prose": "body",
 };

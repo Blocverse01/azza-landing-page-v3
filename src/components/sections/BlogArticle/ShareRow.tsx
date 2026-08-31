@@ -7,7 +7,18 @@ import { Icon } from "@/components/ui";
 import { cn } from "@/lib/cn";
 
 /*
- * THE SHARE ROW - 352:3694 (article header) and 352:3728 (article footer).
+ * THE SHARE ROW - 352:3694 (article header) and 809:308 (article footer).
+ *
+ * THE 2026-08 REVISION OF 282:803 (re-read 2026-08-23) REPLACED THE GLYPHS.
+ * The four controls are the same four controls, but every mark was swapped:
+ * 809:299 the streamline X block, 809:301 basil's solid Instagram in flat
+ * #FF0069, 809:304 a filled TikTok, 809:306 a filled link glyph - all 24px at
+ * a 12px gap, with no tile, no gradient badge and no brand-tint disc any more.
+ * They ship as `share-x-block` / `share-instagram-solid` /
+ * `share-tiktok-filled` / `share-link-filled` (Icon/types.ts); the old
+ * `share-*` and `link` glyphs are untouched and now orphaned. Nothing below
+ * the glyph changed: the same anchors and buttons, the same 44 -> 36 pitch,
+ * the same hover ink.
  *
  * The set is X / Instagram / TikTok / copy-link, exactly as 352:3694 draws it.
  * It is deliberately NOT reconciled against the nav's Socials menu (X /
@@ -47,10 +58,17 @@ const CONTROL =
 /*
  * Hover on an icon-only control changes colour and nothing else
  * (components.md S10.6). `link.hover` is #1E1E1E, which is also these glyphs'
- * rest ink, so it would be a hover that does not happen; `fg.brand` is the
- * copy-link glyph's own authored colour (352:3704 strokes #3430E9) and is
- * therefore already part of this row's palette. Every hover has its
- * :focus-visible twin. Recorded in open_questions.
+ * rest ink, so it would be a hover that does not happen; `fg.brand` was the
+ * old copy-link glyph's own authored colour (352:3704 stroked #3430E9), is
+ * the site's link accent, and is kept as the hover ink for the revised set.
+ * Every hover has its :focus-visible twin. Recorded in open_questions.
+ *
+ * THE REST INK IS `fg.primary` FOR ALL THREE MONOCHROME GLYPHS. The exports
+ * carry their source packs' own defaults - the X is `#000`, the TikTok and the
+ * link are `#10161F` - neither of which is a token, and at 24px against white
+ * they are indistinguishable from #1E1E1E. The glyphs are `currentColor` so
+ * the row inks them, as it always has; one ink, one hover, as components.md
+ * S4.5 asks of every recolourable glyph.
  */
 const INK = "text-fg-primary hoverable:text-fg-brand focus-visible:text-fg-brand";
 
@@ -132,100 +150,97 @@ export function ShareRow({ title, variant = "inline", className }: ShareRowProps
     pageUrl ? `&url=${encodeURIComponent(pageUrl)}` : ""
   }`;
 
-  const cluster = (
-    /*
-     * `role="list"` IS LOAD-BEARING HERE, not a nicety. Tailwind's preflight
-     * sets `list-style: none` - which the `list-none` below re-declares - and
-     * that makes WebKit drop the implicit `list` role. A <ul> stripped of that
-     * role maps to `generic`, which PROHIBITS an accessible name, so BOTH
-     * naming attributes below would be inert and an axe `aria-prohibited-attr`
-     * violation, exactly as Disclosure.tsx records for a bare `aria-labelledby`
-     * on a <div>. In the inline variant that `aria-label` is the only thing
-     * identifying this cluster as the share controls. The role and the name
-     * ship together or not at all. `display: flex` is a second, independent
-     * trigger for the same loss.
-     */
-    <ul
-      role="list"
-      aria-label={variant === "inline" ? CONTROL_LABEL : undefined}
-      aria-labelledby={variant === "footer" ? labelId : undefined}
-      className="flex list-none items-center gap-2 lg:-me-1.5 lg:gap-0"
-    >
-      <li>
-        {/*
-         * 352:3695 / 352:3729 - the filled X tile.
-         *
-         * THE ONLY CONTROL IN THIS CLUSTER THAT OPENS A NEW TAB. The warning
-         * `ArticleBody.tsx`'s `ProseLink` already ships is folded into the
-         * `aria-label` rather than appended as a second `<VisuallyHidden>`
-         * node, because this control's whole name IS the label - appending
-         * would leave the label winning and the note unread. Its three siblings
-         * are <button>s that open the OS share sheet or write the clipboard;
-         * they change no browsing context and must not claim to.
-         */}
-        <a
-          href={xHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Share on X (opens in a new tab)"
-          className={cn(CONTROL, INK, "no-underline")}
-        >
-          <Icon name="share-x" size="md" />
-        </a>
-      </li>
+  const cluster =
+    (
+      /*
+       * `role="list"` IS LOAD-BEARING HERE, not a nicety. Tailwind's preflight
+       * sets `list-style: none` - which the `list-none` below re-declares - and
+       * that makes WebKit drop the implicit `list` role. A <ul> stripped of that
+       * role maps to `generic`, which PROHIBITS an accessible name, so BOTH
+       * naming attributes below would be inert and an axe `aria-prohibited-attr`
+       * violation, exactly as Disclosure.tsx records for a bare `aria-labelledby`
+       * on a <div>. In the inline variant that `aria-label` is the only thing
+       * identifying this cluster as the share controls. The role and the name
+       * ship together or not at all. `display: flex` is a second, independent
+       * trigger for the same loss.
+       */
+      <ul
+        role="list"
+        aria-label={variant === "inline" ? CONTROL_LABEL : undefined}
+        aria-labelledby={variant === "footer" ? labelId : undefined}
+        className="flex list-none items-center gap-2 lg:-me-1.5 lg:gap-0"
+      >
+        <li>
+          {/*
+           * 809:299 / 809:309 - the X block.
+           *
+           * THE ONLY CONTROL IN THIS CLUSTER THAT OPENS A NEW TAB. The warning
+           * `ArticleBody.tsx`'s `ProseLink` already ships is folded into the
+           * `aria-label` rather than appended as a second `<VisuallyHidden>`
+           * node, because this control's whole name IS the label - appending
+           * would leave the label winning and the note unread. Its three siblings
+           * are <button>s that open the OS share sheet or write the clipboard;
+           * they change no browsing context and must not claim to.
+           */}
+          <a
+            href={xHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Share on X (opens in a new tab)"
+            className={cn(CONTROL, INK, "no-underline")}
+          >
+            <Icon name="share-x-block" size="md" />
+          </a>
+        </li>
 
-      <li>
-        {/*
-         * 352:3696 / 352:3730 - the Instagram brand mark is a two-stop radial
-         * gradient and is one of the eight fixed-fill glyphs that must never be
-         * recoloured (components.md S4.5). It therefore takes the press
-         * feedback and the focus ring but no colour change.
-         */}
-        <button
-          type="button"
-          onClick={() => void shareTo("Instagram")}
-          aria-label="Share on Instagram"
-          className={CONTROL}
-        >
-          <Icon name="share-instagram" size="md" />
-        </button>
-      </li>
+        <li>
+          {/*
+           * 809:301 / 809:311 - the Instagram mark is painted in Instagram's own
+           * #FF0069 and is a fixed-fill glyph that must never be recoloured
+           * (components.md S4.5). It therefore takes the press feedback and the
+           * focus ring but no colour change.
+           */}
+          <button
+            type="button"
+            onClick={() => void shareTo("Instagram")}
+            aria-label="Share on Instagram"
+            className={CONTROL}
+          >
+            <Icon name="share-instagram-solid" size="md" />
+          </button>
+        </li>
 
-      <li>
-        {/* 352:3701 / 352:3735 - TikTok. */}
-        <button
-          type="button"
-          onClick={() => void shareTo("TikTok")}
-          aria-label="Share on TikTok"
-          className={cn(CONTROL, INK)}
-        >
-          <Icon name="share-tiktok" size="md" />
-        </button>
-      </li>
+        <li>
+          {/* 809:304 / 809:314 - TikTok. */}
+          <button
+            type="button"
+            onClick={() => void shareTo("TikTok")}
+            aria-label="Share on TikTok"
+            className={cn(CONTROL, INK)}
+          >
+            <Icon name="share-tiktok-filled" size="md" />
+          </button>
+        </li>
 
-      <li>
-        {/*
-         * 352:3703 / 352:3737 - a 16px link glyph centred in a 24px
-         * `surface.brand-tint` disc. Success is announced through the live
-         * region below, never a tooltip, an alert() or a dialog
-         * (responsive.md S6.4 #10).
-         */}
-        <button
-          type="button"
-          onClick={() => void copyLink("Link copied to clipboard")}
-          aria-label="Copy link"
-          className={cn(
-            CONTROL,
-            "text-fg-brand hoverable:text-fg-primary focus-visible:text-fg-primary",
-          )}
-        >
-          <span className="rounded-pill bg-surface-brand-tint grid size-6 place-items-center">
-            <Icon name="link" size="xs" />
-          </span>
-        </button>
-      </li>
-    </ul>
-  );
+        <li>
+          {/*
+           * 809:306 / 809:316 - the filled link glyph, same ink and hover as its
+           * two monochrome siblings (the brand-tint disc it used to sit in is
+           * gone with the revision). Success is announced through the live
+           * region below, never a tooltip, an alert() or a dialog
+           * (responsive.md S6.4 #10).
+           */}
+          <button
+            type="button"
+            onClick={() => void copyLink("Link copied to clipboard")}
+            aria-label="Copy link"
+            className={cn(CONTROL, INK)}
+          >
+            <Icon name="share-link-filled" size="md" />
+          </button>
+        </li>
+      </ul>
+    );
 
   if (variant === "inline") {
     return (
@@ -240,7 +255,8 @@ export function ShareRow({ title, variant = "inline", className }: ShareRowProps
 
   return (
     <div className={cn("flex w-full flex-col gap-5", className)}>
-      {/* 352:3725 - Line 6. A zero-height rule, not an asset (icons.md S12). */}
+      {/* 352:3725 - Line 6. A zero-height rule, not an asset (icons.md S12).
+          352:3724 is `V, gap 20`, which `gap-5` above is. */}
       <hr className="border-line-divider w-full border-t" />
 
       <div className="flex flex-wrap items-center justify-between gap-4">

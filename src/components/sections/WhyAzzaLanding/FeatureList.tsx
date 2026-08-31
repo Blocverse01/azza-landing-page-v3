@@ -125,6 +125,19 @@ export interface FeatureListProps {
   /** Controlled. Exactly one row is open at a time; there is no all-closed state. */
   activeId: string;
   onActiveChange: (id: string) => void;
+  /**
+   * A visual duplicate of the list, rendered only so the cycling viewport in
+   * `FeatureCycle` has a continuous run of rows above and below the real copy.
+   *
+   * It is hidden from assistive technology and taken out of the tab order, but
+   * stays POINTER-interactive: a duplicate can be the row a mouse user sees and
+   * clicks, and it would be worse for that click to do nothing than for the
+   * same destination to exist twice for a pointer. Keyboard and screen-reader
+   * users get exactly one copy - the real one - which is why the triggers are
+   * `tabIndex={-1}` rather than left focusable inside `aria-hidden` (a focusable
+   * descendant of `aria-hidden` is the `aria-hidden-focus` violation).
+   */
+  presentational?: boolean;
   className?: string;
 }
 
@@ -132,6 +145,7 @@ export function FeatureList({
   features,
   activeId,
   onActiveChange,
+  presentational = false,
   className,
 }: FeatureListProps) {
   return (
@@ -145,8 +159,13 @@ export function FeatureList({
        * attribute with `!important` so nothing can reveal it. `display: none`
        * does not stop the <style> inside from applying; a stylesheet's effect
        * is independent of its own box. (`HelpSidebar.tsx` records both halves.)
+       *
+       * Only the real copy ships it - the rescue is a stylesheet, and three
+       * identical copies of it would change nothing.
        */}
-      <noscript hidden dangerouslySetInnerHTML={{ __html: NO_JS_STYLE }} />
+      {presentational ? null : (
+        <noscript hidden dangerouslySetInnerHTML={{ __html: NO_JS_STYLE }} />
+      )}
 
       {/*
        * `role="list"` for the reason WhyAzzaSteps.tsx and WhyAzzaCrossBorder.tsx
@@ -156,6 +175,8 @@ export function FeatureList({
        */}
       <ul
         role="list"
+        aria-hidden={presentational ? "true" : undefined}
+        data-feature-measure={presentational ? undefined : ""}
         className={cn(
           /*
            * The left rail. layout.md S8.2: the marker sits on the 1200 container's
@@ -217,6 +238,13 @@ export function FeatureList({
                    * It lives inside the row rather than in the section, so it
                    * tracks the active row for free and can never drift out of sync
                    * with it. `top-1` centres it on the 28px/1.13 title line.
+                   *
+                   * `lg:hidden` because from `lg` up the list becomes a cycling
+                   * viewport whose active title is always dead centre, and
+                   * `FeatureCycle` paints ONE marker there instead. A per-row
+                   * marker in that mode would cross-fade between two positions
+                   * 138px apart on every step - briefly two blue squares - where
+                   * the design calls for one highlighter the rows travel past.
                    */}
                   <span
                     aria-hidden="true"
@@ -224,23 +252,52 @@ export function FeatureList({
                     className={cn(
                       "pointer-events-none absolute top-1 -left-8 h-[23px] w-[22px] bg-surface-brand-solid",
                       "transition-opacity duration-(--motion-base) ease-out motion-reduce:transition-none",
-                      "lg:-left-17",
+                      "lg:hidden",
                       open ? "opacity-100" : "opacity-0",
                     )}
                   />
 
-                  <h3 className="text-xl text-fg-primary">
+                  {/*
+                   * `data-feature-title` is the measurement hook `FeatureCycle`
+                   * reads. The <h3> box is the row's COLLAPSED height whatever
+                   * the open state, because the description below it sits in a
+                   * `0fr` grid track that contributes nothing - which is exactly
+                   * the number the cycle needs to centre a title without having
+                   * to know how tall any description is.
+                   */}
+                  <h3 data-feature-title="" className="text-xl text-fg-primary">
                     {/*
                      * The trigger is always a <button> (Disclosure's contract), and
                      * it spans the row so the whole line is pressable. The design
                      * row is 32px tall, which fails the 44px minimum target in
-                     * responsive.md S6.1; `py-1.5 -my-1.5` grows the hit box to 44
-                     * into the 40px inter-row gap while taking zero space in flow.
+                     * responsive.md S6.1, so the hit box grows to 44 into the 40px
+                     * inter-row gap.
+                     *
+                     * IT GROWS VIA A PSEUDO-ELEMENT, NOT `py-1.5 -my-1.5`.
+                     *
+                     * That pair was meant to take zero space in flow, and it did
+                     * not: this <button> is the <h3>'s only in-flow child and the
+                     * <h3> has no border or padding, so the negative margins
+                     * COLLAPSED THROUGH IT instead of being contained. The heading
+                     * box ended up the button's full padded height - 44, not 32 -
+                     * which pushed every title-to-title pitch to 84px where
+                     * 570:436 draws 72. Measurable on any build before this
+                     * change: seven rows an eighth of a row too far apart.
+                     *
+                     * An absolutely positioned `::before` cannot affect layout at
+                     * all, and hit-testing still counts it as part of the button,
+                     * so the 44px target survives and the row is 32 again. This is
+                     * also what the cycle's arithmetic depends on - it centres
+                     * titles by measuring this box (see `FeatureCycle`).
                      */}
                     <button
                       {...triggerProps}
+                      tabIndex={presentational ? -1 : undefined}
                       data-feature-trigger=""
-                      className="-my-1.5 block w-full cursor-pointer py-1.5 text-left"
+                      className={cn(
+                        "relative block w-full cursor-pointer text-left",
+                        "before:absolute before:inset-x-0 before:-inset-y-1.5 before:content-['']",
+                      )}
                     >
                       {feature.title}
                     </button>
@@ -271,7 +328,16 @@ export function FeatureList({
                     data-feature-panel=""
                     className={cn(
                       "grid ease-in-out",
-                      "transition-[grid-template-rows,visibility] duration-(--motion-base) motion-reduce:transition-none",
+                      /*
+                       * `--motion-slow`, matching the cycle's track translate
+                       * exactly. These two are not independent animations: the
+                       * rows below this one are moved by BOTH - the track
+                       * carrying the list up and this panel giving its height
+                       * back - so a different duration or curve on either makes
+                       * their travel visibly non-uniform. Same duration, same
+                       * `ease-in-out`, one apparent movement.
+                       */
+                      "transition-[grid-template-rows,visibility] duration-(--motion-slow) motion-reduce:transition-none",
                       open ? "visible grid-rows-[1fr]" : "invisible grid-rows-[0fr]",
                     )}
                   >

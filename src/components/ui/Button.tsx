@@ -9,6 +9,21 @@ import type { IconName } from "./Icon/types";
 /**
  * Colour roles map 1:1 onto the `action.*` token families in tokens.json.
  * There is no way to pass a colour - that is the point.
+ *
+ * `outline` is the one role without a family of its own: the 2026-08 revision
+ * draws an outlined white pill - `surface.page` fill, `line.cta` (#DCDCDC)
+ * hairline, `fg.body` label - for the article page's "View More" (521:572)
+ * and the featured card's "Read Article" (802:848), and tokens.json carries no
+ * `action.outline`. It rides `action.ghost`'s hover and active steps
+ * (#F5F5F5 / #EBEBEB on a white ground, #353535 ink), which is what a ghost
+ * pill with a hairline is. Still no way to pass a colour.
+ *
+ * `quiet` IS GONE (operator ruling, 2026-08-23: "change the lavender fill
+ * button for the white pill everywhere"). The `action.quiet` #F1F1FF family
+ * stays in tokens.json, but every control that wore it - /blog's "View More"
+ * and "Show all articles", the article page's "View More", the landing page's
+ * "START NOW" pill (Pill.tsx `cta`) - is `outline` now, and the variant is
+ * removed rather than left unused so it cannot quietly come back.
  */
 const VARIANT_CLASS: Record<NonNullable<ButtonProps["variant"]>, string> = {
   primary:
@@ -16,11 +31,11 @@ const VARIANT_CLASS: Record<NonNullable<ButtonProps["variant"]>, string> = {
   brand:
     "bg-action-brand text-action-brand-fg hoverable:bg-action-brand-hover focus-visible:bg-action-brand-hover active:bg-action-brand-active",
   soft: "bg-action-soft text-action-soft-fg hoverable:bg-action-soft-hover focus-visible:bg-action-soft-hover active:bg-action-soft-active active:text-action-soft-fg-active",
-  quiet:
-    "bg-action-quiet text-action-quiet-fg hoverable:bg-action-quiet-hover focus-visible:bg-action-quiet-hover active:bg-action-quiet-active",
   chat: "bg-action-chat text-action-chat-fg hoverable:bg-action-chat-hover focus-visible:bg-action-chat-hover active:bg-action-chat-active",
   ghost:
     "bg-action-ghost text-action-ghost-fg hoverable:bg-action-ghost-hover focus-visible:bg-action-ghost-hover active:bg-action-ghost-active",
+  outline:
+    "bg-surface-page text-action-ghost-fg border border-line-cta hoverable:bg-action-ghost-hover focus-visible:bg-action-ghost-hover active:bg-action-ghost-active",
 };
 
 /*
@@ -58,7 +73,7 @@ const DISABLED_CLASS =
 
 export interface ButtonProps {
   /** Colour role. Maps 1:1 onto the action.* token families in tokens.json. */
-  variant?: "primary" | "brand" | "soft" | "quiet" | "chat" | "ghost";
+  variant?: "primary" | "brand" | "soft" | "chat" | "ghost" | "outline";
   /** Height + padding + type token. */
   size?: "sm" | "md" | "lg";
   /** Renders <a> when href is present, <button> otherwise. Never both. */

@@ -1,5 +1,3 @@
-"use client";
-
 /*
  * WhyAzzaLanding - Figma 570:434, the landing page's "Why Azza?" section.
  *
@@ -9,9 +7,11 @@
  * reasons). This directory owns 570:434 and nothing else. Nothing in it
  * generalises over the other three.
  *
- * CLIENT. components.md S3: this file holds "which feature row is expanded".
- * That is the only state in the section, so the directive sits here and
- * FeatureList is client-bundle by import.
+ * CLIENT. This file used to carry `"use client"` because it held "which feature
+ * row is expanded". That state moved into `FeatureCycle` along with the cycle it
+ * belongs to, so this is a server component again: it renders one client island
+ * (`FeatureCycle`) and one already-client primitive (`Reveal`), and nothing else
+ * in the section reaches the browser bundle.
  *
  * GEOMETRY (layout.md S4 / S7.5 - 570:434 has no auto-layout at all):
  *   heading      570:435  661 x 108  @ (120, 131)
@@ -24,17 +24,14 @@
  * are expressed as ratios of the container so `lg` scales rather than overflows.
  */
 
-import { useState } from "react";
-
 import { PhoneMockup, Reveal, Section } from "@/components/ui";
 
-import { DEFAULT_FEATURE_ID, FEATURES, FeatureList } from "./FeatureList";
+import { FeatureCycle } from "./FeatureCycle";
+import { DEFAULT_FEATURE_ID, FEATURES } from "./FeatureList";
 
 const HEADING_ID = "why-azza-landing-heading";
 
 export function WhyAzzaLanding() {
-  const [activeId, setActiveId] = useState<string>(DEFAULT_FEATURE_ID);
-
   return (
     <Section
       id="why-azza"
@@ -68,22 +65,37 @@ export function WhyAzzaLanding() {
          */}
         <Reveal index={1} className="relative w-full lg:w-[52.33%]">
           {/*
-           * The top edge fade, 570:458 - a white-to-transparent mask over the
-           * head of the list. components.md S11 C-5 rules that only this plate is
-           * built; its mirrored twin 570:459 is NOT built (see `findings`).
-           * responsive.md S7.2.2: the plates are desktop-composition scaffolding
-           * and drop below lg.
+           * The edge fades, 570:458 and its mirrored twin 570:459.
+           *
+           * components.md S11 C-5 ruled that only the top plate be built, on the
+           * grounds that the list was static and nothing crossed the bottom edge.
+           * The cycle changes that: rows now travel up and out of the top and in
+           * from the bottom, so BOTH edges have traffic and both need to dissolve
+           * it. Building only one would leave every incoming row popping into
+           * existence against a hard bottom line.
+           *
+           * They also do the second job the cycle depends on - masking the one
+           * discontinuity in the whole mechanism. The tripled track renormalises
+           * by shifting a whole copy's height, and although that shift lands on a
+           * pixel-identical picture, the rows nearest the edges are the ones with
+           * least margin for error. Under 274px and 262px of fade they are all
+           * but gone.
+           *
+           * `z-10` puts them over the rows but under the marker (`z-20`... the
+           * marker is z-10 inside the viewport, which is a separate stacking
+           * context, so it stays above these). responsive.md S7.2.2: the plates
+           * are desktop-composition scaffolding and drop below `lg`.
            */}
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-x-0 top-0 z-10 hidden h-[274px] bg-linear-to-b from-gradient-fade-from to-gradient-fade-to lg:block"
           />
-
-          <FeatureList
-            features={FEATURES}
-            activeId={activeId}
-            onActiveChange={setActiveId}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-0 z-10 hidden h-[262px] bg-linear-to-t from-gradient-fade-from to-gradient-fade-to lg:block"
           />
+
+          <FeatureCycle features={FEATURES} initialId={DEFAULT_FEATURE_ID} />
         </Reveal>
 
         {/*

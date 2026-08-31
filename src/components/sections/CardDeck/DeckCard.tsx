@@ -122,8 +122,26 @@ export interface DeckCardProps {
   onPromote?: (index: number) => void;
   /** Fan only. Focus target after a promotion. */
   panelRef?: (node: HTMLDivElement | null) => void;
-  /** Flow only. The carousel observes the item to track the active card. */
+  /**
+   * A ref to the card's own root <li>.
+   *
+   * The carousel uses it to observe the item and track the active card. `DeckFold`
+   * uses it to drive the fold: that mechanic positions the cards itself, writing
+   * `transform`, `height`, `left`, `width` and `z-index` straight to this element
+   * every frame, so it needs the root rather than the panel `panelRef` returns.
+   */
   itemRef?: (node: HTMLLIElement | null) => void;
+  /**
+   * Suppress the card's own phone.
+   *
+   * The fan gives every card a phone, because in the fan only one card's interior
+   * is ever visible. The fold shows all three at once and scrolls them past a
+   * SINGLE phone that belongs to the stage - owo's behaviour, where the mockup
+   * holds still and the cards travel behind it. Three phones travelling with
+   * their cards is the one thing that cannot survive that change, so the fold
+   * turns them off and paints its own.
+   */
+  hidePhone?: boolean;
   /** Fan only. `will-change` is applied only while the deck is on screen and
    *  removed on exit - components.md S10.8. */
   animating?: boolean;
@@ -141,6 +159,7 @@ export function DeckCard({
   onPromote,
   panelRef,
   itemRef,
+  hidePhone = false,
   animating = false,
   className,
   ...rest
@@ -281,6 +300,7 @@ export function DeckCard({
 
   return (
     <li
+      ref={itemRef}
       className={cn("pointer-events-none absolute inset-0", className)}
       style={{ zIndex: DEPTH_Z[Math.min(depth, DEPTH_Z.length - 1)] }}
     >
@@ -350,20 +370,22 @@ export function DeckCard({
           {textBlock}
         </div>
 
-        <div
-          className={cn("pointer-events-auto absolute", interiorClass)}
-          style={{
-            left: `${PHONE_LEFT}%`,
-            top: `${PHONE_TOP}%`,
-            width: `${PHONE_WIDTH}%`,
-          }}
-        >
-          <PhoneMockup
-            screen="whatsapp-transfer"
-            width={PHONE_INTRINSIC}
-            screenAlt={DECK_SCREEN_ALT}
-          />
-        </div>
+        {hidePhone ? null : (
+          <div
+            className={cn("pointer-events-auto absolute", interiorClass)}
+            style={{
+              left: `${PHONE_LEFT}%`,
+              top: `${PHONE_TOP}%`,
+              width: `${PHONE_WIDTH}%`,
+            }}
+          >
+            <PhoneMockup
+              screen="whatsapp-transfer"
+              width={PHONE_INTRINSIC}
+              screenAlt={DECK_SCREEN_ALT}
+            />
+          </div>
+        )}
       </div>
     </li>
   );

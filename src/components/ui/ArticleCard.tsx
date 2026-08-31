@@ -3,6 +3,7 @@ import type { StaticImageData } from "next/image";
 import { cn } from "@/lib/cn";
 
 import { Card } from "./Card";
+import { Icon } from "./Icon";
 import { Media, type MediaProps } from "./Media";
 import { Pill } from "./Pill";
 import { StretchedLink } from "./StretchedLink";
@@ -35,8 +36,9 @@ export interface BlogPost {
 export interface ArticleCardProps {
   post: BlogPost;
   /**
-   * "featured" -> 32px title (text-2xl-feature), banner ratio 10/3, full width.
-   * "grid"     -> 24px title (text-lg-card),     image ratio 9/7, 360 in a 3-up.
+   * "featured" -> banner ratio 10/3, 32px title, meta row with the "Read
+   *               Article" affordance (802:853, the /blog masthead's card).
+   * "grid"     -> image ratio 9/7, 24px title, 360 in a 3-up (802:643).
    */
   variant?: "featured" | "grid";
   priority?: boolean;
@@ -49,7 +51,7 @@ export interface ArticleCardProps {
 }
 
 /*
- * "May 4, 2026" - 500:2221 / 352:3595, en-US month-first. It was en-GB, which
+ * "May 4, 2026" - 802:649 / 802:843, en-US month-first. It was en-GB, which
  * renders "4 May 2026": a different string from the one the design authors.
  * The locale is pinned rather than left to the runtime so the server and the
  * client cannot disagree about it.
@@ -82,17 +84,92 @@ function cropAnchor(image: StaticImageData): NonNullable<MediaProps["position"]>
   return image.height > image.width ? "top" : "center";
 }
 
+/*
+ * THE GRID TITLE'S HOVER UNDERLINE - operator request, 2026-08-23, modelled on
+ * awwwards.com/blog (`.link-underlined`, read off the live site): a 2px rule
+ * that SWEEPS IN under the text from the left when the card is hovered, and
+ * sweeps back out when the pointer leaves.
+ *
+ * HOW THE SWEEP WORKS. The rule is a background gradient on the title link,
+ * drawn at 220% of the text's width and only 2px tall, pinned to the bottom.
+ * Its left 45% is ink, its right 45% is transparent, and the 10% between them
+ * is the feathered leading edge. At rest it sits at `background-position-x:
+ * 100%`, so only the transparent half is under the text and nothing shows; on
+ * hover it slides to 0% and the ink half - soft edge first - travels across.
+ * That is the awwwards construction exactly, with one change: their resting
+ * half is the ink at 30% alpha (a permanent faint underline); ours is
+ * transparent, because 802:648 draws no underline at rest. Swap `to-transparent`
+ * for `to-fg-subtle/30` to get theirs. The ink is `fg.subtle`, the date
+ * line's colour, rather than the title's - the rule reads as part of the
+ * card's meta, not as heavier title decoration.
+ *
+ * `box-decoration-clone` matters: these titles wrap to two lines in a 360
+ * column, and without it the gradient would be laid out once across the
+ * unbroken inline and sliced per line - a different fragment of the sweep on
+ * each line. Cloned, every line carries its own complete rule and they sweep
+ * together. `pb-[0.06em]` drops the rule a hair below the descender line so
+ * it clears the glyphs - a tiny amount, because with `clone` the padding
+ * repeats on each line and the leading is only 1.3.
+ *
+ * The whole card is the hover target, not just the glyphs: the link's
+ * stretched `::after` covers the card, and a pseudo-element hit counts as a
+ * hover of its originating element. Awwwards only triggers on the text
+ * itself, but their card is not one link; ours is.
+ *
+ * THE TIMING IS AWWWARDS' OWN - `0.3s` on the CSS `ease-out` KEYWORD
+ * (cubic-bezier(0, 0, 0.58, 1)) - and NOT the house `--motion-base` /
+ * `--ease-out` pair. Measured with the tokens first: the house curve is so
+ * front-loaded that the rule was 88% of the way across at 60ms, and the
+ * sweep read as "appear", not travel. The travel IS the interaction - a line
+ * you can watch cross the title - so the authored curve wins here, for the
+ * same reason theme.css lets Figma's `easeInOut` keyword beat the token on
+ * the hero ornaments. Same curve both ways, as on awwwards: leaving retracts
+ * the rule along the path it came in on. Position-only: there is still no
+ * lift, no shadow and no title tint on these cards (operator, 2026-08-22).
+ */
+const TITLE_SWEEP = cn(
+  // `fg.subtle` - the same ink as the card's date line (802:649), not the
+  // title's own (operator request, 2026-08-23). `to-fg-subtle/30` is the
+  // awwwards resting-line variant.
+  "bg-linear-to-r from-fg-subtle from-45% to-transparent to-55%",
+  "bg-size-[220%_2px] bg-position-[100%_100%] bg-no-repeat box-decoration-clone pb-[0.06em]",
+  "transition-[background-position] duration-300 ease-[cubic-bezier(0,0,0.58,1)]",
+  "hoverable:bg-position-[0%_100%]",
+);
+
 /**
- * The blog card.
+ * The blog card - 802:643 (grid) / 802:853 (featured), the 2026-08 operator
+ * revision of 500:2215 / 352:3588.
+ *
+ * WHAT THE REVISION CHANGED. Both variants now read image -> title -> meta ->
+ * chip, where the original put the chip first: the category chip moved to the
+ * card's FOOT on grid cards (802:645 is the last child, 24px below the date)
+ * and into a meta ROW on the featured card (chip + date on the left, the
+ * "Read Article" pill on the right - 802:849). Chips are outlined
+ * `surface.page` now, not brand-subtle fills (see Pill.tsx). The featured
+ * title tracks -4% (`text-2xl-feature`), and the featured meta line dropped to
+ * 16px (`text-sm-meta`) while grid dates stay 20 (`text-md`).
  *
  * It lives in `ui/` rather than in the BlogIndex directory precisely so that
  * the article route never imports from another section agent's tree.
  *
- * The whole card is one link: `Card interactive` provides the positioning
- * context and the lift, and the title's `StretchedLink` covers it. The
+ * The whole card is one link: the card box is the positioning context and the
+ * title's `StretchedLink` covers it. The card deliberately does NOT take
+ * `Card interactive` - the operator removed the blog cards' hover treatment
+ * (2026-08-22): no lift, no shadow, no title colour shift. The one hover
+ * signal since added is the grid title's underline sweep (`TITLE_SWEEP`,
+ * 2026-08-23), which paints nothing but a 2px rule. `relative` is
+ * supplied directly, because the stretched link still needs the positioned
+ * ancestor that `interactive` used to bring along. Keyboard focus keeps the
+ * global 2px `:focus-visible` ring on the link itself, which never depended
+ * on the lift. The
  * accessible name is the title - the image alt repeats the headline baked into
- * the bitmap, which is different copy, and the date is inside the same link
- * only because it sits under the ::after, not because it is announced.
+ * the bitmap, which is different copy, and everything else sits inside the
+ * same link only because it sits under the ::after, not because it is
+ * announced. That includes the featured card's "Read Article" pill: it is a
+ * `<span>`, a painted affordance for the link that already covers it, never a
+ * second control - a nested interactive element inside a stretched link is
+ * unreachable in the wrong order or announced twice, depending on the AT.
  */
 export function ArticleCard({
   post,
@@ -110,8 +187,7 @@ export function ArticleCard({
       surface="page"
       radius="3xl"
       bordered={false}
-      interactive
-      className={cn("flex h-full flex-col gap-4", className)}
+      className={cn("relative flex h-full flex-col gap-6", className)}
     >
       <Media
         src={post.image}
@@ -124,46 +200,74 @@ export function ArticleCard({
         priority={priority}
         sizes={
           featured
-            ? "(max-width:1279px) 100vw, 1160px"
+            ? "(max-width:1439px) 100vw, 1280px"
             : "(max-width:767px) 100vw, (max-width:1023px) 50vw, 360px"
         }
         radius="3xl"
       />
 
-      <div className="flex flex-col gap-4">
-        {/*
-         * The featured card sits on the `surface.brand-subtle` hero panel and
-         * paints no fill of its own, so a `brand-subtle` chip on it is exactly
-         * invisible. The design draws the two chips differently for that
-         * reason: 500:1838 (featured) is `surface.page`, 500:2217 (grid) is
-         * `surface.brand-subtle`.
-         */}
-        <Pill variant="tag" tone={featured ? "page" : "brand-subtle"}>
-          {post.category}
-        </Pill>
+      {featured ? (
+        <div className="flex flex-col gap-4">
+          {/* 802:839 - 1160 inside the 1280 column, left-aligned. */}
+          <h3 className="text-2xl-feature max-w-[1160px]">
+            <StretchedLink href={`/blog/${post.slug}`}>{post.title}</StretchedLink>
+          </h3>
 
-        <h3 className={featured ? "text-2xl-feature" : "text-lg-card"}>
-          <StretchedLink href={`/blog/${post.slug}`}>
-            {post.title}
-          </StretchedLink>
-        </h3>
+          {/* 802:849 - chip + date left, the Read Article affordance right. */}
+          <div className="flex w-full flex-wrap items-center justify-between gap-4">
+            <span className="flex items-center gap-4">
+              <Pill variant="tag-md">{post.category}</Pill>
+              <span className="text-sm-meta text-fg-subtle">
+                <time dateTime={post.date}>
+                  {published.toLocaleDateString("en-US", DATE_FORMAT)}
+                </time>
+                {post.readingTime ? <> · {post.readingTime}</> : null}
+              </span>
+            </span>
 
-        {post.standfirst ? (
-          <p className="text-sm-body text-fg-body-strong">{post.standfirst}</p>
-        ) : null}
+            {/*
+             * 802:848 - 180 wide, pl 12 / pr 24, arrow leading the label. The
+             * asymmetric padding is authored: with the fixed width it seats
+             * the icon 24px in from the left edge, exactly where the frame
+             * draws it.
+             */}
+            <span
+              aria-hidden="true"
+              className={cn(
+                "rounded-pill flex w-45 items-center justify-center gap-2 py-2 pr-6 pl-3",
+                "border-line-cta bg-surface-page border",
+                "text-sm-meta text-fg-body",
+              )}
+            >
+              <Icon name="arrow-right" size="md" />
+              Read Article
+            </span>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="flex flex-col gap-4">
+            <h3 className="text-lg-card">
+              <StretchedLink href={`/blog/${post.slug}`} className={TITLE_SWEEP}>
+                {post.title}
+              </StretchedLink>
+            </h3>
 
-        {/*
-         * 500:2221 / 352:3595 - 20px Medium at -0.03em, `fg.subtle`.
-         * It shipped at 14px `fg.muted`, which is two type steps and a shade
-         * away from the authored meta line.
-         */}
-        <p className="text-md text-fg-subtle">
-          <time dateTime={post.date}>
-            {published.toLocaleDateString("en-US", DATE_FORMAT)}
-          </time>
-          {post.readingTime ? <> · {post.readingTime}</> : null}
-        </p>
-      </div>
+            {post.standfirst ? (
+              <p className="text-sm-body text-fg-body-strong">{post.standfirst}</p>
+            ) : null}
+
+            {/* 802:649 - 20px Medium at -0.03em, `fg.subtle`. */}
+            <p className="text-md text-fg-subtle">
+              <time dateTime={post.date}>{published.toLocaleDateString("en-US", DATE_FORMAT)}</time>
+              {post.readingTime ? <> · {post.readingTime}</> : null}
+            </p>
+          </div>
+
+          {/* 802:645 - the chip closes the card, 24px under the meta line. */}
+          <Pill variant="tag">{post.category}</Pill>
+        </>
+      )}
     </Card>
   );
 }

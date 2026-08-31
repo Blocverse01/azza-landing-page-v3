@@ -13,6 +13,16 @@ export const metadata: Metadata = {
 };
 
 /**
+ * Re-render at most every 5 minutes - the same window `/products/crypto-wallet`
+ * carries, and for the same reason: the hero's converter now renders the
+ * server-resolved rate table, and without this Next would prerender this page
+ * once and serve that HTML forever, freezing the rates at build time. An admin
+ * change lands sooner than the window - `PUT /api/rates` revalidates this path
+ * explicitly.
+ */
+export const revalidate = 300;
+
+/**
  * `/products/cross-border-payments` - Figma `412:1829`.
  *
  * Three sections in the frame's own order: the hero with the exchange widget

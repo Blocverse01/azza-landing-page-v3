@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 
-import { AzzaWrapped } from "@/components/sections/AzzaWrapped";
 import { CardDeck } from "@/components/sections/CardDeck";
 import { Faq } from "@/components/sections/Faq";
 import { HeroLanding } from "@/components/sections/HeroLanding";
@@ -22,12 +21,17 @@ export const metadata: Metadata = {
 };
 
 /**
- * `/` - Figma `412:759` "Main Landing Page", seven sections between the nav and
+ * `/` - Figma `412:759` "Main Landing Page", six sections between the nav and
  * the footer.
  *
  * The order below is the frame's own draw order, read off the node tree by y:
  * Hero 121 · Why Azza? 971 · Cards 1939 · What People Say 2838 · FAQs 3609 ·
- * Azza Wrapped 4570 · use Azza Today 5493. It matches components.md S1.
+ * use Azza Today 5493. It matches components.md S1 minus one: Azza Wrapped
+ * (`412:1154`, at y 4570 between the FAQs and the closing section) was REMOVED
+ * on the operator's instruction (2026-08-23) - the section, its
+ * `components/sections/AzzaWrapped` folder and its two client modules are
+ * gone. Its illustration assets stay in `design-system/assets`, which is the
+ * design's exported set, not the site's; nothing imports them now.
  *
  * There is no wrapper element and no padding here. Every section owns its own
  * `Section` rhythm and full-bleed background, and sections abut at 0px
@@ -45,7 +49,6 @@ export default function HomePage() {
       <CardDeck />
       <Testimonials />
       <Faq items={FAQ_LANDING} />
-      <AzzaWrapped />
       <UseAzzaToday />
     </>
   );

@@ -3,8 +3,13 @@ import type { BlogPost } from "@/content/blog";
 import { ShareRow } from "./ShareRow";
 
 /*
- * THE ARTICLE HEADER - 352:3684, an 842-wide column at `V, gap 28`
- * (layout.md S4.8): title 352:3685, standfirst 352:3686, meta row 352:3687.
+ * THE ARTICLE HEADER - 352:3684, an 842-wide column at `V, gap 32`: title
+ * 352:3685, standfirst 352:3686, meta row 352:3687.
+ *
+ * THE 2026-08 REVISION OF 282:803 (re-read 2026-08-23): the column gap went
+ * 28 -> 32, the meta row's pitch tightened 20 -> 16 with 6px separator discs
+ * where layout.md S4.8 had recorded 12, and the share cluster is a new set of
+ * four 24px glyphs at a 12px gap (809:299 … 809:306 - see ShareRow).
  *
  * WHAT COMES FROM THE POST AND WHAT COMES FROM THE FIGMA NODE.
  * `BlogPost` (content/blog.ts S7.1) carries `title`, `date`, `standfirst?` and
@@ -45,16 +50,16 @@ export interface ArticleHeaderProps {
   titleId: string;
 }
 
-/** 352:3690 / 352:3692 - the 12px separator discs, decorative. */
+/** 352:3690 / 352:3692 - the 6px separator discs, decorative. */
 function MetaDot() {
-  return <span aria-hidden="true" className="rounded-pill bg-line-divider size-3 shrink-0" />;
+  return <span aria-hidden="true" className="rounded-pill bg-line-divider size-1.5 shrink-0" />;
 }
 
 export function ArticleHeader({ post, titleId }: ArticleHeaderProps) {
   const published = new Date(post.date);
 
   return (
-    <header className="flex w-full max-w-(--container-prose) flex-col gap-7">
+    <header className="flex w-full max-w-(--container-prose) flex-col gap-8">
       {/* 352:3685 - text-3xl, the article <h1> (typography.md S4.1). */}
       <h1 id={titleId} className="text-fg-body text-3xl">
         {post.title}
@@ -70,20 +75,20 @@ export function ArticleHeader({ post, titleId }: ArticleHeaderProps) {
        */}
       <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-4">
         {/*
-         * 352:3688 - H, gap 20.
+         * 352:3688 - H, gap 16.
          *
          * Each label is grouped with the dot that FOLLOWS it, not the one
-         * before it. The pitch is identical either way - 20 inside the group,
-         * 20 from the outer gap - but when the row wraps at `< lg` a trailing
+         * before it. The pitch is identical either way - 16 inside the group,
+         * 16 from the outer gap - but when the row wraps at `< lg` a trailing
          * dot ends the line instead of a leading dot orphaning at the start of
          * the next one.
          */}
-        <div className="text-md text-fg-subtle flex flex-wrap items-center gap-x-5 gap-y-2">
-          <span className="flex items-center gap-5">
+        <div className="text-md text-fg-subtle flex flex-wrap items-center gap-x-4 gap-y-2">
+          <span className="flex items-center gap-4">
             {BYLINE}
             <MetaDot />
           </span>
-          <span className="flex items-center gap-5">
+          <span className="flex items-center gap-4">
             <time dateTime={post.date}>{published.toLocaleDateString("en-US", DATE_FORMAT)}</time>
             <MetaDot />
           </span>

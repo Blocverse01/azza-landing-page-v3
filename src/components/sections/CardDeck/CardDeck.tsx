@@ -7,6 +7,7 @@ import { scrollBehavior, useReducedMotion } from "@/lib/motion";
 
 import { DeckCard } from "./DeckCard";
 import { DeckCarousel } from "./DeckCarousel";
+import { DeckFold } from "./DeckFold";
 import { DECK_RECORDS } from "./deck-content";
 
 /**
@@ -337,9 +338,25 @@ export function CardDeck() {
       <div className="w-full">
         <noscript dangerouslySetInnerHTML={{ __html: NO_JS_STYLE }} />
 
+        {/*
+         * THE FOLD DECK REPLACES THE FAN AT `xl`+ (operator, 2026-08-05).
+         *
+         * `DeckFold` owns owo.app's mechanic - folded fan, unfold, scroll
+         * through the column - and supersedes the index-promotion fan below it.
+         * The fan tree is kept for `lg` (1024-1279), where responsive.md gives a
+         * fan but no scroll track and so there is no progress to drive a fold
+         * from, and the carousel keeps everything under it. Two mechanics, each
+         * where its input exists.
+         */}
+        <DeckFold className="hidden motion-safe:xl:block" />
+
         {/* The scroll track. Height only where the fan is pinned - at `lg` and
          *  under reduced motion this is a plain wrapper of auto height. */}
-        <div ref={trackRef} data-deck-track="" className="motion-safe:xl:h-[280vh]">
+        <div
+          ref={trackRef}
+          data-deck-track=""
+          className="motion-safe:xl:hidden"
+        >
           {/*
            * The sticky stage. `max-w` on the fan, not `max-h`, is what keeps
            * the 13:7 stage inside a short viewport: capping the height would
