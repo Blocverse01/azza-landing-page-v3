@@ -13,10 +13,20 @@ import { LegalText } from "./LegalText";
  * top-level clause from a nested one and neither can the rail. Here the ramp is
  * explicit and drawn from the existing scale -
  *
- *   page title   text-2xl        32/500
- *   section      text-lg         24/500
- *   subsection   text-md-semibold 20/600
+ *   page title   text-2xl         32/500
+ *   section      text-base        18/500
+ *   subsection   text-base-quote  18/600
  *   body         text-base-answer 18/1.44/400
+ *
+ * SECTION AND SUBSECTION WERE PULLED DOWN TO THE BODY SIZE on operator request
+ * (2026-09-01), each keeping its weight. Worth saying plainly: below the title
+ * the hierarchy is now carried by WEIGHT ALONE - 600 over 500 over 400 at one
+ * size - which is the same flattening the note above criticises on
+ * interfere.com. The difference is that it is a deliberate choice here rather
+ * than an oversight, and the clause numbers (1.0 / 4.1) carry the structure the
+ * type no longer does. `base-quote` is the subsection step because it is the
+ * only 18px size authored at 600; its name is the FAQ role it was cut for, not
+ * a constraint on where it may be used.
  *
  * - so every step is a real change of size, not of weight alone.
  *
@@ -81,7 +91,7 @@ function Blocks({ blocks, depth = 0 }: { blocks: readonly LegalBlock[]; depth?: 
         // occur in either document.
         return (
           <section key={i} className="flex flex-col gap-3">
-            <h3 className="text-md-semibold text-fg-body flex gap-2">
+            <h3 className="text-base-quote text-fg-body flex gap-2">
               {block.number ? (
                 <span className="text-fg-ghost shrink-0 tabular-nums">{block.number}</span>
               ) : null}
@@ -104,7 +114,7 @@ export function LegalBody({ sections }: LegalBodyProps) {
     <div className={cn(BODY_STEP, "flex flex-col gap-14")}>
       {sections.map((section) => (
         <section key={section.id} id={section.id} className="flex scroll-mt-4 flex-col gap-5">
-          <h2 className="text-fg-body group flex items-baseline gap-3 text-lg">
+          <h2 className="text-fg-body group flex items-baseline gap-3 text-base">
             <span className="text-fg-ghost shrink-0 tabular-nums">{section.number}</span>
             <span className="min-w-0">{section.heading}</span>
 

@@ -26,7 +26,7 @@ import { LegalTocMobile } from "./LegalTocMobile";
  *   standfirst   text-lg-standfirst -> text-md         24 -> 20
  *   date         text-sm-meta    -> text-xs           16 -> 14
  *   section      text-xl-h2      -> text-lg           28 -> 24
- *   subsection   text-lg-h3      -> text-md-semibold  24 -> 20
+ *   subsection   text-lg-h3      -> text-base-quote   24 -> 18
  *   body         text-md-prose   -> text-base-answer  20 -> 18
  *   rail         text-sm-body    -> text-xs           16 -> 14
  *
@@ -58,15 +58,16 @@ export function LegalPage({ document: doc, titleId }: LegalPageProps) {
   return (
     <Section rhythm="flush" container="wide" align="start" gap={0} aria-labelledby={titleId}>
       {/*
-       * `rhythm="flush"` plus an explicit padding-block, rather than
+       * `rhythm="flush"` plus an explicit padding-TOP, rather than
        * `rhythm="standard"`. The operator asked for the copy to start higher
-       * once the eyebrow came off, and the top and bottom now want different
-       * values - the bottom keeps the standard 56/64/72/80 ramp, the top runs
-       * at roughly half. `SectionRhythm` has no asymmetric member and inventing
-       * one for a single consumer would widen a shared contract; passing
-       * `standard` and overriding `pt-*` from here is worse still, since `cn`
-       * joins without merging and `py-20` + `pt-12` would both survive into the
-       * class attribute with the cascade picking the winner.
+       * once the eyebrow came off, so the top runs at roughly half the standard
+       * ramp; the bottom is not set here at all, because theme.css's
+       * `#main > :last-child` rule owns the run-out to the footer on every
+       * route. `SectionRhythm` has no top-only member and inventing one for a
+       * single consumer would widen a shared contract; passing `standard` and
+       * overriding from here is worse still, since `cn` joins without merging
+       * and `py-20` + `pt-12` would both survive into the class attribute with
+       * the cascade picking the winner.
        *
        * `--rail` and `--rail-gap` are declared here so the grid below and the
        * masthead's indent read the SAME two numbers. The masthead is aligned to
@@ -79,7 +80,14 @@ export function LegalPage({ document: doc, titleId }: LegalPageProps) {
         className={cn(
           "[--rail-gap:4rem] [--rail:18rem]",
           "flex w-full flex-col gap-10 lg:gap-12",
-          "xs:pb-16 pt-8 pb-14 sm:pt-10 sm:pb-18 md:pt-12 md:pb-20",
+          /*
+           * TOP ONLY. The run-out to the footer is owned site-wide by
+           * theme.css's `#main > :last-child` rule (160px), and this <Section>
+           * IS that last child on both routes - so a bottom padding here would
+           * stack on top of it and give the legal pages 240 where every other
+           * route gets 160.
+           */
+          "pt-8 sm:pt-10 md:pt-12",
         )}
       >
         {/*

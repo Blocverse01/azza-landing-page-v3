@@ -569,6 +569,13 @@
    * this token mirrors the result at `xs`+: 48px CTA + 2x20 = 88. TopNav's
    * `--azza-nav-h` ladder and this value must move together. */
   --height-nav: 88px;
+
+  /*
+   * The gap every route leaves between its last section and the footer
+   * (operator request, 2026-09-01: "at least 160px ... for every other page on
+   * this website"). Applied by the `#main > :last-child` rule below.
+   */
+  --spacing-page-end: 10rem; /* 160 */
   --height-footer: 764px;
 
   /* -------------------------------------------------------------------------
@@ -971,5 +978,41 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/*
+ * THE RUN-OUT MUST OUTRANK THE SECTION'S OWN `py-*`, so it lives in the
+ * UTILITIES layer, not `base`. Tailwind orders `base < components < utilities`,
+ * and every section's rhythm is a utility (`md:py-20`) - a base-layer rule
+ * loses to it on layer order no matter how specific the selector, which is
+ * exactly how this shipped once and changed nothing. Inside `utilities` the
+ * `#main >` id selector wins on specificity instead.
+ */
+@layer utilities {
+  /*
+   * THE RUN-OUT TO THE FOOTER - at least 160px on every route.
+   *
+   * WHY THE LAST SECTION AND NOT `<main>`. Padding on `<main>` would put the
+   * gap OUTSIDE the section that precedes it, and that gap paints the page
+   * white. Four routes end on a section that is not white: the three
+   * `/products/*` pages close on a `surface.faint` (#FAFAFA) FAQ band and `/`
+   * closes on a gradient. Each would have gained a white strip between the band
+   * and the dark footer - a seam that reads as a bug. Growing the section's own
+   * padding instead means the run-out inherits whatever that section is
+   * painted, so the band simply gets taller and the seam never exists.
+   *
+   * This DELIBERATELY OVERRIDES the designed bottom padding of whichever
+   * section happens to be last (layout.md S4.1 puts all vertical rhythm in a
+   * section's own padding-block, and 80 was that value on most routes). It is a
+   * site-wide rhythm change, asked for as one; the top padding of every section
+   * and the bottom padding of every section that is NOT last are untouched.
+   *
+   * `:last-child`, not `:last-of-type`: the last child is a <section> on all
+   * nine routes today, and `last-child` keeps working if a route ever ends on
+   * something else.
+   */
+  #main > :last-child {
+    padding-block-end: var(--spacing-page-end);
   }
 }
