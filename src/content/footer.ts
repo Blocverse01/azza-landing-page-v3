@@ -55,12 +55,16 @@ export interface FooterColumn {
  * widths the design deliberately does not equalise (components.md S7.4).
  *
  * ROUTE TARGETS. design/DECISIONS.md D-002 invents the seven routes from the
- * frame names. Four footer labels have no frame and therefore no route:
+ * frame names. Four footer labels had no frame and therefore no route:
  * Documentation, Media Kit, Privacy Policy and Terms of Use. Each is pointed at
  * the path its label names rather than at a placeholder or at a near-miss route;
  * reversing any of them is a one-line change here and touches no component.
- * All four carry `prefetch: false` so the browser stops requesting a page that
- * does not exist - see `NavLink.prefetch`.
+ *
+ * TWO OF THE FOUR HAVE LANDED. `/privacy-policy` and `/terms-of-use` were built
+ * on 2026-09-01 from operator-supplied documents, at exactly the paths this
+ * table already named, so both dropped `prefetch: false` - the flag exists to
+ * stop the browser requesting a page that does not exist, and these now do.
+ * Documentation and Media Kit still carry it.
  */
 export const FOOTER_COLUMNS: readonly FooterColumn[] = [
   {
@@ -86,8 +90,8 @@ export const FOOTER_COLUMNS: readonly FooterColumn[] = [
     heading: "Company",
     links: [
       { label: "Media Kit", href: "/media-kit", prefetch: false },
-      { label: "Privacy Policy", href: "/privacy-policy", prefetch: false },
-      { label: "Terms of Use", href: "/terms-of-use", prefetch: false },
+      { label: "Privacy Policy", href: "/privacy-policy" },
+      { label: "Terms of Use", href: "/terms-of-use" },
     ],
   },
   {
