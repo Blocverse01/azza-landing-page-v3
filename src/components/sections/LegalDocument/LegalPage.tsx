@@ -13,7 +13,7 @@ import { LegalTocMobile } from "./LegalTocMobile";
  * would be the same file with two strings changed.
  *
  * THE FRAME. A `wide` (1280) container holding a two-column grid at `lg`+ -
- * prose on the left, an 18rem rail on the right, 64px between them. Below `lg`
+ * an 18rem rail on the left, prose on the right, 64px between them. Below `lg`
  * it is one column with the rail collapsed into a disclosure above the copy.
  *
  * The prose column keeps `--container-prose` (842), the site's own reading
@@ -66,7 +66,32 @@ export function LegalPage({ document: doc, titleId }: LegalPageProps) {
 
         <LegalTocMobile sections={doc.sections} label={tocLabel} className="lg:hidden" />
 
-        <div className="grid grid-cols-1 gap-x-16 lg:grid-cols-[minmax(0,1fr)_18rem]">
+        {/*
+         * RAIL LEFT, PROSE RIGHT (operator request, 2026-09-01 - it was drawn
+         * the other way round, following interfere.com).
+         *
+         * The rail is FIRST IN THE DOM as well as first visually. Ordering it
+         * with `lg:order-*` while leaving the prose first in source would put
+         * the tab sequence out of step with the reading order - a keyboard user
+         * would tab from the masthead past the whole document to reach a rail
+         * sitting at the left margin. The cost of source order is that the rail
+         * is 15 (or 20) tab stops ahead of the copy, which is the ordinary cost
+         * of a sidebar and is what its `<nav>` landmark exists to let assistive
+         * tech skip.
+         */}
+        <div className="grid grid-cols-1 gap-x-16 lg:grid-cols-[18rem_minmax(0,1fr)]">
+          {/*
+           * The rail is `sticky` inside a grid item, which only works while
+           * that item is not stretched to the row height - hence `self-start`.
+           * Without it the column is as tall as the document and the rail has
+           * nothing left to travel within, so it silently never sticks.
+           *
+           * `top` clears the sticky bar plus one 24px step of breathing room.
+           */}
+          <aside className="hidden self-start lg:sticky lg:top-[calc(var(--height-nav)+1.5rem)] lg:block">
+            <LegalToc sections={doc.sections} label={tocLabel} />
+          </aside>
+
           {/*
            * `Prose` carries the body ink, the measure and the inline-link
            * treatment; `LegalBody` supplies the structure inside it. Headings
@@ -84,18 +109,6 @@ export function LegalPage({ document: doc, titleId }: LegalPageProps) {
           <Prose step="md-prose" gap={20} tone="prose" as="div">
             <LegalBody sections={doc.sections} />
           </Prose>
-
-          {/*
-           * The rail is `sticky` inside a grid item, which only works while
-           * that item is not stretched to the row height - hence `self-start`.
-           * Without it the column is as tall as the document and the rail has
-           * nothing left to travel within, so it silently never sticks.
-           *
-           * `top` clears the sticky bar plus one 24px step of breathing room.
-           */}
-          <aside className="hidden self-start lg:sticky lg:top-[calc(var(--height-nav)+1.5rem)] lg:block">
-            <LegalToc sections={doc.sections} label={tocLabel} />
-          </aside>
         </div>
       </div>
     </Section>

@@ -246,9 +246,32 @@ export function LegalToc({ sections, label, className }: LegalTocProps) {
                   "flex gap-2 rounded-lg px-2 py-1.5",
                   "text-sm-body no-underline",
                   "transition-[color] duration-(--motion-fast) ease-out",
-                  isLive ? "text-fg-body" : "text-fg-caption-soft",
-                  "hoverable:text-fg-body",
-                  "focus-visible:text-fg-body",
+                  /*
+                   * THREE INKS, THREE MEANINGS. Hover used to resolve to
+                   * `fg-body` - the SAME ink the live rows take - so pointing
+                   * at a row made it indistinguishable from the highlighted
+                   * range, and with the pill spanning two or three rows the
+                   * rail read as four things selected at once. Reported from
+                   * the browser, and reproduced: hovering row 12 painted it
+                   * rgb(53,53,53), byte-identical to live rows 5 and 6.
+                   *
+                   *   rest   fg-caption-soft  #5C5C5CCC
+                   *   hover  fg-caption       #4C4C4C    + underline
+                   *   live   fg-body          #353535    + the pill
+                   *
+                   * Hover now lands BETWEEN rest and live and never reaches the
+                   * live ink, so "where I am reading" and "what I am pointing
+                   * at" can never look the same. The underline carries most of
+                   * the affordance - it is a different KIND of signal from a
+                   * colour step, which is what keeps the two unambiguous
+                   * rather than merely a shade apart. A live row keeps its own
+                   * ink on hover and takes only the underline.
+                   */
+                  isLive ? "text-fg-body" : "text-fg-caption-soft hoverable:text-fg-caption",
+                  "hoverable:underline hoverable:underline-offset-2",
+                  // Focus already draws the global ring, so it needs no ink of
+                  // its own; the underline keeps pointer and keyboard matched.
+                  "focus-visible:underline focus-visible:underline-offset-2",
                 )}
               >
                 {/*
