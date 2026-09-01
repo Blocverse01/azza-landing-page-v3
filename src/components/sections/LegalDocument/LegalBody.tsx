@@ -131,6 +131,22 @@ export function LegalBody({ sections }: LegalBodyProps) {
              * `hoverable:` reveals it on pointer hover; `focus-visible:` brings
              * it back for the keyboard user who actually lands on it.
              *
+             * IT DOES NOT EXIST ON TOUCH. `hidden fine-pointer:inline-flex`, so
+             * the element is only rendered where a hover can reveal it. On a
+             * phone or tablet it was the one hover-dependent control on the
+             * whole site - an audit of every route at 320/390/768/1024 found no
+             * other - and it was the worst kind: invisible, unreachable by
+             * hover, a 20x22 target well under the 44px floor, and still in the
+             * tab order, so a keyboard or switch user on a tablet met fifteen
+             * (or twenty) invisible controls. `display: none` takes it out of
+             * the layout, the tab order and the a11y tree together.
+             *
+             * The affordance is not lost, only moved: every rail row is a real
+             * anchor that writes the same hash, and the rail is present on
+             * touch as the Contents disclosure. That is the "shorten, but keep
+             * the full meaning recoverable" rule - the deep link stays reachable
+             * by the route that actually works with a finger.
+             *
              * THE `!` IS LOAD BEARING. This anchor is a descendant of `Prose`,
              * which styles `[&_a]` with `link.inline` and `underline` - a
              * descendant selector, so it outranks this element's own
@@ -144,7 +160,8 @@ export function LegalBody({ sections }: LegalBodyProps) {
             <a
               href={`#${section.id}`}
               className={cn(
-                "text-fg-ghost! shrink-0 self-center no-underline! opacity-0",
+                "fine-pointer:inline-flex hidden shrink-0 self-center",
+                "text-fg-ghost! no-underline! opacity-0",
                 "transition-[opacity,color] duration-(--motion-fast) ease-out",
                 "fine-pointer:group-hover:opacity-100",
                 "focus-visible:opacity-100",

@@ -78,7 +78,30 @@ export function LegalPage({ document: doc, titleId }: LegalPageProps) {
        */}
       <div
         className={cn(
-          "[--rail-gap:4rem] [--rail:18rem]",
+          /*
+           * THE THREE NUMBERS THE WHOLE PAGE READS. Declared once here so the
+           * grid, the masthead's indent and the copy's cap can never drift
+           * apart.
+           *
+           * `--rail` and `--rail-gap` STEP DOWN AT `lg` and only reach their
+           * drawn size at `xl`. That is a content breakpoint, not a device one:
+           * at 1024 the container is 928, and an 18rem rail plus a 4rem gutter
+           * left the copy 576px, which at the 18px step is 58 characters a line
+           * - measured, not estimated. The same measurement across the range
+           * found 82 characters at 900 and 80 at 1280, so the reading measure
+           * lurched 82 -> 58 -> 80 across one breakpoint. Narrowing the rail to
+           * 15rem and the gutter to 3rem at `lg` returns 640px / 67 characters
+           * there, and `xl` has the room for the drawn 18rem again.
+           *
+           * `--measure` is the copy's own cap, 42rem / 672px ~ 70 characters at
+           * 18px. `--container-prose` (842) is NOT used here: it was tuned
+           * against the 20px step this page no longer sets, where it lands near
+           * 80, and at 18px the same 842 runs about 90. The token is site-wide
+           * and narrowing it would fork the measure for `/blog` and `/help`
+           * too, so this page caps itself locally instead.
+           */
+          "[--measure:42rem] [--rail-gap:3rem] [--rail:15rem]",
+          "xl:[--rail-gap:4rem] xl:[--rail:18rem]",
           "flex w-full flex-col gap-10 lg:gap-12",
           /*
            * TOP ONLY. The run-out to the footer is owned site-wide by
@@ -108,7 +131,7 @@ export function LegalPage({ document: doc, titleId }: LegalPageProps) {
              * the container is narrow enough for 352px of indent to matter.
              * Stretch subtracts the margin; `width: 100%` does not.
              */
-            "flex max-w-(--container-prose) flex-col gap-5",
+            "flex max-w-(--measure) flex-col gap-5",
             "lg:ms-[calc(var(--rail)+var(--rail-gap))]",
           )}
         >
@@ -170,8 +193,23 @@ export function LegalPage({ document: doc, titleId }: LegalPageProps) {
            * here: `cn` joins without merging, so `gap-5` and `gap-0` would both
            * survive into the class attribute and the cascade, not the call
            * site, would pick the winner.
+           *
+           * `measure={false}` IS THE SUPPORTED WAY to cap this differently.
+           * `Prose` emits `w-full max-w-(--container-prose)` when its measure
+           * is on, and `cn` joins without merging - so passing a second
+           * `max-w-*` through `className` would leave both in the class
+           * attribute with the cascade picking the winner. The prop turns the
+           * component's own cap off and leaves `w-full`, which `--measure`
+           * then caps cleanly. No `!`, no specificity fight.
            */}
-          <Prose step="md-prose" gap={20} tone="prose" as="div">
+          <Prose
+            step="md-prose"
+            gap={20}
+            tone="prose"
+            as="div"
+            measure={false}
+            className="max-w-(--measure)"
+          >
             <LegalBody sections={doc.sections} />
           </Prose>
         </div>
