@@ -212,7 +212,7 @@ export function LegalToc({ sections, label, className }: LegalTocProps) {
 
   return (
     <nav aria-label={label} className={cn("w-full", className)}>
-      <p className="text-sm-meta text-fg-caption-soft mb-3 px-2">Contents</p>
+      <p className="text-fg-caption-soft mb-3 px-2 text-xs">Contents</p>
 
       <ul className="relative m-0 list-none p-0">
         {/*
@@ -244,7 +244,7 @@ export function LegalToc({ sections, label, className }: LegalTocProps) {
                 aria-current={i === live[0] ? "location" : undefined}
                 className={cn(
                   "flex gap-2 rounded-lg px-2 py-1.5",
-                  "text-sm-body no-underline",
+                  "text-xs no-underline",
                   "transition-[color] duration-(--motion-fast) ease-out",
                   /*
                    * THREE INKS, THREE MEANINGS. Hover used to resolve to

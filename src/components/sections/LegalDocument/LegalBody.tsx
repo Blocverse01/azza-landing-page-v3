@@ -13,10 +13,10 @@ import { LegalText } from "./LegalText";
  * top-level clause from a nested one and neither can the rail. Here the ramp is
  * explicit and drawn from the existing scale -
  *
- *   page title   text-3xl     36/600   (ArticleHeader's own step)
- *   section      text-xl-h2   28/500
- *   subsection   text-lg-h3   24/600
- *   body         text-md-prose 20/1.6/400
+ *   page title   text-2xl        32/500
+ *   section      text-lg         24/500
+ *   subsection   text-md-semibold 20/600
+ *   body         text-base-answer 18/1.44/400
  *
  * - so every step is a real change of size, not of weight alone.
  *
@@ -29,6 +29,22 @@ import { LegalText } from "./LegalText";
 
 /** Paragraph and list rhythm, one step of the 4px scale apart. */
 const BLOCK_GAP = "flex flex-col gap-6";
+
+/*
+ * THE BODY STEP, set here rather than through `Prose`.
+ *
+ * `Prose`'s `step` is a two-member union (`md-prose` | `2xl-prose`) and the
+ * ui barrel's contract is explicit: do not widen a union. 18px prose is not in
+ * it, so the step is re-declared on this subtree instead - which is a plain
+ * inheritance override on a DIFFERENT element, not a class fighting `Prose`'s
+ * own `text-md-prose` on the same one, so `cn`'s no-merge rule is not in play.
+ * `Prose` still owns what it is good for here: the ink, the measure and the
+ * inline-link treatment.
+ *
+ * `base-answer` is the only 18px step authored at Regular 400 with a reading
+ * line-height (1.44), which is what a prose step has to be.
+ */
+const BODY_STEP = "text-base-answer";
 
 function Blocks({ blocks, depth = 0 }: { blocks: readonly LegalBlock[]; depth?: number }) {
   return (
@@ -65,7 +81,7 @@ function Blocks({ blocks, depth = 0 }: { blocks: readonly LegalBlock[]; depth?: 
         // occur in either document.
         return (
           <section key={i} className="flex flex-col gap-3">
-            <h3 className="text-lg-h3 text-fg-body flex gap-2">
+            <h3 className="text-md-semibold text-fg-body flex gap-2">
               {block.number ? (
                 <span className="text-fg-ghost shrink-0 tabular-nums">{block.number}</span>
               ) : null}
@@ -85,10 +101,10 @@ export interface LegalBodyProps {
 
 export function LegalBody({ sections }: LegalBodyProps) {
   return (
-    <div className="flex flex-col gap-16">
+    <div className={cn(BODY_STEP, "flex flex-col gap-14")}>
       {sections.map((section) => (
         <section key={section.id} id={section.id} className="flex scroll-mt-4 flex-col gap-5">
-          <h2 className="text-xl-h2 text-fg-body group flex items-baseline gap-3">
+          <h2 className="text-fg-body group flex items-baseline gap-3 text-lg">
             <span className="text-fg-ghost shrink-0 tabular-nums">{section.number}</span>
             <span className="min-w-0">{section.heading}</span>
 

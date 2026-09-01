@@ -40,7 +40,7 @@ export function LegalTocMobile({ sections, label, className }: LegalTocMobilePro
             {...triggerProps}
             onClick={toggle}
             className={cn(
-              "text-md text-fg-body flex w-full cursor-pointer items-center justify-between",
+              "text-fg-body flex w-full cursor-pointer items-center justify-between text-base",
               "gap-4 rounded-xl px-5 py-4 text-left",
               "transition-colors duration-(--motion-fast) ease-out",
               "hoverable:bg-surface-faint",
@@ -83,7 +83,7 @@ export function LegalTocMobile({ sections, label, className }: LegalTocMobilePro
                       href={`#${section.id}`}
                       onClick={() => toggle()}
                       className={cn(
-                        "text-sm-body text-fg-caption flex gap-3 rounded-lg px-3 py-2 no-underline",
+                        "text-fg-caption flex gap-3 rounded-lg px-3 py-2 text-xs no-underline",
                         "transition-colors duration-(--motion-fast) ease-out",
                         "hoverable:bg-surface-faint hoverable:text-fg-body",
                         "focus-visible:text-fg-body",
