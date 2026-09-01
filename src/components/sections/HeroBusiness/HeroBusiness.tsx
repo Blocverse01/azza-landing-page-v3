@@ -1,4 +1,3 @@
-import { QrBadge } from "@/components/sections/QrBadge";
 import { Container, DisplayHeading, Pill, Section } from "@/components/ui";
 
 import { BusinessHeroArt } from "./BusinessHeroArt";
@@ -24,12 +23,6 @@ import { BusinessHeroArt } from "./BusinessHeroArt";
  * the card is purely content-sized. A hard `min-height` would clip the headline
  * the moment a substitute font measures differently, and fonts are not loaded
  * until wave 2D.
- *
- * The QR badge is a SIBLING of <Section>, not a child of it: components.md S6
- * places it at `right: 82px; top: 488px` relative to the hero's positioning
- * context, which is the full 1440 hero box. Inside <Section> it would resolve
- * against the 1280 container instead and land 80px out. It self-hides below
- * `lg`.
  */
 
 const HEADING_ID = "hero-business-heading";
@@ -49,62 +42,58 @@ const HEADLINE_O_SWAPS = [6, 13, 19] as const;
 
 export function HeroBusiness() {
   return (
-    <div className="relative">
-      <Section
-        rhythm="standard"
-        container="wide"
-        gap={0}
-        background="bg-surface-page"
-        clip
-        aria-labelledby={HEADING_ID}
+    <Section
+      rhythm="standard"
+      container="wide"
+      gap={0}
+      background="bg-surface-page"
+      clip
+      aria-labelledby={HEADING_ID}
+    >
+      <div
+        data-node-id="412:2437"
+        className="bg-surface-accent-lime relative isolate grid w-full grid-cols-1 overflow-clip rounded-3xl"
       >
+        {/*
+         * The aspect keeper. `grid-cols-1` and `self-start` are both load
+         * bearing: without them this element is stretched to the row height,
+         * which makes its height definite, which transfers back through
+         * `aspect-ratio` into a MIN-WIDTH of height x 1280/609 and sizes the
+         * auto column 25% too wide. Every absolutely-positioned decoration
+         * then resolves its percentages against that wrong width. Caught in a
+         * browser; it typechecks, builds and lints clean either way.
+         */}
         <div
-          data-node-id="412:2437"
-          className="bg-surface-accent-lime relative isolate grid w-full grid-cols-1 overflow-clip rounded-3xl"
-        >
-          {/*
-           * The aspect keeper. `grid-cols-1` and `self-start` are both load
-           * bearing: without them this element is stretched to the row height,
-           * which makes its height definite, which transfers back through
-           * `aspect-ratio` into a MIN-WIDTH of height x 1280/609 and sizes the
-           * auto column 25% too wide. Every absolutely-positioned decoration
-           * then resolves its percentages against that wrong width. Caught in a
-           * browser; it typechecks, builds and lints clean either way.
-           */}
-          <div
-            aria-hidden="true"
-            className="col-start-1 row-start-1 hidden w-full self-start lg:block lg:aspect-[1280/609]"
-          />
+          aria-hidden="true"
+          className="col-start-1 row-start-1 hidden w-full self-start lg:block lg:aspect-[1280/609]"
+        />
 
-          <BusinessHeroArt className="z-0 col-start-1 row-start-1" />
+        <BusinessHeroArt className="z-0 col-start-1 row-start-1" />
 
-          <div className="relative z-10 col-start-1 row-start-1 flex flex-col items-center justify-center py-13">
-            <Container width={718} className="flex flex-col items-center gap-10 text-center">
-              <Pill variant="eyebrow">AZZA BUSINESS</Pill>
+        <div className="relative z-10 col-start-1 row-start-1 flex flex-col items-center justify-center py-13">
+          <Container width={718} className="flex flex-col items-center gap-10 text-center">
+            <Pill variant="eyebrow">AZZA BUSINESS</Pill>
 
-              <div className="flex w-full flex-col items-center gap-4">
-                <DisplayHeading
-                  as="h1"
-                  id={HEADING_ID}
-                  step="display-2"
-                  swapIndices={HEADLINE_O_SWAPS}
-                  swapWeight="light"
-                  className="text-fg-display"
-                >
-                  {HEADLINE}
-                </DisplayHeading>
+            <div className="flex w-full flex-col items-center gap-4">
+              <DisplayHeading
+                as="h1"
+                id={HEADING_ID}
+                step="display-2"
+                swapIndices={HEADLINE_O_SWAPS}
+                swapWeight="light"
+                className="text-fg-display"
+              >
+                {HEADLINE}
+              </DisplayHeading>
 
-                <p className="text-md-auto text-fg-body-muted max-w-lg">
-                  Receive payments, move money across borders, and access USD with ease.
-                </p>
-              </div>
-            </Container>
-          </div>
+              <p className="text-md-auto text-fg-body-muted max-w-lg">
+                Receive payments, move money across borders, and access USD with ease.
+              </p>
+            </div>
+          </Container>
         </div>
-      </Section>
-
-      <QrBadge />
-    </div>
+      </div>
+    </Section>
   );
 }
 
