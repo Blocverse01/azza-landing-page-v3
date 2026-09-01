@@ -647,6 +647,161 @@
     }
   }
 
+  /* =======================================================================
+   * THE MOBILE DESIGN SYSTEM
+   * =======================================================================
+   *
+   * A mobile-sized equivalent of the three token families - type, colour and
+   * spacing - expressed the only way this codebase expresses a responsive
+   * value: STEPPED TOKENS REDEFINED IN A MEDIA QUERY, never a fluid function.
+   * It is the `--gutter` ladder above generalised, and it obeys the same rule
+   * responsive.md S3.3 sets for everything else - nothing scales continuously.
+   *
+   * WHY IT WORKS AT ALL, mechanically. Tailwind emits every text utility as
+   * `font-size: var(--text-lg)`, not as a literal, and both token files declare
+   * their values through `@theme`, which compiles into the `theme` layer. These
+   * redefinitions sit in `@layer base`, which the cascade resolves AFTER
+   * `theme`. So a component keeps its authored class - `text-md-prose`,
+   * `text-fg-caption-soft` - and simply resolves to the mobile value below the
+   * breakpoint. Not one call site changes, and there is no `sm:` variant to
+   * forget on the next component someone writes.
+   *
+   * LINE HEIGHT AND TRACKING ARE NOT REDECLARED, deliberately. Every
+   * `--text-*--line-height` in this file is a UNITLESS ratio and every
+   * `--letter-spacing` is in `em`, so both follow the font-size down on their
+   * own. Restating them would be 40 more declarations that can only drift.
+   *
+   * TWO TIERS, on breakpoints this file already owns:
+   *
+   *   phone    < 40rem (640)          type + colour + spacing
+   *   tablet   40rem - 64rem (1024)   colour + spacing; type stays as drawn
+   *
+   * Tablet keeps the desktop type on measured evidence, not assumption: the
+   * legal body runs 68 characters a line at 768 and 56 at 600, so the ramp only
+   * needs to give way below `sm`.
+   * ---------------------------------------------------------------------- */
+
+  @media (width < 40rem) {
+    :root {
+      /* --- TYPE -----------------------------------------------------------
+       * The sans text ramp only, and only its rungs below 32px. Everything
+       * from 32px up is already `clamp()`ed (S11 C-1) and reaches its own
+       * mobile size without help; the accent, display and brand ramps are
+       * left alone because they are drawn artwork, not reading type.
+       *
+       *   18 -> 16    16 is the floor: iOS Safari zooms a focused control
+       *   20 -> 18    below it, and it is the smallest comfortable body size
+       *   24 -> 20
+       *   28 -> 24
+       *
+       * 12 / 14 / 16 do NOT move. They are already at the floor, and this is
+       * where components.md S11 C-8's "no 17px rung" is honoured - the ramp
+       * compresses onto existing rungs rather than inventing half-steps.
+       *
+       * Measured before the change: body prose rendered at 20px and 24px on a
+       * 390px viewport, identical to 1440, because "everything below 32px
+       * holds its design value at every breakpoint". That rule is right for
+       * Figma fidelity on desktop and is what this tier deliberately relaxes.
+       */
+      --text-base: 1rem; /* 18 -> 16 */
+      --text-base-bold: 1rem;
+      --text-base-tab: 1rem;
+      --text-base-answer: 1rem;
+      --text-base-quote: 1rem;
+
+      --text-md: 1.125rem; /* 20 -> 18 */
+      --text-md-semibold: 1.125rem;
+      --text-md-link: 1.125rem;
+      --text-md-prose: 1.125rem;
+      --text-md-feature: 1.125rem;
+      --text-md-hero: 1.125rem;
+      --text-md-card: 1.125rem;
+      --text-md-auto: 1.125rem;
+
+      --text-lg: 1.25rem; /* 24 -> 20 */
+      --text-lg-card: 1.25rem;
+      --text-lg-standfirst: 1.25rem;
+      --text-lg-standfirst-light: 1.25rem;
+      --text-lg-h3: 1.25rem;
+      --text-lg-caption: 1.25rem;
+
+      --text-xl: 1.5rem; /* 28 -> 24 */
+      --text-xl-h2: 1.5rem;
+    }
+  }
+
+  @media (width < 64rem) {
+    :root {
+      /* --- COLOUR ---------------------------------------------------------
+       * Four inks that do not clear WCAG AA for body text on `surface.page`.
+       * Measured against #FFFFFF, alpha composited:
+       *
+       *   fg.body-muted     rgba(53,53,53,.6)   3.65   AA needs 4.5
+       *   fg.caption-soft   rgba(92,92,92,.8)   4.14
+       *   fg.muted          #838383             3.79
+       *   fg.placeholder    #787878             4.42
+       *
+       * All four pass the 3.0 LARGE-text floor, which is why they are sound on
+       * desktop where they mostly carry 20px and up. On a phone the type ramp
+       * above puts several of them onto 16px, where the body threshold is the
+       * one that applies - so the mobile tier trades a shade of contrast-ratio
+       * headroom for legibility, and the two failures that are alpha are also
+       * the two that stop compositing unpredictably over a tinted surface.
+       *
+       * EVERY REPLACEMENT IS AN EXISTING PALETTE RUNG, one or two steps down
+       * the same neutral ramp - nothing here invents a colour:
+       *
+       *   #5C5C5C  neutral.600   6.42
+       *   #747474  neutral.550   4.67
+       *
+       * `fg.disabled` is left alone at 1.88: disabled controls are exempt from
+       * the contrast minimum, and darkening it would make disabled read as
+       * enabled, which is a worse failure than the one it fixes.
+       *
+       * THE SAME FOUR TOKENS FAIL ON DESKTOP. Fixing them there is a visual
+       * change to every route and belongs to whoever owns the palette, so it
+       * is reported rather than taken here.
+       */
+      --color-fg-body-muted: #5c5c5c;
+      --color-fg-caption-soft: #5c5c5c;
+      --color-fg-muted: #747474;
+      --color-fg-placeholder: #747474;
+
+      /* --- SPACING --------------------------------------------------------
+       * `--spacing-page-end` is the run-out from the last section to the
+       * footer. At 240px it is 28% of a 390x844 phone screen - a third of a
+       * scroll of nothing - measured, not guessed. 96 on a phone and 160 on a
+       * tablet keep the same gesture at a size the screen can afford.
+       *
+       * The SECTION RHYTHM is not in this tier, and that is a finding rather
+       * than an omission: `Section` ladders its own padding through utility
+       * variants (`py-14 xs:py-16 sm:py-18 md:py-20`), so it already lands on
+       * 56 at a phone and only reaches the drawn 80 at `md`. It needs no
+       * mobile value. The `--spacing-section*` tokens below it are laddered
+       * here anyway so that a token and the utility it names cannot disagree -
+       * they currently publish the 1440 value at every width, which is wrong
+       * for anything that reads them, and nothing outside this file does yet.
+       */
+      --spacing-page-end: 10rem; /* 240 -> 160, tablet */
+      --spacing-section: 4.5rem; /*  80 -> 72 */
+      --spacing-section-spotlight: 4.5rem; /* 100 -> 72 */
+      --spacing-section-final: 4.5rem; /* 120 -> 72 */
+      --spacing-section-header: 2.5rem; /*  48 -> 40 */
+      --spacing-gutter: 2rem; /*  40 -> 32 */
+    }
+  }
+
+  @media (width < 40rem) {
+    :root {
+      --spacing-page-end: 6rem; /* 240 -> 96, phone */
+      --spacing-section: 3.5rem; /*  80 -> 56 */
+      --spacing-section-spotlight: 3.5rem; /* 100 -> 56 */
+      --spacing-section-final: 3.5rem; /* 120 -> 56 */
+      --spacing-section-header: 2rem; /*  48 -> 32 */
+      --spacing-gutter: 1.5rem; /*  40 -> 24 */
+    }
+  }
+
   /*
    * The nav-height ladder - the bar's REAL box height, hairline included.
    *
