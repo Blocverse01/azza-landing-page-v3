@@ -571,11 +571,16 @@
   --height-nav: 88px;
 
   /*
-   * The gap every route leaves between its last section and the footer
-   * (operator request, 2026-09-01: "at least 160px ... for every other page on
-   * this website"). Applied by the `#main > :last-child` rule below.
+   * The gap every route leaves between its last section and the footer.
+   *
+   * Asked for as "at least 160px" (operator, 2026-09-01) and shipped at exactly
+   * that; measured back at 160 to the pixel from the last line of copy to the
+   * top of the footer, and the operator still read it as cramped. Raised to 240
+   * on their call - the request was a floor, not a target, and 160 turned out to
+   * be the wrong number for a page this wide rather than a number applied
+   * wrongly. Applied by the `#main > :last-child` rule below.
    */
-  --spacing-page-end: 10rem; /* 160 */
+  --spacing-page-end: 15rem; /* 240 */
   --height-footer: 764px;
 
   /* -------------------------------------------------------------------------
