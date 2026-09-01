@@ -673,6 +673,35 @@
      * motion preference. components.md S10.8. */
     scroll-padding-top: var(--height-nav);
     -webkit-text-size-adjust: 100%;
+
+    /*
+     * NO ELASTIC OVERSCROLL AT THE DOCUMENT EDGES (operator report,
+     * 2026-09-01: "whitespace at the bottom ... when I continue trying to
+     * scroll after reaching the absolute bottom").
+     *
+     * The document itself is sound - measured at the foot of /terms-of-use,
+     * `scrollHeight` equals the footer's own bottom exactly and no element
+     * extends past it. What the reader was seeing is the rubber-band: scroll
+     * past the end and the browser paints the CANVAS, whose colour propagates
+     * from <body> because <html> has no background of its own. `body` is
+     * `surface.page` (white) and the footer is `surface.inverse` (near-black),
+     * so the bounce opened a white band under a dark footer on every route -
+     * the footer is site-wide, so this was never specific to the legal pages.
+     *
+     * `none`, not `contain`. `contain` only stops scroll CHAINING to an
+     * ancestor and leaves the bounce in place, which is the half that does not
+     * help here. `none` suppresses the overscroll effect itself at both ends.
+     *
+     * THE COST, stated: this also disables pull-to-refresh in Chrome on
+     * Android. On a marketing site with no live feed that is a fair trade for
+     * an edge that never flashes the wrong colour; reverse it here if the
+     * gesture is ever wanted back.
+     *
+     * Painting <html> with the footer's ink was the alternative and is worse:
+     * one canvas colour serves BOTH edges, so matching the footer at the foot
+     * would put a near-black band above the white nav at the top.
+     */
+    overscroll-behavior-y: none;
   }
 
   @media (prefers-reduced-motion: no-preference) {
