@@ -727,6 +727,52 @@
 
       --text-xl: 1.5rem; /* 28 -> 24 */
       --text-xl-h2: 1.5rem;
+
+      /* --- DISPLAY --------------------------------------------------------
+       * THE ONE PLACE THIS TIER MAKES TYPE BIGGER, NOT SMALLER (operator
+       * report, 2026-09-02: "the hero header text is too small on mobile").
+       *
+       * The display ramp is `clamp()`ed and its lower bound IS its drawn 320px
+       * value, so the mobile end is a designed number rather than a fallback.
+       * The trouble is upstream of the clamp: the 2026-08-04 request to scale
+       * the ramp to 75% multiplied EVERY term, so the 320 anchors came down a
+       * quarter along with the 1440 maxima. That left `display-hero` at 30px
+       * at 320 and 36 at 390 - the LOWEST anchor in the whole ramp, on the
+       * headline that carries the largest desktop size on the site. Measured
+       * across the five heroes at 390: hero 36, wallet 38, cross-border 42,
+       * business 42, blog masthead 48. The most important headline was the
+       * smallest one.
+       *
+       * WHAT THIS RESTORES: the drawn mobile anchor, i.e. each 320 value back
+       * to what it was before the 75% (v / 0.75), with the desktop end left
+       * exactly as it is. Each curve is re-solved to pass through the ORIGINAL
+       * value at 640, which is where this tier ends, so the two meet at the
+       * boundary and nothing jumps - verified term by term, e.g. masthead
+       * 78.9px on both sides of 40rem.
+       *
+       *   at 390   hero 36->44   business 42->52   masthead 48->59
+       *
+       * `display-6` and `display-7` are deliberately absent: their curves are
+       * flat enough that the restored 320 value (42.7) would exceed their own
+       * 640 value (41.1 / 38.9), so the ramp would run backwards through the
+       * breakpoint. Neither carries a hero.
+       */
+      /*
+       * `display-masthead` IS DELIBERATELY NOT RESTORED. It was already the
+       * largest headline on a phone - 48px at 390 against the hero's 36 - so
+       * it was never part of what was reported. Raising it to 59 broke
+       * "CATCH THE LATEST WITH AZZA" onto a second line as a lone orphaned
+       * "AZZA", which is worse than the size it fixed. It keeps the drawn
+       * curve and its one-line fit at 390.
+       */
+      --text-display-hero: clamp(2.5rem, 1.4643rem + 5.1786vw, 3.5357rem);
+      --text-display-1: clamp(3.1667rem, 2.1369rem + 5.1487vw, 4.1964rem);
+      --text-display-2: clamp(3rem, 1.9643rem + 5.1786vw, 4.0357rem);
+      --text-display-3: clamp(3rem, 2.1071rem + 4.4644vw, 3.8928rem);
+      --text-display-3-bold: clamp(3rem, 2.1071rem + 4.4644vw, 3.8928rem);
+      --text-display-4: clamp(2.8333rem, 2.3631rem + 2.3513vw, 3.3036rem);
+      --text-display-4-tight: clamp(2.8333rem, 2.3631rem + 2.3513vw, 3.3036rem);
+      --text-display-5: clamp(2.8334rem, 2.4346rem + 1.994vw, 3.2322rem);
     }
   }
 
