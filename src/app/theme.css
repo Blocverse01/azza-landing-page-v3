@@ -1171,35 +1171,55 @@
 /* ---------------------------------------------------------------------------
  * CTA COINS CHOREOGRAPHY - the `412:1234` cluster's landing sequence.
  *
- * Operator-authored motion (2026-09-04), performed by `CtaCoins.tsx`, which
- * carries the layer structure and the trigger; this block carries the entire
- * timeline. One 4000ms clock, five performers, and every move reads off it as
- * percentages - the hero ornament float's idiom, for the float's reason: the
- * choreography is relative timing BETWEEN elements, and expressing it as five
- * animation-delays would let a mid-flight class change desynchronise them.
- * 4000ms sits at the top of the operator's asked-for 3-4s.
+ * Operator-authored motion (2026-09-04, "cinematic in moderation" revision
+ * same day), performed by `CtaCoins.tsx`, which carries the layer structure
+ * and the trigger; this block carries the entire timeline. One 4000ms clock,
+ * five performers, every move read off it as percentages - the hero ornament
+ * float's idiom, for the float's reason: the choreography is relative timing
+ * BETWEEN elements, and five animation-delays would let a mid-flight class
+ * change desynchronise them.
  *
- * THE SCRIPT (percent of 4000ms - each hop is 600ms, gaps ~0.9s):
+ * THE SCRIPT (ms of 4000 - flights are arcs, landings have weight):
  *
- *     0.0 - 15.0   Kenya descends onto the bottom-right pad, covering it
- *    22.5 - 37.5   Nigeria crosses and lands ON the Kenya coin
- *    45.0 - 60.0   AZZA slides left onto its own pad
- *    65.0 - 80.0   the two-coin stack tucks in beneath AZZA and is gone
- *    85.0 - 100    AZZA rides back to centre, stage empty behind it
+ *      0 -  800   Kenya lifts, arcs down onto the bottom-right pad, sinks
+ *                 5 units into the landing and recovers
+ *    880 - 1640   Nigeria arcs across and seats itself on the Kenya coin -
+ *                 which DIPS under the impact and comes back (1460-1700)
+ *   1780 - 2640   AZZA glides onto its own pad, lower and flatter - it is
+ *                 the heavy one, and it is not being thrown
+ *   2600 - 3140   the two-coin stack tucks in beneath AZZA and is gone
+ *   3140 - 3400   the swallow: AZZA rises 8 and settles back down
+ *   3520 - 4000   AZZA arcs home, bobs 3 past the hover and comes to rest
  *
- * Each pad fades in the beat after it is covered or abandoned; the stack's
- * own fade (74->80) happens while it is sliding under the AZZA coin, so what
- * the eye reads is absorption, not disappearance.
+ * Each pad fades the beat after the choreography retires it.
  *
- * THE NUMBERS ARE DERIVED, NOT TUNED. All in viewBox user units, computed
- * from the transform matrices in the source export (face centre = matrix
- * applied to circle centre; wall depth = wall path bottom minus face bottom,
- * 63 units on the single-band coins):
+ * WHAT MAKES A FLIGHT AN ARC. Three stops, two curves: `--ease-out` from
+ * lift-off to an apex placed at the flight's midpoint plus a few units of
+ * lift and a whisper of scale (the coin comes toward the camera), then
+ * `--ease-in` from apex to touchdown. That ease-in is gravity, not a UI
+ * entrance - the token's "every exit / close" reading does not apply to a
+ * falling object, and the impact it builds is absorbed by the overshoot:
+ * every flight lands a few units PAST its mark and recovers, which is what
+ * gives the coins weight instead of glide. The lift and scale shrink with
+ * the performer - Kenya 14/1.03, Nigeria 14/1.03 (the longest throw), AZZA
+ * 10/1.015 out and 8/1.01 home - so drama scales with distance and mass.
+ * Both flag coins' arcs pass partly behind the AZZA coin mid-flight; that
+ * eclipse is staging (paint order already puts AZZA in front for the tuck)
+ * and the lifts are set shallow so it never swallows the apex.
  *
- *   landings   face centre -> pad centre - 15y. The 15 lift makes face + wall
- *              cover the pad's whole ellipse (the pads' projection is 97.3
- *              units tall to the faces' 89.8, so dead-centre would leave a
- *              7.5-unit crescent of pad above the coin).
+ * SCALE NEEDS `transform-box: fill-box`: without it an SVG group scales
+ * about the viewBox origin and the coin flies off its arc. Set with the
+ * animation, origin at the group's own centre.
+ *
+ * THE NUMBERS ARE STILL DERIVED, NOT TUNED (viewBox user units, from the
+ * export's matrices - face centre = matrix applied to circle centre; wall
+ * depth = wall path bottom minus face bottom, 63 on the single-band coins):
+ *
+ *   landings   face centre -> pad centre - 15y. The 15 lift makes face +
+ *              wall cover the pad's whole ellipse (pads project 97.3 units
+ *              tall to the faces' 89.8; dead-centre would leave a 7.5-unit
+ *              crescent above the coin). The 5-unit landing overshoot spends
+ *              2.5 of that margin for a beat, never all of it.
  *   stacking   Nigeria's face lands 50y above Kenya's - one wall-depth (63)
  *              minus 13 of sink. Exact wall-depth was tried first and left a
  *              crescent of Kenya's face showing at the waistline, where a
@@ -1215,19 +1235,24 @@
  *              mid-slide (caught frame-by-frame, headless), where opaque
  *              coins simply slide behind AZZA.
  *
- * Timing: `--ease-in-out` on every hop - two-way position changes, the exact
- * case the token names - declared per-segment on the keyframe each hop starts
- * from; `--ease-in` on every fade, all of which are exits. `linear` on the
- * animation itself so only those per-segment curves speak. `both` holds the
- * emptied stage while the section stays in view; the trigger attribute is
- * dropped only once the art has fully left the viewport, which resets the
- * stage for the next entrance.
+ * Timing tokens only: `--ease-out` rising and recovering, `--ease-in`
+ * falling, `--ease-in-out` for the tuck (a carried move, not a throw) and
+ * every fade's start frame; `linear` on the animation itself so only the
+ * per-segment curves speak. `both` holds the emptied stage while the section
+ * stays in view; the trigger attribute drops only once the art has fully
+ * left the viewport, which resets the stage for the next entrance.
  *
  * REDUCED MOTION: the whole block is gated on `no-preference` (hero float
  * precedent) - Tier 1, decorative. The attribute then styles nothing and the
  * art simply holds the drawn composition. No-JS never sets the attribute.
  * ------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: no-preference) {
+  [data-cta-coins="play"] .cta-coin-kenya,
+  [data-cta-coins="play"] .cta-coin-ngn,
+  [data-cta-coins="play"] .cta-coin-azza {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
   [data-cta-coins="play"] .cta-coin-kenya {
     animation: cta-coins-kenya 4000ms linear both;
   }
@@ -1248,64 +1273,124 @@
   }
 }
 
-/* Kenya: down onto the bottom-right pad, then under AZZA with the stack.
- * (-37.9, 298.3) = pad centre - face centre - 15y; the second stop adds the
- * stack's shared tuck delta (-567.9, -147.1). */
+/* Kenya. Flight 0-620 (apex 310), landing recovery to 800; dips under
+ * Nigeria's impact at 1460-1700; tucked with the stack 2600-3140.
+ * (-37.9, 298.3) = pad centre - face centre - 15y; the tuck stop adds the
+ * stack's shared delta (-567.9, -160.1). */
 @keyframes cta-coins-kenya {
   0% {
     transform: translate(0, 0);
-    animation-timing-function: var(--ease-in-out);
+    animation-timing-function: var(--ease-out);
   }
-  15%,
+  7.75% {
+    /* apex: midpoint, 14 up, a whisper toward the camera */
+    transform: translate(-19px, 135.2px) scale(1.03);
+    animation-timing-function: var(--ease-in);
+  }
+  15.5% {
+    /* touchdown, 5 past the mark */
+    transform: translate(-37.9px, 303.3px);
+    animation-timing-function: var(--ease-out);
+  }
+  20%,
+  36.5% {
+    transform: translate(-37.9px, 298.3px);
+    animation-timing-function: var(--ease-out);
+  }
+  39% {
+    /* Nigeria lands on it: give, then come back */
+    transform: translate(-37.9px, 303.3px);
+    animation-timing-function: var(--ease-out);
+  }
+  42.5%,
   65% {
     transform: translate(-37.9px, 298.3px);
     animation-timing-function: var(--ease-in-out);
   }
-  78% {
+  76.5% {
     opacity: 1;
     animation-timing-function: var(--ease-in);
   }
-  80%,
+  78.5%,
   100% {
     transform: translate(-605.8px, 138.2px);
     opacity: 0;
   }
 }
 
-/* Nigeria: across onto the landed Kenya coin (569.4, -68) - that is pad
- * centre - 15y lift - 50y of seated stacking - then the same shared tuck. */
+/* Nigeria. Flight 880-1460 (apex 1170 - the longest throw gets the biggest
+ * arc), seats itself by 1640; tucked with the stack 2600-3140.
+ * (569.4, -68) = pad centre - 15y lift - 50y of seated stacking. */
 @keyframes cta-coins-ngn {
-  22.5% {
+  22% {
     transform: translate(0, 0);
-    animation-timing-function: var(--ease-in-out);
+    animation-timing-function: var(--ease-out);
   }
-  37.5%,
+  29.25% {
+    /* the arc grazes BEHIND the AZZA coin - kept, it reads as depth, but
+     * shallow enough that the eclipse is a grace note, not a vanishing */
+    transform: translate(284.7px, -48px) scale(1.03);
+    animation-timing-function: var(--ease-in);
+  }
+  36.5% {
+    transform: translate(569.4px, -63px);
+    animation-timing-function: var(--ease-out);
+  }
+  41%,
   65% {
     transform: translate(569.4px, -68px);
     animation-timing-function: var(--ease-in-out);
   }
-  78% {
+  76.5% {
     opacity: 1;
     animation-timing-function: var(--ease-in);
   }
-  80%,
+  78.5%,
   100% {
     transform: translate(1.5px, -228.1px);
     opacity: 0;
   }
 }
 
-/* AZZA: left onto its pad, holds while the stack arrives beneath it, then
- * home. Ends at rest exactly where the design draws it. */
+/* AZZA. Glides low onto its pad 1780-2640 (it is the heavy one); holds while
+ * the stack arrives beneath it; swallows 3140-3400 - an 8-unit rise and a
+ * soft settle - then arcs home 3520-4000 and bobs to rest. */
 @keyframes cta-coins-azza {
-  45% {
+  44.5% {
     transform: translate(0, 0);
+    animation-timing-function: var(--ease-out);
+  }
+  53% {
+    transform: translate(-132.9px, -15px) scale(1.015);
+    animation-timing-function: var(--ease-in);
+  }
+  61.5% {
+    transform: translate(-265.8px, -5.9px);
+    animation-timing-function: var(--ease-out);
+  }
+  66%,
+  78.5% {
+    transform: translate(-265.8px, -9.9px);
+    animation-timing-function: var(--ease-out);
+  }
+  80% {
+    /* the swallow: a quick rise... */
+    transform: translate(-265.8px, -17.9px) scale(1.02);
     animation-timing-function: var(--ease-in-out);
   }
-  60%,
-  85% {
+  85%,
+  88% {
+    /* ...and a soft settle, then a beat of stillness before leaving */
     transform: translate(-265.8px, -9.9px);
-    animation-timing-function: var(--ease-in-out);
+    animation-timing-function: var(--ease-out);
+  }
+  93.5% {
+    transform: translate(-132.9px, -13px) scale(1.01);
+    animation-timing-function: var(--ease-in);
+  }
+  99% {
+    transform: translate(0, 3px);
+    animation-timing-function: var(--ease-out);
   }
   100% {
     transform: translate(0, 0);
@@ -1313,34 +1398,34 @@
 }
 
 /* Each pad fades in the beat after the choreography retires it: bottom-right
- * once Kenya covers it, Nigeria's once its coin has lifted away, top-left
- * once AZZA covers it. Missing 0% stops inherit the resting opacity of 1. */
+ * once Kenya has landed, Nigeria's once its coin has lifted away, top-left
+ * once AZZA has settled. Missing 0% stops inherit the resting opacity of 1. */
 @keyframes cta-coins-pad-br {
-  15% {
+  15.5% {
     opacity: 1;
     animation-timing-function: var(--ease-in);
   }
-  18%,
+  19.5%,
   100% {
     opacity: 0;
   }
 }
 @keyframes cta-coins-pad-ngn {
-  24% {
+  23% {
     opacity: 1;
     animation-timing-function: var(--ease-in);
   }
-  30%,
+  29%,
   100% {
     opacity: 0;
   }
 }
 @keyframes cta-coins-pad-tl {
-  60% {
+  61.5% {
     opacity: 1;
     animation-timing-function: var(--ease-in);
   }
-  63%,
+  65.5%,
   100% {
     opacity: 0;
   }
