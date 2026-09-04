@@ -65,7 +65,7 @@ const FAQ_ANSWER_UNAVAILABLE =
  * and no stylesheet can reach it - which made the collapsed answer permanently
  * unreachable for a reader with scripting disabled. `open` here is React state
  * that, with no script, can never change: `Faq` opens `items[0]` and nothing
- * else ever opens, so 14 of the 19 answers on the four FAQ routes were in the
+ * else ever opens, so 14 of the 18 panels on the four FAQ routes were in the
  * DOM and absent from the accessibility tree, at every width, forever. The
  * `<noscript>` counterpart in `FaqQuestionList` can force `grid-template-rows`
  * and `opacity`; it could not have forced `inert` off.
@@ -127,7 +127,8 @@ export function FaqAnswerPanel({
        * while scripting is on. */
       data-faq-panel=""
       style={{ "--faq-row": row } as CSSProperties}
-      /* Machine-readable marker for the 14 questions the design never answered.
+      /* Machine-readable marker for the questions nobody has answered yet -
+       * seven of the eighteen, once the client FAQ document landed.
        * No visual effect and no visible text - it exists so an audit, or
        * whoever writes the real copy, can find every one of them in the served
        * DOM without reading prose. */
