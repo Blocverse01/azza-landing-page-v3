@@ -7,8 +7,8 @@ export interface FaqAnswerPanelProps {
   open: boolean;
   /** Spread verbatim from `Disclosure` - id, role, aria-labelledby, hidden. */
   panelProps: HTMLAttributes<HTMLDivElement>;
-  /** The authored answer, or `undefined` when the design authors none. */
-  answer?: string;
+  /** The authored answer. Always present - see `FaqItem` in content/faq.ts. */
+  answer: string;
   /**
    * This answer's grid row at `lg`+ - the same line its question sits on,
    * i.e. `index + 2`.
@@ -21,27 +21,6 @@ export interface FaqAnswerPanelProps {
    */
   row: number;
 }
-
-/**
- * Shown to a visitor who opens a question the design never answered.
- *
- * Constraints this line has to satisfy, in order:
- *
- *   1. It is READ BY THE PUBLIC. It says nothing about Figma, the design file,
- *      the backlog or the build. A visitor is not an audience for our process.
- *   2. It makes NO product claim. AZZA is a regulated money product; a sentence
- *      about limits, fees, currencies or compliance written by an implementer
- *      is a liability, not a placeholder.
- *   3. It is short and neutral, so an unanswered row reads as a small gap
- *      rather than as a broken page.
- *
- * It lives here, not in `src/content/faq.ts`, on purpose: the content module
- * carries authored copy only, so there is no build-facing string in the content
- * layer that can be shipped by accident. That is exactly how the previous
- * wording reached four public routes.
- */
-const FAQ_ANSWER_UNAVAILABLE =
-  "We're preparing a detailed answer to this question. Please check back soon.";
 
 /**
  * One answer bubble - `412:1573` and its three siblings.
@@ -65,8 +44,9 @@ const FAQ_ANSWER_UNAVAILABLE =
  * and no stylesheet can reach it - which made the collapsed answer permanently
  * unreachable for a reader with scripting disabled. `open` here is React state
  * that, with no script, can never change: `Faq` opens `items[0]` and nothing
- * else ever opens, so 14 of the 18 panels on the four FAQ routes were in the
- * DOM and absent from the accessibility tree, at every width, forever. The
+ * else ever opens, so on each of the four FAQ routes every panel but the first
+ * was in the DOM and absent from the accessibility tree, at every width,
+ * forever. The
  * `<noscript>` counterpart in `FaqQuestionList` can force `grid-template-rows`
  * and `opacity`; it could not have forced `inert` off.
  *
@@ -115,8 +95,6 @@ export function FaqAnswerPanel({
   answer,
   row,
 }: FaqAnswerPanelProps) {
-  const pending = answer === undefined;
-
   return (
     <div
       {...panelProps}
@@ -127,12 +105,6 @@ export function FaqAnswerPanel({
        * while scripting is on. */
       data-faq-panel=""
       style={{ "--faq-row": row } as CSSProperties}
-      /* Machine-readable marker for the questions nobody has answered yet -
-       * seven of the eighteen, once the client FAQ document landed.
-       * No visual effect and no visible text - it exists so an audit, or
-       * whoever writes the real copy, can find every one of them in the served
-       * DOM without reading prose. */
-      data-answer-pending={pending ? "true" : undefined}
       className={cn(
         "relative grid px-3 sm:px-4",
         // <lg: the accordion height animation. S10.5 - never max-height.
@@ -177,7 +149,7 @@ export function FaqAnswerPanel({
               "text-base-answer text-accordion-answer-fg",
             )}
           >
-            {answer ?? FAQ_ANSWER_UNAVAILABLE}
+            {answer}
           </div>
         </div>
       </div>

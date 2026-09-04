@@ -1,115 +1,72 @@
 /**
  * The four FAQ question sets - design/components.md S7.2.
  *
- * TWO SOURCES, IN THIS ORDER OF AUTHORITY
- * ---------------------------------------
+ * EVERY ROW HERE IS REAL, ANSWERED COPY. THAT IS THE WHOLE RULE.
+ * -------------------------------------------------------------
+ * A question with no authored answer does not belong in this file, does not
+ * get a placeholder, and does not ship. `answer` is REQUIRED, so the compiler
+ * enforces it rather than a convention nobody can see.
+ *
+ * SOURCES, IN ORDER OF AUTHORITY
  *   1. THE CLIENT FAQ DOCUMENT (Google Doc `1rAvFZ4eak…`, received 2026-09-04).
- *      It authors answers for the Cross Border Payments set (all five) and the
- *      Business set (all three), and re-confirms the Crypto Wallet deposit
- *      answer already carried here. Where it speaks, it wins.
- *   2. THE FIGMA NODES, for everything it does not cover - the questions
- *      themselves, and the four answers the design file authored.
+ *      It authors every Cross Border Payments answer and every Business
+ *      answer, and re-confirms the Crypto Wallet deposit answer.
+ *   2. THE FIGMA NODES, for what it does not cover - the question strings, and
+ *      the four answers the design file itself authored.
  *
- * Questions are still transcribed VERBATIM from Figma, including the defects.
- * Two are on the record:
+ * WHAT WAS REMOVED, AND WHY IT IS NOT COMING BACK BY INFERENCE
+ * -----------------------------------------------------------
+ * The design file drew 18 question rows and authored only 4 answers - one per
+ * frame, the row shown open at rest. The client document closed 8 more. The
+ * remaining 7 were "Why should i doo KYC?" (landing + crypto wallet) and
+ * "Supported Local Currency?" (three times on landing - a duplicate row in the
+ * source, responsive.md S14.3 #3 - and twice on crypto wallet). None had an
+ * answer from anyone, so all 7 are deleted here.
  *
- *   - `412:1566`, `412:1568` and `412:1570` are all "Supported Local Currency?"
- *     on the landing FAQ (responsive.md S14.3 #3).
- *   - `412:1565` reads "Why should i doo KYC?" - lowercase `i`, "doo"
- *     (responsive.md S14.3 #4).
+ * They are not to be restored with copy written by an implementer. AZZA is a
+ * regulated money product; a sentence about KYC or supported currencies
+ * invented during the build is a factual claim made by someone with no
+ * authority to make it. The cross-border answer below lists the currencies
+ * AZZA settles in and is tempting to reuse for "Supported Local Currency?" -
+ * it answers a different question. Real copy comes from the client, and lands
+ * here as a new entry with its `answer` filled in.
  *
- * Reproduce them and let the operator decide; do not silently correct copy.
- * The client document does not address either, so both still stand.
+ * The landing set is consequently ONE row. That is not a layout accident:
+ * `FaqQuestionList` sizes its grid from `items.length`, so the card is as tall
+ * as the copy it actually has.
  *
- * WHAT IS STILL UNANSWERED - 7 OF 18 ROWS
- * ---------------------------------------
- * The design file authored one answer per frame (`412:1574`, `412:1779`,
- * `412:2016`, `412:2653`) - the first question of each, the one shown open at
- * rest. The client document closed eight more of those gaps. Seven remain, all
- * of them "Why should i doo KYC?" or "Supported Local Currency?", on the
- * landing and crypto-wallet sets.
- *
- * HOW THAT GAP IS REPRESENTED HERE - BY ABSENCE, NOT BY A PLACEHOLDER STRING.
- * ---------------------------------------------------------------------------
- * `answer` is OPTIONAL. A question nobody has answered yet simply omits it.
- * This file holds authored copy and nothing else: there is no stand-in string
- * to leak, because there is no stand-in string.
- *
- * An earlier revision stored a build-team-facing sentence ("Answer copy
- * pending...") as the answer VALUE, and it was rendered verbatim to visitors on
- * four public routes. Prose written for the build must never live in the
- * content layer - the content layer is, by definition, the thing that ships.
- * What a visitor sees while an answer is unwritten is a PRESENTATION decision
- * and belongs to `FaqAnswerPanel`, which owns the holding copy.
- *
- * DO NOT FILL THE REMAINING SEVEN IN BY INFERENCE. The cross-border answer
- * below lists the currencies AZZA settles in, and it is tempting to reuse it
- * for "Supported Local Currency?" - do not. That is a different question, and
- * answering it is a factual claim on a regulated money product made by someone
- * with no authority to make it. The answers must come from the client.
- *
- * TO FIND ALL SEVEN: grep this file for `NO ANSWER IN SOURCE`, or query the
- * served DOM for `[data-answer-pending="true"]` - `FaqAnswerPanel` stamps that
- * marker on every panel with no authored answer.
+ * The source typo in "Why should i doo KYC?" (`412:1565`) leaves the codebase
+ * with it - not corrected, just no longer present. Should the client answer
+ * that question, transcribe THEIR wording of it; do not reinstate the Figma
+ * string.
  */
 
 export interface FaqItem {
   id: string;
   question: string;
-  /**
-   * The authored answer. OMITTED when neither the client document nor the
-   * design file supplies one - see the file header. `FaqAnswerPanel` renders
-   * neutral holding copy in its place and marks the panel
-   * `data-answer-pending="true"`.
-   */
-  answer?: string;
+  /** Required. See the file header - unanswered questions are not carried. */
+  answer: string;
 }
 
-/** `412:1554` - Main Landing. Rows `412:1562` / `1564` / `1566` / `1568` / `1570`. */
+/** `412:1554` - Main Landing. Row `412:1562`, answer `412:1574`. */
 export const FAQ_LANDING: readonly FaqItem[] = [
   {
     id: "landing-supported-chain",
     // 412:1563
     question: "Supported Chain on Azza?",
-    // 412:1574 - the one authored answer on this frame
+    // 412:1574
     answer:
       "AZZA supports the following blockchains and networks: Optimism, Ethereum, Solana, Binance Smart Chain, Tron, Polygon, Arbitrum, Base, Celo, Lisk and Assetchain.",
-  },
-  {
-    id: "landing-kyc",
-    // 412:1565 - typo is in the source and is reproduced deliberately
-    question: "Why should i doo KYC?",
-    // NO ANSWER IN SOURCE - neither Figma nor the client doc authors one.
-  },
-  {
-    id: "landing-local-currency-1",
-    // 412:1567
-    question: "Supported Local Currency?",
-    // NO ANSWER IN SOURCE - neither Figma nor the client doc authors one.
-  },
-  {
-    id: "landing-local-currency-2",
-    // 412:1569 - duplicate of the row above, in the source
-    question: "Supported Local Currency?",
-    // NO ANSWER IN SOURCE - neither Figma nor the client doc authors one.
-  },
-  {
-    id: "landing-local-currency-3",
-    // 412:1571 - duplicate of the two rows above, in the source
-    question: "Supported Local Currency?",
-    // NO ANSWER IN SOURCE - neither Figma nor the client doc authors one.
   },
 ];
 
 /**
  * `412:1759` - Products, Crypto Wallet.
- * Source order is `412:1771`, `1767`, `1769`, `1773`, `1775` - the layer names
- * are out of sequence in the file but the rendered order is the one below.
  *
  * The client document's Crypto Wallet section reads "Everything crypto faq +
- * this", followed by the deposit answer. The deposit answer was already here;
- * the instruction to carry the whole crypto FAQ is why "Supported Chain on
- * Azza?" below now repeats the landing set's authored answer verbatim - same
+ * this", followed by the deposit answer. The deposit answer was already
+ * carried; the instruction to carry the whole crypto FAQ is why "Supported
+ * Chain on Azza?" repeats the landing set's authored answer verbatim - same
  * question string, same product, one authored answer.
  */
 export const FAQ_CRYPTO_WALLET: readonly FaqItem[] = [
@@ -128,24 +85,6 @@ export const FAQ_CRYPTO_WALLET: readonly FaqItem[] = [
     // Carried from `landing-supported-chain` (412:1574) - identical question.
     answer:
       "AZZA supports the following blockchains and networks: Optimism, Ethereum, Solana, Binance Smart Chain, Tron, Polygon, Arbitrum, Base, Celo, Lisk and Assetchain.",
-  },
-  {
-    id: "crypto-kyc",
-    // 412:1770 - same source typo as the landing set
-    question: "Why should i doo KYC?",
-    // NO ANSWER IN SOURCE - neither Figma nor the client doc authors one.
-  },
-  {
-    id: "crypto-local-currency-1",
-    // 412:1774
-    question: "Supported Local Currency?",
-    // NO ANSWER IN SOURCE - neither Figma nor the client doc authors one.
-  },
-  {
-    id: "crypto-local-currency-2",
-    // 412:1776 - duplicate of the row above, in the source
-    question: "Supported Local Currency?",
-    // NO ANSWER IN SOURCE - neither Figma nor the client doc authors one.
   },
 ];
 
