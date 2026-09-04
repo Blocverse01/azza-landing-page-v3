@@ -1169,6 +1169,184 @@
 }
 
 /* ---------------------------------------------------------------------------
+ * CTA COINS CHOREOGRAPHY - the `412:1234` cluster's landing sequence.
+ *
+ * Operator-authored motion (2026-09-04), performed by `CtaCoins.tsx`, which
+ * carries the layer structure and the trigger; this block carries the entire
+ * timeline. One 4000ms clock, five performers, and every move reads off it as
+ * percentages - the hero ornament float's idiom, for the float's reason: the
+ * choreography is relative timing BETWEEN elements, and expressing it as five
+ * animation-delays would let a mid-flight class change desynchronise them.
+ * 4000ms sits at the top of the operator's asked-for 3-4s.
+ *
+ * THE SCRIPT (percent of 4000ms - each hop is 600ms, gaps ~0.9s):
+ *
+ *     0.0 - 15.0   Kenya descends onto the bottom-right pad, covering it
+ *    22.5 - 37.5   Nigeria crosses and lands ON the Kenya coin
+ *    45.0 - 60.0   AZZA slides left onto its own pad
+ *    65.0 - 80.0   the two-coin stack tucks in beneath AZZA and is gone
+ *    85.0 - 100    AZZA rides back to centre, stage empty behind it
+ *
+ * Each pad fades in the beat after it is covered or abandoned; the stack's
+ * own fade (74->80) happens while it is sliding under the AZZA coin, so what
+ * the eye reads is absorption, not disappearance.
+ *
+ * THE NUMBERS ARE DERIVED, NOT TUNED. All in viewBox user units, computed
+ * from the transform matrices in the source export (face centre = matrix
+ * applied to circle centre; wall depth = wall path bottom minus face bottom,
+ * 63 units on the single-band coins):
+ *
+ *   landings   face centre -> pad centre - 15y. The 15 lift makes face + wall
+ *              cover the pad's whole ellipse (the pads' projection is 97.3
+ *              units tall to the faces' 89.8, so dead-centre would leave a
+ *              7.5-unit crescent of pad above the coin).
+ *   stacking   Nigeria's face lands 50y above Kenya's - one wall-depth (63)
+ *              minus 13 of sink. Exact wall-depth was tried first and left a
+ *              crescent of Kenya's face showing at the waistline, where a
+ *              wall tapers to nothing; seating the coin 13 units into the one
+ *              below is what an actual pile of coins photographs like, and it
+ *              swallows the crescent (verified frame-by-frame, headless).
+ *   the tuck   the stack's face centre ends exactly on AZZA's landed face
+ *              centre. Equal radii and AZZA's 131-unit triple wall mean the
+ *              stack (202.8 units deep) fits entirely inside AZZA's 221-unit
+ *              cover - full occlusion by geometry. The fade is only the final
+ *              80ms: fading any earlier let the eye see THROUGH the
+ *              translucent Nigeria coin into the Kenya flag beneath it
+ *              mid-slide (caught frame-by-frame, headless), where opaque
+ *              coins simply slide behind AZZA.
+ *
+ * Timing: `--ease-in-out` on every hop - two-way position changes, the exact
+ * case the token names - declared per-segment on the keyframe each hop starts
+ * from; `--ease-in` on every fade, all of which are exits. `linear` on the
+ * animation itself so only those per-segment curves speak. `both` holds the
+ * emptied stage while the section stays in view; the trigger attribute is
+ * dropped only once the art has fully left the viewport, which resets the
+ * stage for the next entrance.
+ *
+ * REDUCED MOTION: the whole block is gated on `no-preference` (hero float
+ * precedent) - Tier 1, decorative. The attribute then styles nothing and the
+ * art simply holds the drawn composition. No-JS never sets the attribute.
+ * ------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  [data-cta-coins="play"] .cta-coin-kenya {
+    animation: cta-coins-kenya 4000ms linear both;
+  }
+  [data-cta-coins="play"] .cta-coin-ngn {
+    animation: cta-coins-ngn 4000ms linear both;
+  }
+  [data-cta-coins="play"] .cta-coin-azza {
+    animation: cta-coins-azza 4000ms linear both;
+  }
+  [data-cta-coins="play"] .cta-pad-br {
+    animation: cta-coins-pad-br 4000ms linear both;
+  }
+  [data-cta-coins="play"] .cta-pad-tl {
+    animation: cta-coins-pad-tl 4000ms linear both;
+  }
+  [data-cta-coins="play"] .cta-pad-ngn {
+    animation: cta-coins-pad-ngn 4000ms linear both;
+  }
+}
+
+/* Kenya: down onto the bottom-right pad, then under AZZA with the stack.
+ * (-37.9, 298.3) = pad centre - face centre - 15y; the second stop adds the
+ * stack's shared tuck delta (-567.9, -147.1). */
+@keyframes cta-coins-kenya {
+  0% {
+    transform: translate(0, 0);
+    animation-timing-function: var(--ease-in-out);
+  }
+  15%,
+  65% {
+    transform: translate(-37.9px, 298.3px);
+    animation-timing-function: var(--ease-in-out);
+  }
+  78% {
+    opacity: 1;
+    animation-timing-function: var(--ease-in);
+  }
+  80%,
+  100% {
+    transform: translate(-605.8px, 138.2px);
+    opacity: 0;
+  }
+}
+
+/* Nigeria: across onto the landed Kenya coin (569.4, -68) - that is pad
+ * centre - 15y lift - 50y of seated stacking - then the same shared tuck. */
+@keyframes cta-coins-ngn {
+  22.5% {
+    transform: translate(0, 0);
+    animation-timing-function: var(--ease-in-out);
+  }
+  37.5%,
+  65% {
+    transform: translate(569.4px, -68px);
+    animation-timing-function: var(--ease-in-out);
+  }
+  78% {
+    opacity: 1;
+    animation-timing-function: var(--ease-in);
+  }
+  80%,
+  100% {
+    transform: translate(1.5px, -228.1px);
+    opacity: 0;
+  }
+}
+
+/* AZZA: left onto its pad, holds while the stack arrives beneath it, then
+ * home. Ends at rest exactly where the design draws it. */
+@keyframes cta-coins-azza {
+  45% {
+    transform: translate(0, 0);
+    animation-timing-function: var(--ease-in-out);
+  }
+  60%,
+  85% {
+    transform: translate(-265.8px, -9.9px);
+    animation-timing-function: var(--ease-in-out);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+/* Each pad fades in the beat after the choreography retires it: bottom-right
+ * once Kenya covers it, Nigeria's once its coin has lifted away, top-left
+ * once AZZA covers it. Missing 0% stops inherit the resting opacity of 1. */
+@keyframes cta-coins-pad-br {
+  15% {
+    opacity: 1;
+    animation-timing-function: var(--ease-in);
+  }
+  18%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes cta-coins-pad-ngn {
+  24% {
+    opacity: 1;
+    animation-timing-function: var(--ease-in);
+  }
+  30%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes cta-coins-pad-tl {
+  60% {
+    opacity: 1;
+    animation-timing-function: var(--ease-in);
+  }
+  63%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
  * The global reduced-motion floor - components.md S10.10.
  *
  * Unlayered and `!important` on purpose. This is a floor, NOT a substitute for

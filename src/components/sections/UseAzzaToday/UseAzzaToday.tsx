@@ -1,14 +1,13 @@
-import ctaCoins from "@design-system/assets/illustration/cta-coins-composition.svg";
-
 import {
   Button,
   DisplayHeading,
-  Media,
   Pill,
   Reveal,
   Section,
 } from "@/components/ui";
 import { WHATSAPP_CHAT_URL as WHATSAPP_HREF } from "@/content/navigation";
+
+import { CtaCoins } from "./CtaCoins";
 
 const HEADING_ID = "use-azza-today-heading";
 
@@ -165,44 +164,25 @@ export default function UseAzzaToday() {
        * (170, 467).
        *
        * This slot was reserved and empty (the D-023 pattern) for as long as the
-       * composition had no committed export: fifteen overlapping ellipse and
-       * vector nodes, of which only `brand/wordmark-azza-outline.svg` had been
-       * exported, and that mark is invisible on its own (its paths are filled
-       * surface.brand-faint and need the indigo disc beneath them).
+       * composition had no committed export; then it carried
+       * `illustration/cta-coins-composition.svg`, the whole band flattened into
+       * one file per design-system/assets.md S4.3. It is now `CtaCoins`, the
+       * same fifteen nodes as layered inline SVG, because the operator authored
+       * a landing choreography for the coins (2026-09-04) and a flat file has
+       * nothing to move. `CtaCoins.tsx` records how the S4.3 flattening
+       * arguments were carried over rather than discarded - the blend
+       * isolation in particular - and theme.css ("CTA COINS CHOREOGRAPHY")
+       * carries the timeline. Same viewBox, same 1070/616 ratio, same slot:
+       * zero reflow.
        *
-       * `illustration/cta-coins-composition.svg` is that export, and it is the
-       * whole band flattened into one file. design-system/assets.md S3 explains
-       * why it is flat rather than six positioned pieces: the discs blend
-       * against each other, and `mix-blend-mode` across sibling DOM nodes
-       * resolves to the page backdrop instead. The file carries
-       * `isolation:isolate` on its root group so the page can never leak into
-       * that blend, and it is vector, so it stays crisp at all six stops
-       * (1070x616 at 1440 down to 238x137 at 320) where a raster sized for 1440
-       * would be soft below `lg`.
+       * Decorative throughout, exactly as before: `aria-hidden`, no focusable
+       * child, contributing no accessible name, and it is the section's only
+       * client island. Below the fold on every viewport.
        *
-       * RATIO. `1070/616` is the file's own viewBox and the node's own
-       * 1069.9 x 615.4 - so `object-cover` crops nothing and nothing distorts.
-       * The slot previously reserved 1069/615, a 0.07% difference, so this is a
-       * zero-reflow change.
-       *
-       * Decorative throughout: `alt=""` plus `aria-hidden` on the wrapper, no
-       * focusable child, contributing no accessible name. It is below the fold
-       * on every viewport, so it stays lazy - no `priority`.
-       *
-       * No parallax, at any motion setting (components.md S10.9).
+       * No parallax, at any motion setting (components.md S10.9) - the
+       * choreography is a play-once performance, not scroll-coupled motion.
        */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none mt-4 w-full max-w-[1069px]"
-        data-figma-node="412:1234"
-      >
-        <Media
-          src={ctaCoins}
-          alt=""
-          ratio="1070/616"
-          sizes="(max-width: 1069px) 100vw, 1069px"
-        />
-      </div>
+      <CtaCoins />
     </Section>
   );
 }
