@@ -131,9 +131,46 @@ export function CtaCoins() {
             <path d="M454.793 251.102L489.756 237.904L451.218 246.616L440.465 236.157L489.942 224.972L509.48 243.976L475.778 256.888L514.738 248.081L525.491 258.54L474.33 270.105L454.793 251.102Z" fill="#FAFAFF" />
             <path d="M482.327 197.164L517.29 183.967L478.752 192.679L467.999 182.22L517.476 171.035L537.014 190.038L503.313 202.951L542.272 194.144L553.025 204.602L501.865 216.168L482.327 197.164Z" fill="#FAFAFF" />
             <path d="M434.694 194.243L447.203 212.361L457.3 210.078L434.694 194.243ZM475.033 222.182L470.231 218.721L453.57 222.488L456.353 226.405L430.821 232.234L408.988 195.566L452.996 185.618L500.613 216.399L475.033 222.182Z" fill="#FAFAFF" />
+
+            {/* The glimmer - a soft gloss band that sweeps the face once,
+             * right as the button-press releases at the end of the
+             * choreography. Clipped to the face disc; the rotation wrapper
+             * exists because the sweep is a CSS transform on the rect, and a
+             * CSS transform REPLACES an SVG transform attribute on the same
+             * element - the angle would be lost if both lived on the rect.
+             * Resting opacity is 0 (theme.css, ungated) so it is invisible
+             * whenever the choreography is not running - including reduced
+             * motion and no-JS. */}
+            <g clipPath="url(#cta-azza-face)">
+              <g transform="rotate(-25 496.58 221.1)">
+                <rect
+                  className="cta-azza-glimmer"
+                  x="426.6"
+                  y="11.1"
+                  width="140"
+                  height="420"
+                  fill="url(#cta-glimmer)"
+                />
+              </g>
+            </g>
           </g>
         </g>
         <defs>
+          <clipPath id="cta-azza-face">
+            <circle
+              cx="128.982"
+              cy="128.982"
+              r="128.982"
+              transform="matrix(0.935472 -0.353401 0.8 0.6 272.734 189.293)"
+            />
+          </clipPath>
+          <linearGradient id="cta-glimmer" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stopColor="#FFFFFF" stopOpacity="0" />
+            <stop offset="0.35" stopColor="#FFFFFF" stopOpacity="0.26" />
+            <stop offset="0.5" stopColor="#FFFFFF" stopOpacity="0.45" />
+            <stop offset="0.65" stopColor="#FFFFFF" stopOpacity="0.26" />
+            <stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
+          </linearGradient>
           <pattern
             id="cta-flag-nigeria"
             patternContentUnits="objectBoundingBox"
