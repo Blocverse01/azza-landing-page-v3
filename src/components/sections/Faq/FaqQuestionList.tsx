@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import type { CSSProperties, KeyboardEvent } from "react";
 
 import { Disclosure, DisplayHeading } from "@/components/ui";
@@ -47,6 +48,10 @@ const ROVING_KEYS = new Set(["ArrowDown", "ArrowUp", "Home", "End"]);
  *            open-row fill neutralised - with every answer showing, a single
  *            highlighted row marks a selection that no longer exists. One
  *            declaration also lands the hover fill, which is normal-weight.
+ *   travel   the `lg`+ directional offset zeroed. It positions each closed
+ *            answer 8px off centre on its own side of the open one, which is
+ *            meaningless when every answer is open at once - it would simply
+ *            leave all but one of them sitting 8px out of line.
  *   lg+      each answer re-placed on its own question's row. This is the one
  *            rule that is not a simple revert: at `lg` every panel is
  *            deliberately placed in ONE shared cell in column 2, which is
@@ -75,7 +80,7 @@ const NO_JS_STYLE =
   "[data-faq-trigger]{cursor:default!important;" +
   "background-color:var(--color-accordion-row)!important}" +
   "@media(min-width:64rem){[data-faq-panel]{grid-row:var(--faq-row)!important;" +
-  "margin-top:0!important}}" +
+  "margin-top:0!important;translate:none!important}}" +
   "</style>";
 
 /**
@@ -144,6 +149,23 @@ export function FaqQuestionList({
    * the ARIA accordion pattern. Tab order is untouched: this only moves focus
    * when a trigger already has it, so nothing is trapped and nothing is skipped.
    */
+  /*
+   * The anchor for the directional travel at `lg`+ (see `FaqAnswerPanel`).
+   * Each panel is told whether it sits above, on, or below the open row, and
+   * rests on that side until it is the one selected.
+   *
+   * The ref is what makes Escape behave. Escape closes every row, and with no
+   * open index the anchor would jump to 0 and slide every panel that is ALREADY
+   * FADING OUT sideways on its way. Holding the last open index keeps the
+   * closing frame still, and the next selection travels from where the visitor
+   * last left off. Writing it during render is safe because it is idempotent -
+   * the same render always computes the same value.
+   */
+  const openIndex = items.findIndex((item) => item.id === openId);
+  const lastOpenIndex = useRef(0);
+  if (openIndex !== -1) lastOpenIndex.current = openIndex;
+  const anchor = openIndex === -1 ? lastOpenIndex.current : openIndex;
+
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     const root = event.currentTarget;
 
@@ -267,8 +289,24 @@ export function FaqQuestionList({
                     "border border-accordion-row-border bg-accordion-row",
                     "px-4 py-4 sm:px-6",
                     "text-lg text-accordion-row-fg",
-                    "transition-colors duration-(--motion-fast) ease-out",
-                    "motion-reduce:transition-none",
+                    // Press feedback. The row is the whole interaction and it
+                    // had none: a click changed the panel and the thing you
+                    // actually touched never acknowledged you. 1% is under a
+                    // pixel of travel at the mobile width and ~4px at the
+                    // design width - felt rather than seen, which is the point.
+                    // It matters most on touch, where there is no hover state
+                    // to have confirmed the target beforehand.
+                    //
+                    // Asymmetric on purpose: `--motion-instant` (80ms) going
+                    // down, the standard `--motion-fast` coming back up. Fast
+                    // in, softer out is how a physical button behaves, and
+                    // theme.css names 80ms for "press" specifically.
+                    "transition-[background-color,border-color,translate,scale]",
+                    "duration-(--motion-fast) ease-out",
+                    "active:scale-[0.99] active:duration-(--motion-instant)",
+                    // No transition means the scale would SNAP rather than
+                    // animate, which is a worse press than none at all.
+                    "motion-reduce:transition-none motion-reduce:active:scale-100",
                     "hoverable:bg-accordion-row-hover",
                     // The open row keeps a persistent fill - the design's only
                     // selected-state affordance. There is no chevron on this
@@ -287,6 +325,7 @@ export function FaqQuestionList({
                 /* The same line its question sits on above. Used only by the
                  * no-JS stylesheet; see `row` on FaqAnswerPanelProps. */
                 row={index + 2}
+                position={Math.sign(index - anchor)}
               />
             </>
           )}
