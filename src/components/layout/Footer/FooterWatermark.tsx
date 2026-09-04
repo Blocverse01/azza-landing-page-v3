@@ -34,6 +34,16 @@ export interface FooterWatermarkProps {
  * `overflow-hidden` is also what guarantees no horizontal overflow: the wordmark
  * is `whitespace-nowrap` at a clamped size, and any width it cannot fit is
  * clipped by this box rather than escaping into the page.
+ *
+ * CENTRED, BY OPERATOR RULING (2026-09-04). The first build set the glyphs
+ * flush left, which left a visibly larger gap on the right of the band at
+ * every width; the operator called it and the wordmark now centres in the
+ * band. `text-center` composes with the clipping rather than fighting it:
+ * any width the box cannot fit now clips evenly from BOTH ends instead of
+ * amputating only the trailing "A"s. The glow orb keeps its band-relative
+ * 47.3% - it is a 75px-blurred ambient glow a few percent off band centre,
+ * and re-deriving its offset against the centred glyph run would trade a
+ * font-metrics dependency for a shift the blur makes invisible.
  */
 export function FooterWatermark({ children = "USE AZZA" }: FooterWatermarkProps) {
   return (
@@ -42,7 +52,7 @@ export function FooterWatermark({ children = "USE AZZA" }: FooterWatermarkProps)
       className="relative w-full overflow-hidden select-none"
       style={{ height: "calc(var(--text-accent-watermark) * 162 / 195)" }}
     >
-      <span className="font-accent text-accent-watermark text-fg-ghost absolute inset-x-0 top-0 block whitespace-nowrap">
+      <span className="font-accent text-accent-watermark text-fg-ghost absolute inset-x-0 top-0 block text-center whitespace-nowrap">
         {children}
       </span>
 
