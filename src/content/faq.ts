@@ -13,32 +13,38 @@
  *      answer, and re-confirms the Crypto Wallet deposit answer.
  *   2. THE FIGMA NODES, for what it does not cover - the question strings, and
  *      the four answers the design file itself authored.
+ *   3. THE LIVE SITE, https://www.useazza.com - for the LANDING set only. Its
+ *      five-row FAQ is AZZA's own published copy, questions and answers both,
+ *      and it answers the two the design file only asked.
  *
- * WHAT WAS REMOVED, AND WHY IT IS NOT COMING BACK BY INFERENCE
- * -----------------------------------------------------------
+ * WHAT WAS REMOVED, AND WHY NOTHING HERE IS INFERRED
+ * -------------------------------------------------
  * The design file drew 18 question rows and authored only 4 answers - one per
  * frame, the row shown open at rest. The client document closed 8 more. The
  * remaining 7 were "Why should i doo KYC?" (landing + crypto wallet) and
  * "Supported Local Currency?" (three times on landing - a duplicate row in the
  * source, responsive.md S14.3 #3 - and twice on crypto wallet). None had an
- * answer from anyone, so all 7 are deleted here.
+ * answer from anyone, so all 7 were deleted rather than shown with holding
+ * copy.
  *
- * They are not to be restored with copy written by an implementer. AZZA is a
- * regulated money product; a sentence about KYC or supported currencies
- * invented during the build is a factual claim made by someone with no
- * authority to make it. The cross-border answer below lists the currencies
- * AZZA settles in and is tempting to reuse for "Supported Local Currency?" -
- * it answers a different question. Real copy comes from the client, and lands
- * here as a new entry with its `answer` filled in.
+ * The landing set has since been repopulated from the live site, which answers
+ * both of those questions in AZZA's own words. THE CRYPTO WALLET SET HAS NOT
+ * BEEN, and must not be by copy-paste: the live rows are a general product FAQ
+ * and that page is about the wallet specifically. Its two unanswered questions
+ * stay gone until the client says what belongs there.
  *
- * The landing set is consequently ONE row. That is not a layout accident:
- * `FaqQuestionList` sizes its grid from `items.length`, so the card is as tall
- * as the copy it actually has.
+ * Nothing in this file is written by an implementer. AZZA is a regulated money
+ * product; a sentence about KYC, rates or supported currencies invented during
+ * the build is a factual claim made by someone with no authority to make it.
  *
- * The source typo in "Why should i doo KYC?" (`412:1565`) leaves the codebase
- * with it - not corrected, just no longer present. Should the client answer
- * that question, transcribe THEIR wording of it; do not reinstate the Figma
- * string.
+ * WHOSE WORDING WINS FOR A QUESTION
+ * --------------------------------
+ * The landing rows below carry the LIVE SITE's question strings, not Figma's,
+ * because a question and its answer are one authored pair and splitting them
+ * across two sources invents a third thing. That retires two Figma defects as
+ * a side effect - the triple-duplicated "Supported Local Currency?" row
+ * (`412:1567`/`1569`/`1571`) and the "Why should i doo KYC?" typo (`412:1565`,
+ * responsive.md S14.3 #4) - by replacement, not by correction.
  */
 
 export interface FaqItem {
@@ -48,15 +54,51 @@ export interface FaqItem {
   answer: string;
 }
 
-/** `412:1554` - Main Landing. Row `412:1562`, answer `412:1574`. */
+/**
+ * `412:1554` - Main Landing.
+ *
+ * All five rows are the live site's FAQ (https://www.useazza.com), question
+ * and answer, in its order. The first answer is the one the design file also
+ * authored at `412:1574`, word for word - the two sources agree, which is why
+ * the live question wording is safe to take for the rest.
+ */
 export const FAQ_LANDING: readonly FaqItem[] = [
   {
-    id: "landing-supported-chain",
-    // 412:1563
-    question: "Supported Chain on Azza?",
-    // 412:1574
+    id: "landing-supported-chains",
+    question: "What are the supported blockchains/networks on AZZA?",
+    // Identical to the design file's `412:1574`.
     answer:
       "AZZA supports the following blockchains and networks: Optimism, Ethereum, Solana, Binance Smart Chain, Tron, Polygon, Arbitrum, Base, Celo, Lisk and Assetchain.",
+  },
+  {
+    id: "landing-supported-cryptocurrencies",
+    question: "What are the supported cryptocurrencies on AZZA?",
+    answer: "Azza supports USDT, USDC, BNB, ETH, SOL, CNGN, CELO and TRX.",
+  },
+  {
+    id: "landing-local-currencies",
+    question: "What local currencies are available on AZZA?",
+    // Verbatim but for a stray leading space on the live string.
+    answer:
+      "Naira (NGN), Kenya Shillings (KES), Ghana Cedis (GHS) and South Africa Rand (ZAR) are the only local currencies available on AZZA for now. More local currencies will be added soon.",
+  },
+  {
+    id: "landing-rates",
+    question: "What are the rates like?",
+    /**
+     * Verbatim, and weaker than the rows around it - it reassures without
+     * saying anything, on the one question where a visitor wants a number or a
+     * method. Left as published because it IS published: rewriting it here
+     * would be an implementer making a pricing claim. Worth raising with the
+     * client, alongside the cross-border fees answer, which does answer it.
+     */
+    answer: "The rates are satisfactory, and not something to worry about.",
+  },
+  {
+    id: "landing-kyc",
+    question: "Why should I do KYC?",
+    answer:
+      "KYC is required to ensure the security of your account and to comply with regulations.",
   },
 ];
 
