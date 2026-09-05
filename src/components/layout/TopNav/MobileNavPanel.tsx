@@ -22,30 +22,21 @@ const ROW =
   "transition-colors duration-(--motion-fast) ease-out motion-reduce:transition-none " +
   "hoverable:bg-nav-dropdown-item-hover focus-visible:bg-nav-dropdown-item-hover";
 
-function SubRow({
-  item,
-  currentPath,
-}: {
-  item: NavDropdownItem;
-  currentPath: string;
-}) {
+function SubRow({ item, currentPath }: { item: NavDropdownItem; currentPath: string }) {
   const external = !item.href.startsWith("/");
   const isCurrent = !external && currentPath === item.href;
 
   const body = (
     <>
       {/* Slot always reserved so the missing glyphs drop in without reflow - D-023. */}
-      <span
-        aria-hidden="true"
-        className="flex size-6 shrink-0 items-center justify-center"
-      >
+      <span aria-hidden="true" className="flex size-6 shrink-0 items-center justify-center">
         {item.icon ? <Icon name={item.icon} size="md" /> : null}
       </span>
       <span className="flex min-w-0 flex-col gap-1">
-        <span className="text-sm text-nav-dropdown-fg">{item.label}</span>
+        <span className="text-nav-dropdown-fg text-sm">{item.label}</span>
         {item.description ? (
           // Dropped below `xs` so the row holds its 56px height.
-          <span className="hidden text-xs font-normal text-nav-dropdown-fg-muted xs:block">
+          <span className="text-nav-dropdown-fg-muted xs:block hidden text-xs font-normal">
             {item.description}
           </span>
         ) : null}
@@ -62,12 +53,7 @@ function SubRow({
   return (
     <li>
       {external ? (
-        <a
-          href={item.href}
-          target="_blank"
-          rel="noreferrer noopener"
-          className={className}
-        >
+        <a href={item.href} target="_blank" rel="noreferrer noopener" className={className}>
           {body}
           {/*
            * The same treatment `ArticleBody.tsx`'s `ProseLink` already ships,
@@ -79,11 +65,7 @@ function SubRow({
           <VisuallyHidden> (opens in a new tab)</VisuallyHidden>
         </a>
       ) : (
-        <Link
-          href={item.href}
-          aria-current={isCurrent ? "page" : undefined}
-          className={className}
-        >
+        <Link href={item.href} aria-current={isCurrent ? "page" : undefined} className={className}>
           {body}
         </Link>
       )}
@@ -139,7 +121,7 @@ export function MobileNavPanel({
         aria-hidden="true"
         onClick={onDismiss}
         className={cn(
-          "absolute inset-0 bg-overlay-scrim",
+          "bg-overlay-scrim absolute inset-0",
           "transition-opacity duration-(--motion-base) ease-out",
           "motion-reduce:transition-none",
           open ? "opacity-100" : "opacity-0",
@@ -152,10 +134,18 @@ export function MobileNavPanel({
         aria-label="Site menu"
         className={cn(
           "absolute inset-x-0 top-0 max-h-full overflow-y-auto overscroll-contain",
-          "bg-surface-page pb-6 shadow-dropdown",
+          "bg-surface-page pb-6",
           "transition-transform motion-reduce:transition-none",
+          /*
+           * The shadow rides the OPEN state, not the element (operator report
+           * with screenshot, 2026-09-05). Parked, the sheet sits exactly one
+           * panel-height above its wrapper's top edge - inert and invisible,
+           * but `shadow-dropdown` still projected 32px past its bottom edge
+           * into the wrapper, painting a permanent grey band across the top
+           * of the hero on every phone. A hidden control must not cast.
+           */
           open
-            ? "translate-y-0 duration-(--motion-slow) ease-out"
+            ? "shadow-dropdown translate-y-0 duration-(--motion-slow) ease-out"
             : "-translate-y-full duration-(--motion-base) ease-in",
         )}
       >
@@ -164,7 +154,7 @@ export function MobileNavPanel({
          * full-text CTA reappears here as the first row and the label is never
          * lost. At `xs`+ the bar already carries it and this is hidden.
          */}
-        <div className="px-6 pt-6 pb-2 xs:hidden">
+        <div className="xs:hidden px-6 pt-6 pb-2">
           <Button variant="chat" size="md" href={NAV_CTA.href} fullWidth>
             {NAV_CTA.label}
           </Button>
@@ -188,10 +178,7 @@ export function MobileNavPanel({
                   <Disclosure>
                     {({ open: expanded, triggerProps, panelProps }) => (
                       <>
-                        <button
-                          {...triggerProps}
-                          className={cn(ROW, "cursor-pointer text-nav-fg")}
-                        >
+                        <button {...triggerProps} className={cn(ROW, "text-nav-fg cursor-pointer")}>
                           {item.label}
                           <Icon
                             name="chevron-down"
@@ -255,10 +242,7 @@ export function MobileNavPanel({
                   href={href}
                   prefetch={item.prefetch}
                   aria-current={isCurrent ? "page" : undefined}
-                  className={cn(
-                    ROW,
-                    isCurrent ? "text-nav-fg-current" : "text-nav-fg",
-                  )}
+                  className={cn(ROW, isCurrent ? "text-nav-fg-current" : "text-nav-fg")}
                 >
                   {item.label}
                 </Link>

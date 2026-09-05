@@ -2,14 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  type KeyboardEvent,
-} from "react";
+import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 
 import { Button, Container, Icon, Logo, VisuallyHidden } from "@/components/ui";
 import { NAV_CTA, PRIMARY_NAV } from "@/content/navigation";
@@ -46,8 +39,7 @@ const FOCUSABLE = [
 function focusableWithin(root: HTMLElement | null): HTMLElement[] {
   if (!root) return [];
   return Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
-    (element) =>
-      !element.closest("[inert]") && element.getClientRects().length > 0,
+    (element) => !element.closest("[inert]") && element.getClientRects().length > 0,
   );
 }
 
@@ -386,11 +378,22 @@ export function TopNav({ currentPath }: TopNavProps) {
         // (734:373). The colours cross-fade at `--motion-fast` so the swap at the
         // bottom of the stage is not a hard cut; it is a scroll-driven change, so
         // it stays at the short end of the ramp and honours reduced motion.
-        "transition-[background-color,border-color] duration-(--motion-fast) ease-out",
+        "transition-[background-color,border-color,box-shadow] duration-(--motion-fast) ease-out",
         "motion-reduce:transition-none",
+        /*
+         * The shadow belongs to the WHITE state only (operator, 2026-09-05:
+         * "the shadow can only come back at the same moment when the navbar
+         * becomes white"). Over a painted hero the bar is surface-less and
+         * casts nothing; the moment `overlaid` ends it takes `shadow-dropdown`
+         * along with its surface, in the same cross-fade. The shadow the
+         * operator saw over the hero was never this bar's - it was the parked
+         * mobile sheet's, fixed in MobileNavPanel - but the rule they stated
+         * is the right contract for the bar itself, and it supersedes D-6's
+         * "the bar dissolves against content" for the scrolled state.
+         */
         overlaid
-          ? "border-transparent bg-transparent"
-          : "border-nav-border bg-nav-surface",
+          ? "border-transparent bg-transparent shadow-none"
+          : "border-nav-border bg-nav-surface shadow-dropdown",
         "border-b",
       )}
     >
@@ -414,13 +417,10 @@ export function TopNav({ currentPath }: TopNavProps) {
         aria-label="Primary"
         className={cn(
           overlaid &&
-            "[--color-nav-fg:var(--color-fg-on-brand)] [--color-nav-fg-current:var(--color-fg-on-brand)] [--color-nav-fg-hover:var(--color-fg-on-inverse-muted)]",
+            "[--color-nav-fg-current:var(--color-fg-on-brand)] [--color-nav-fg-hover:var(--color-fg-on-inverse-muted)] [--color-nav-fg:var(--color-fg-on-brand)]",
         )}
       >
-        <Container
-          width="nav"
-          className="flex items-center justify-between gap-4 py-5"
-        >
+        <Container width="nav" className="flex items-center justify-between gap-4 py-5">
           {/* Left cluster. `items-end` reproduces the design's MAX cross-axis
               alignment - the 20px logo and the 19px link row are baseline
               matched, not centre matched (layout.md S8). */}
@@ -433,12 +433,7 @@ export function TopNav({ currentPath }: TopNavProps) {
              * `items-end` aligns - is still 20px and the glyph does not move by
              * a pixel. The link was a 20px target on all seven routes.
              */}
-            <Logo
-              variant="wordmark"
-              height={20}
-              asHomeLink
-              className="-my-3 py-3"
-            />
+            <Logo variant="wordmark" height={20} asHomeLink className="-my-3 py-3" />
 
             {/*
              * `role="list"` for the reason WhyAzzaSteps.tsx and
@@ -449,11 +444,7 @@ export function TopNav({ currentPath }: TopNavProps) {
              * is the site's primary destination list; without the role it is
              * announced as loose links with no "list, N items" boundary.
              */}
-            <ul
-              data-azza-nav-links=""
-              role="list"
-              className="hidden items-center gap-8 lg:flex"
-            >
+            <ul data-azza-nav-links="" role="list" className="hidden items-center gap-8 lg:flex">
               {PRIMARY_NAV.map((item) => {
                 const children = item.items;
 
@@ -532,7 +523,7 @@ export function TopNav({ currentPath }: TopNavProps) {
              * Do NOT collapse this back onto the Button, and do not "fix" it by
              * teaching `cn` to merge - see the note in src/lib/cn.ts.
              */}
-            <span className="hidden xs:contents">
+            <span className="xs:contents hidden">
               <Button variant="chat" size="md" href={NAV_CTA.href}>
                 {NAV_CTA.label}
               </Button>
@@ -554,7 +545,7 @@ export function TopNav({ currentPath }: TopNavProps) {
              * responsive.md S6.1 44px floor. A declared hit target that a parent
              * can renegotiate is not a hit target.
              */}
-            <span className="contents xs:hidden">
+            <span className="xs:hidden contents">
               <Button
                 variant="chat"
                 size="sm"
@@ -579,7 +570,7 @@ export function TopNav({ currentPath }: TopNavProps) {
                 // is a flex item, so without it `size-11` is only an opening
                 // offer and a crowded row at 320 shaved it to 32.7px wide.
                 "inline-flex size-11 shrink-0 cursor-pointer items-center justify-center",
-                "rounded-2xl text-nav-fg lg:hidden",
+                "text-nav-fg rounded-2xl lg:hidden",
                 "transition-colors duration-(--motion-fast) ease-out",
                 "motion-reduce:transition-none",
                 "hoverable:text-nav-fg-hover",
@@ -648,7 +639,7 @@ export function TopNav({ currentPath }: TopNavProps) {
       <nav
         data-azza-nav-fallback=""
         aria-label="All pages"
-        className="hidden border-t border-nav-border bg-nav-surface"
+        className="border-nav-border bg-nav-surface hidden border-t"
       >
         <Container width="nav" className="flex flex-col gap-4 py-4">
           {PRIMARY_NAV.map((item) => {
@@ -663,9 +654,7 @@ export function TopNav({ currentPath }: TopNavProps) {
                    * the outline for exactly the reader this block exists for.
                    * `aria-label` on the <ul> carries the grouping instead.
                    */}
-                  <p className="text-xs text-nav-dropdown-fg-muted">
-                    {item.label}
-                  </p>
+                  <p className="text-nav-dropdown-fg-muted text-xs">{item.label}</p>
                   {/*
                    * `role="list"` IS LOAD-BEARING HERE, not a nicety. Tailwind's
                    * preflight sets `list-style: none`, which makes WebKit drop
