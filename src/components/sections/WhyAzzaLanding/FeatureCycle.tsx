@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { cn } from "@/lib/cn";
 
@@ -103,11 +96,16 @@ import { FeatureList, type Feature } from "./FeatureList";
  *
  * BELOW `lg`
  * ----------
- * No cycle. responsive.md S7.2.2 lays the features out as a static two-column
- * grid there, and a 581px clipped viewport that scrolls itself is the wrong
- * shape for a phone. The viewport height, the clip, the translate and the timer
- * are all `lg`-gated, so below it this is the list that shipped before: seven
- * rows, click to open, per-row marker.
+ * The BEAT runs, the TRAVEL does not (operator request, 2026-09-05: "this is
+ * also supposed to cycle just like on desktop"). responsive.md S7.2.2 lays the
+ * features out as a static flow there, and a 581px clipped viewport that
+ * scrolls itself is still the wrong shape for a phone - so the viewport
+ * height, the clip, the translate, the padding copies and the centre marker
+ * stay `lg`-gated. What is no longer gated is the timer: the active row - its
+ * marker and its open description - walks the list on the same 3s dwell at
+ * every width, pausing for the same reasons (touch or focus inside, the
+ * pause toggle, off-screen, reduced motion). The rows do not travel; the
+ * highlight does.
  */
 
 /** Copies of the seven rows in the track. Three is the minimum that keeps a full
@@ -212,11 +210,7 @@ export interface FeatureCycleProps {
   className?: string;
 }
 
-export function FeatureCycle({
-  features,
-  initialId,
-  className,
-}: FeatureCycleProps) {
+export function FeatureCycle({ features, initialId, className }: FeatureCycleProps) {
   const count = features.length;
   /** The real copy is the middle one, so the counter lives in [count, 2*count). */
   const home = count;
@@ -387,14 +381,16 @@ export function FeatureCycle({
    * the user picked gets a full dwell rather than the remainder of the previous
    * one.
    */
-  const running = cycling && inView && !engaged && !paused && !reduceMotion;
+  /*
+   * `cycling` is deliberately absent: the beat is live at every width since
+   * 2026-09-05, while `cycling` keeps gating the things that only exist at
+   * `lg` - the translate, the padding copies, the centre marker.
+   */
+  const running = inView && !engaged && !paused && !reduceMotion;
 
   useEffect(() => {
     if (!running) return;
-    const id = window.setTimeout(
-      () => setPosition((p) => p + 1),
-      DWELL_MS,
-    );
+    const id = window.setTimeout(() => setPosition((p) => p + 1), DWELL_MS);
     return () => window.clearTimeout(id);
   }, [running, position]);
 
@@ -406,8 +402,7 @@ export function FeatureCycle({
    * the counter drifting until a resize made it matter.
    */
   useEffect(() => {
-    const shift =
-      position >= 2 * count ? -count : position < count ? count : 0;
+    const shift = position >= 2 * count ? -count : position < count ? count : 0;
     if (shift === 0) return;
 
     const id = window.setTimeout(() => {
@@ -442,15 +437,9 @@ export function FeatureCycle({
     return () => cancelAnimationFrame(id);
   }, [cycling]);
 
-  const offset = useMemo(
-    () => trackOffset(position, metrics),
-    [position, metrics],
-  );
+  const offset = useMemo(() => trackOffset(position, metrics), [position, metrics]);
 
-  const copies = useMemo(
-    () => Array.from({ length: COPIES }, (_, copy) => copy),
-    [],
-  );
+  const copies = useMemo(() => Array.from({ length: COPIES }, (_, copy) => copy), []);
 
   return (
     <div
@@ -470,11 +459,11 @@ export function FeatureCycle({
        * `sr-only` until focused, borrowing `SkipLink`'s idiom verbatim: the design
        * draws no such control and inventing a visible one would change the
        * composition, while this costs nothing visually and stays keyboard
-       * reachable and announced. Rendered only while the cycle is actually live -
-       * below `lg` there is no rotation, and a control for something that is not
-       * moving is worse than no control.
+       * reachable and announced. Rendered at every width since the beat went
+       * site-wide (2026-09-05) - wherever the highlight advances on its own,
+       * the mechanism to stop it must exist.
        */}
-      {cycling ? (
+      {
         <button
           type="button"
           aria-pressed={paused}
@@ -489,7 +478,7 @@ export function FeatureCycle({
         >
           {paused ? "Resume the feature carousel" : "Pause the feature carousel"}
         </button>
-      ) : null}
+      }
 
       {/*
        * The track. One composited property on one element carries the whole
@@ -545,7 +534,7 @@ export function FeatureCycle({
        */}
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute top-1/2 left-0 z-10 hidden h-[23px] w-[22px] -translate-y-1/2 bg-surface-brand-solid lg:block"
+        className="bg-surface-brand-solid pointer-events-none absolute top-1/2 left-0 z-10 hidden h-[23px] w-[22px] -translate-y-1/2 lg:block"
       />
     </div>
   );
