@@ -252,7 +252,7 @@ export function DeckCarousel({ className }: DeckCarouselProps) {
         data-deck-controls=""
         className="mt-6 flex items-center justify-center gap-2 motion-reduce:hidden"
       >
-        <ul role="list" className="flex items-center gap-1">
+        <ul role="list" className="flex items-center gap-1.5">
           {DECK_RECORDS.map((record, index) => (
             <li key={record.id}>
               <button
@@ -260,12 +260,23 @@ export function DeckCarousel({ className }: DeckCarouselProps) {
                 onClick={() => goTo(index)}
                 aria-label={`Go to card ${index + 1} of ${count}`}
                 aria-current={index === activeIndex ? "true" : undefined}
-                className="grid size-11 cursor-pointer place-items-center"
+                /*
+                 * 14px dots, 6px apart (operator, 2026-09-05 - "space between
+                 * the circles be just 6px and make the circles 6px bigger").
+                 * The button narrows to the dot so the VISIBLE gap is exactly
+                 * the list gap; the 44px height keeps a full-height tap band.
+                 * That trades the 44px-wide target away - a 14px-wide control
+                 * is under WCAG 2.5.8's 24 - which is accepted here because
+                 * the dots are the tertiary route to a card: swipe and the
+                 * auto-advance carry the primary interaction, and the row is
+                 * exactly what the operator drew.
+                 */
+                className="grid h-11 w-3.5 cursor-pointer place-items-center"
               >
                 <span
                   aria-hidden="true"
                   className={cn(
-                    "block size-2 rounded-full transition-colors duration-[var(--motion-fast)] ease-[var(--ease-out)]",
+                    "block size-3.5 rounded-full transition-colors duration-[var(--motion-fast)] ease-[var(--ease-out)]",
                     index === activeIndex ? "bg-fg-primary" : "bg-fg-primary/25",
                   )}
                 />
