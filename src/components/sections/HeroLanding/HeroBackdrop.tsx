@@ -1,5 +1,7 @@
 import type { CSSProperties } from "react";
 
+import { cn } from "@/lib/cn";
+
 import buildingsAsset from "@design-system/assets/illustration/hero-buildings-skyline.svg";
 
 /*
@@ -84,14 +86,30 @@ export function HeroBackdrop() {
         />
       ))}
 
+      {/*
+       * PHONES ANCHOR THE ART TO A CORNER, NOT THE CENTRE (operator request
+       * 2026-09-05: "scaled so that more of the illustrated building shows
+       * up"). The illustration's mass sits in the corners of its 1440 canvas
+       * with an empty middle, so CENTRE-anchored scaling can only lose: every
+       * enlargement slides both clusters outward and a 145% first attempt
+       * rendered smaller slivers than 100% did - the geometry admits no
+       * middle setting that enlarges anything. Anchoring bottom-LEFT at 185%
+       * puts one whole cluster on screen at nearly twice its 100% size, which
+       * is the only way a 390px window shows MORE building from a canvas
+       * shaped like this. `lg`+ keeps the drawn centred 100%.
+       */}
       <div
-        className="absolute inset-x-0 bottom-0 h-[752px]"
+        className={cn(
+          "absolute inset-x-0 bottom-0 h-[752px]",
+          "[--hero-art-pos:bottom_left] [--hero-art-size:185%]",
+          "lg:[--hero-art-pos:bottom_center] lg:[--hero-art-size:100%]",
+        )}
         style={
           {
             backgroundImage: `url(${buildings.src})`,
-            backgroundPosition: "bottom center",
+            backgroundPosition: "var(--hero-art-pos)",
             backgroundRepeat: "no-repeat",
-            backgroundSize: "100% auto",
+            backgroundSize: "var(--hero-art-size) auto",
           } as CSSProperties
         }
       />

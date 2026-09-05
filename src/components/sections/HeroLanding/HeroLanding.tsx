@@ -156,7 +156,10 @@ export default function HeroLanding() {
             href={WHATSAPP_CHAT_URL}
             variant="primary"
             size="md"
-            className="w-full md:w-[182px]"
+            /* The mock draws the compact pill on phones too, so the drawn
+             * 182 fixed width now holds at every width - full-bleed mobile
+             * CTA retired with the 2026-09-05 hero mock. */
+            className="w-[182px]"
           >
             {CTA_LABEL}
           </Button>

@@ -57,11 +57,30 @@ import type { CSSProperties } from "react";
  * on top of the 0.82 line-height the token already sets.
  */
 
-/** The three lines, in order, with the frame's own feature settings. */
+/** The three drawn lines, in order, with the frame's own feature settings. */
 const LINES = [
   { text: "Your mONEY", features: '"salt" 1, "ss01" 1' },
   { text: "should work", features: '"salt" 1' },
   { text: "anywhere.", features: '"salt" 1, "ss01" 1' },
+] as const;
+
+/*
+ * THE PHONE LOCKUP - operator mock, 2026-09-05: one word per line at 100px on
+ * an 80px leading, "money" and "anywhere" in the lime #D3FEB6 (which IS
+ * `surface.accent-lime`, so it is spoken as the token). Each word keeps the
+ * feature settings of the drawn line it came from, and "mONEY" keeps its
+ * authored casing - uppercasing stays a CSS concern.
+ *
+ * The mock writes "ANYWHERE" without the drawn full stop. That is presentation,
+ * not copy: the accessible name below carries the authored sentence, period
+ * included, at every width.
+ */
+const WORDS = [
+  { text: "Your", lime: false, features: '"salt" 1, "ss01" 1' },
+  { text: "mONEY", lime: true, features: '"salt" 1, "ss01" 1' },
+  { text: "should", lime: false, features: '"salt" 1' },
+  { text: "work", lime: false, features: '"salt" 1' },
+  { text: "anywhere", lime: true, features: '"salt" 1, "ss01" 1' },
 ] as const;
 
 export interface HeroHeadlineProps {
@@ -71,19 +90,56 @@ export interface HeroHeadlineProps {
 
 export function HeroHeadline({ id }: HeroHeadlineProps) {
   return (
-    <h1
-      id={id}
-      className="flex w-full flex-col items-center gap-1 text-center font-display text-display-hero uppercase text-fg-on-brand"
-    >
-      {LINES.map(({ text, features }) => (
-        <span
-          key={text}
-          className="block w-full"
-          style={{ fontFeatureSettings: features } as CSSProperties}
-        >
-          {text}
-        </span>
-      ))}
+    /*
+     * ONE <h1>, ONE NAME, TWO LOCKUPS. The drawn three-line desktop headline
+     * and the mock's five-line phone lockup are both `aria-hidden`
+     * presentation; the sr-only sentence is the single accessible name, so a
+     * screen reader hears the authored copy once, with its period, regardless
+     * of which lockup is painted. Exactly one lockup is displayed at any
+     * width (`lg` is the seam, as everywhere in this hero).
+     */
+    <h1 id={id} className="font-display w-full text-center uppercase">
+      <span className="sr-only">Your money should work anywhere.</span>
+
+      {/* The drawn lockup - 734:345, unchanged, `lg`+ only now. */}
+      <span
+        aria-hidden="true"
+        className="text-display-hero text-fg-on-brand hidden w-full flex-col items-center gap-1 lg:flex"
+      >
+        {LINES.map(({ text, features }) => (
+          <span
+            key={text}
+            className="block w-full"
+            style={{ fontFeatureSettings: features } as CSSProperties}
+          >
+            {text}
+          </span>
+        ))}
+      </span>
+
+      {/*
+       * The phone lockup. `min(100px, 25.5vw)` is the mock's 100px wherever
+       * it fits and a proportional step-down below ~392px viewport - at 320
+       * "ANYWHERE" measures wider than the screen at a hard 100, so the guard
+       * is what keeps the widest word inside the gutters. Leading is the
+       * mock's 80/100 = 0.8, carried as a ratio so it follows the guard down.
+       */}
+      <span
+        aria-hidden="true"
+        className="flex w-full flex-col items-center [font-size:min(100px,25.641vw)] leading-[0.8] lg:hidden"
+      >
+        {WORDS.map(({ text, lime, features }) => (
+          <span
+            key={text}
+            className={
+              lime ? "text-surface-accent-lime block w-full" : "text-fg-on-brand block w-full"
+            }
+            style={{ fontFeatureSettings: features } as CSSProperties}
+          >
+            {text}
+          </span>
+        ))}
+      </span>
     </h1>
   );
 }

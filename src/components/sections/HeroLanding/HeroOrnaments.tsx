@@ -219,10 +219,7 @@ function FloatingOrnament({
          * element would be overwritten on the first frame and the notes would
          * snap upright.
          */
-        <span
-          className="block flex-none"
-          style={{ transform: `rotate(${restRotation}deg)` }}
-        >
+        <span className="block flex-none" style={{ transform: `rotate(${restRotation}deg)` }}>
           {art}
         </span>
       )}
