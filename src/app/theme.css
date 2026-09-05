@@ -765,7 +765,13 @@
        * "AZZA", which is worse than the size it fixed. It keeps the drawn
        * curve and its one-line fit at 390.
        */
-      --text-display-hero: clamp(2.5rem, 1.4643rem + 5.1786vw, 3.5357rem);
+      /*
+       * Flat 56 on request (operator, 2026-09-05: "bump it up to 56px"),
+       * replacing the restored curve's 40->56.57 ramp. The tier boundary
+       * stays seamless by arithmetic: the desktop curve passes through
+       * 56.57px at 640, a half-pixel above this constant.
+       */
+      --text-display-hero: 3.5rem;
       --text-display-1: clamp(3.1667rem, 2.1369rem + 5.1487vw, 4.1964rem);
       --text-display-2: clamp(3rem, 1.9643rem + 5.1786vw, 4.0357rem);
       --text-display-3: clamp(3rem, 2.1071rem + 4.4644vw, 3.8928rem);
