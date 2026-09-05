@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { AllArticles, BlogHero } from "@/components/sections/BlogIndex";
-import { BLOG_POSTS } from "@/content/blog";
+import { getBlogPosts } from "@/lib/hashnode";
 
 /**
  * Copy is the blog hero's own standfirst (`802:835`), verbatim. The `<title>`
@@ -23,30 +23,28 @@ export const metadata: Metadata = {
  * the masthead hero `802:774` at y 123, then "All Articles" `802:627`.
  * Site chrome is `layout.tsx` + `SiteChrome`; nothing here repeats it.
  *
- * THE SEAM IS 160 NOW, AND BOTH SECTIONS OWN HALF. The original grid section
- * had no top padding and leaned on the hero's 80; the revision gives `802:627`
- * its own 80 on top of the hero's (the `final` rhythm carries it), so the two
- * paddings meet at the designed 160. Sections still abut at 0px (layout.md
- * S10.3, assertion 1). Hence the fragment.
+ * DATA IS THE HASHNODE FEED NOW (2026-09-05, replacing the ten dummy
+ * records). `getBlogPosts` is ISR-cached at five minutes and tag-busted by
+ * the webhook route, so this page re-renders with fresh posts without a
+ * deploy - see `src/lib/hashnode.ts`. The adapter marks the newest post
+ * `featured`, which is the same role index 0 played in the dummy set: the
+ * hero's card, dropped from the grid by `AllArticles` itself.
  *
- * ONE FEATURED POST, NINE IN THE GRID, TEN RECORDS.
- * `BLOG_POSTS` holds ten: index 0 is the hero's featured card (`352:3588`) and
- * 1-9 are the grid (`500:2215` … `500:2273`). The whole array is passed to
- * `AllArticles` because it drops `featured` posts from the grid itself
- * (content/blog.ts, "HOW /blog COMPOSES THIS"), so passing the array and
- * passing a pre-filtered one produce the same nine cards - and only one place
- * knows the rule.
+ * An unreachable feed returns `[]`: the hero renders its masthead without a
+ * card and the grid shows its own empty state - a degraded page, never a 500,
+ * and the next revalidation retries.
  *
- * The `<h1>` ("THE AZZA BLOG", `352:3586`) lives in `BlogHero`, which is why
+ * The `<h1>` ("THE AZZA BLOG" slogan node) lives in `BlogHero`, which is why
  * this file renders no heading of its own.
  */
-export default function BlogPage() {
-  const featured = BLOG_POSTS.find((post) => post.featured) ?? BLOG_POSTS[0];
+export default async function BlogPage() {
+  const posts = await getBlogPosts();
+  const featured = posts.find((post) => post.featured) ?? posts[0];
 
   return (
     <>
       <BlogHero featured={featured} />
-      <AllArticles posts={BLOG_POSTS} />
+      <AllArticles posts={posts} />
     </>
   );
 }

@@ -1683,3 +1683,158 @@
     padding-block-end: var(--spacing-page-end);
   }
 }
+
+/* ----------------------------------------------------------------------------
+ * The article body - `.azza-article`, the styles for a Hashnode post's own
+ * HTML (lib/hashnode.ts, 2026-09-05). `Prose` wraps this block and keeps what
+ * it always owned: the measure, the ink, the body step and the inline-link
+ * treatment. Everything here is the vocabulary a feed can contain that the
+ * old hand-written body never used, styled on tokens and scoped under the one
+ * class so nothing leaks.
+ *
+ * Rhythm lives on margins INSIDE the block: `Prose` gaps its direct children,
+ * and the whole article is one child, so the paragraph pitch has to be local.
+ * Author headings arrive at any level - Hashnode allows h1-h6 in a body - and
+ * are flattened onto two steps (the section step, then the sub step) because
+ * the page's real <h1> is the article title above; a body h1 restyled to the
+ * section step keeps the visual order sane without rewriting the author's
+ * markup.
+ * ------------------------------------------------------------------------- */
+@layer components {
+  .azza-article > :first-child {
+    margin-block-start: 0;
+  }
+
+  .azza-article > :last-child {
+    margin-block-end: 0;
+  }
+
+  .azza-article p {
+    margin-block: 0 1.5em;
+  }
+
+  .azza-article h1,
+  .azza-article h2 {
+    font-size: var(--text-xl-h2);
+    line-height: var(--text-xl-h2--line-height);
+    letter-spacing: var(--text-xl-h2--letter-spacing);
+    font-weight: var(--text-xl-h2--font-weight);
+    color: var(--color-fg-body);
+    margin-block: 2em 0.75em;
+  }
+
+  .azza-article h3,
+  .azza-article h4,
+  .azza-article h5,
+  .azza-article h6 {
+    font-size: var(--text-lg-h3);
+    line-height: var(--text-lg-h3--line-height);
+    letter-spacing: var(--text-lg-h3--letter-spacing);
+    font-weight: var(--text-lg-h3--font-weight);
+    color: var(--color-fg-body);
+    margin-block: 1.75em 0.65em;
+  }
+
+  .azza-article ul,
+  .azza-article ol {
+    margin-block: 0 1.5em;
+    padding-inline-start: 1.4em;
+  }
+
+  .azza-article ul {
+    list-style: disc;
+  }
+
+  .azza-article ol {
+    list-style: decimal;
+  }
+
+  .azza-article li {
+    margin-block-end: 0.5em;
+    padding-inline-start: 0.2em;
+  }
+
+  .azza-article li::marker {
+    color: var(--color-fg-ghost);
+  }
+
+  .azza-article blockquote {
+    margin-block: 0 1.5em;
+    margin-inline: 0;
+    padding-inline-start: 1.25em;
+    border-inline-start: 3px solid var(--color-surface-accent-lime);
+    color: var(--color-fg-caption);
+    font-style: italic;
+  }
+
+  .azza-article img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-3xl);
+    margin-block: 0 1.5em;
+  }
+
+  .azza-article figure {
+    margin: 0 0 1.5em;
+  }
+
+  .azza-article figure img {
+    margin-block-end: 0.5em;
+  }
+
+  .azza-article figcaption {
+    color: var(--color-fg-caption-soft);
+    font-size: var(--text-xs);
+    line-height: var(--text-xs--line-height);
+    text-align: center;
+  }
+
+  .azza-article code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.85em;
+    background: var(--color-surface-faint);
+    border-radius: var(--radius-sm);
+    padding: 0.1em 0.35em;
+  }
+
+  .azza-article pre {
+    background: var(--color-surface-faint);
+    border-radius: var(--radius-lg);
+    padding: 1em 1.25em;
+    margin-block: 0 1.5em;
+    overflow-x: auto;
+  }
+
+  .azza-article pre code {
+    background: none;
+    border-radius: 0;
+    padding: 0;
+  }
+
+  .azza-article hr {
+    border: 0;
+    border-top: 1px solid var(--color-line-divider);
+    margin-block: 2em;
+  }
+
+  /*
+   * A feed table cannot be wrapped in an overflow container from CSS alone,
+   * so the table becomes its own scroller - the same "wide content scrolls
+   * inside itself" rule every other wide element on the site follows.
+   */
+  .azza-article table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    margin-block: 0 1.5em;
+  }
+
+  .azza-article th,
+  .azza-article td {
+    border: 1px solid var(--color-line-divider);
+    padding: 0.5em 0.75em;
+    text-align: start;
+  }
+}

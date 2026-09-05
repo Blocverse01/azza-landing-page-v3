@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { BlogArticle } from "@/components/sections/BlogArticle";
-import { BLOG_POSTS, getPost, getRelated, type BlogPost } from "@/content/blog";
+import type { BlogPost } from "@/content/blog";
+import { getBlogPost, getBlogPosts, getRelatedPosts } from "@/lib/hashnode";
 
 interface ArticlePageProps {
   /** Next 15 hands route params in as a promise. */
@@ -10,45 +11,35 @@ interface ArticlePageProps {
 }
 
 /**
- * ONE PAGE PER RECORD IN `BLOG_POSTS` - all ten, including the featured one.
+ * ONE PAGE PER POST IN THE FEED - featured included: every card on `/blog` is
+ * a stretched link here, and the hero's featured card is one of them.
  *
- * Every card on `/blog` is a stretched link to `/blog/{slug}` (`ArticleCard`),
- * and the hero's featured card is one of them, so leaving it out would ship a
- * dead link from the first thing on the route. `getRelated` separately excludes
- * the featured post from the "Related Articles" rail, which is a different
- * question - not being *recommended* is not the same as not *existing*.
+ * The list is fetched at build for static generation, and `dynamicParams`
+ * stays at its default TRUE on purpose: a post published after the build has
+ * no static page yet, and the default lets Next render it on first request
+ * through the same ISR-cached fetch - which is the whole point of reading a
+ * live feed. An unreachable feed at build time returns `[]` and every page
+ * simply renders on demand instead; the build must not fail because Hashnode
+ * had a bad minute.
  */
-export function generateStaticParams(): Array<{ slug: string }> {
-  return BLOG_POSTS.map((post) => ({ slug: post.slug }));
+export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
+  const posts = await getBlogPosts();
+  return posts.map((post) => ({ slug: post.slug }));
 }
 
 /**
- * The `<meta name="description">` for one post.
- *
- * None of the ten records sets `standfirst` - the field is optional in the
- * S7.1 contract and the design authored only one standfirst node
- * (`352:3686`), which `ArticleHeader` uses as its on-page fallback. Reusing
- * that one sentence as the description of all ten pages would make every
- * article look identical to a search engine and to a link preview, so the
- * fallback here is composed from the post's own title and category instead.
- * It is per-post, it is derived rather than invented, and it disappears the
- * moment real standfirsts are authored.
- *
- * The trailing dots are stripped first: six of the ten titles end in a typed
- * "..." or ".." baked into the Figma text node (content/blog.ts, defect 3),
- * which would otherwise collide with the sentence period that follows.
+ * The `<meta name="description">` for one post. Every Hashnode post carries a
+ * real standfirst (the feed's description), so the composed fallback is for
+ * the record that somehow lacks one - derived, never invented.
  */
 function describe(post: BlogPost): string {
   if (post.standfirst) return post.standfirst;
-
   return `${post.title.replace(/\.+$/, "")}. ${post.category} on the Azza blog.`;
 }
 
-export async function generateMetadata({
-  params,
-}: ArticlePageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPost(slug);
+  const post = await getBlogPost(slug);
 
   /*
    * An unknown slug still reaches this function before the component runs.
@@ -61,16 +52,10 @@ export async function generateMetadata({
     title: post.title,
     description: describe(post),
     /*
-     * NO `images` HERE, deliberately - see `open_questions`.
-     *
-     * `post.image.src` is a root-relative `/_next/static/media/…` path. Open
-     * Graph requires an absolute URL, and Next resolves relative ones against
-     * `metadataBase`, which is unset. It therefore falls back to
-     * `http://localhost:3000` and bakes that host into the static HTML of all
-     * ten article pages - a broken preview everywhere, plus a build warning on
-     * every run. `metadataBase` belongs in `layout.tsx` next to the rest of the
-     * site-wide metadata, and this agent does not own that file. Adding the
-     * property there re-enables this block unchanged.
+     * NO `images` HERE still - the covers are absolute Hashnode CDN URLs now,
+     * which WOULD satisfy Open Graph, but `metadataBase` remains unset in
+     * layout.tsx and adding og images consistently belongs with that
+     * site-wide decision. The standing note from the dummy era carries over.
      */
     openGraph: {
       type: "article",
@@ -86,19 +71,18 @@ export async function generateMetadata({
  *
  * One section between the nav and the footer: `BlogArticle` (`352:3681`),
  * which owns the header, the hero image, the body, the share rows and the
- * related rail, and supplies the route's single `<h1>` (`352:3685`). Site
- * chrome is `layout.tsx` + `SiteChrome`.
+ * related rail, and supplies the route's single `<h1>` (`352:3685`).
  *
- * The design draws this frame for exactly one article; the ten records in
- * `content/blog.ts` are the same layout with different data, which is why the
- * route is dynamic and statically generated rather than ten hand-written
- * pages.
+ * THE BODY IS REAL NOW: the post's own sanitised HTML from the Hashnode feed,
+ * rendered by `ArticleBody` through the article prose styles - the era of
+ * every slug sharing one hand-transcribed body (the old ArticleBody's
+ * documented finding) ends with the dummy records.
  */
 export default async function BlogArticlePage({ params }: ArticlePageProps) {
   const { slug } = await params;
-  const post = getPost(slug);
+  const post = await getBlogPost(slug);
 
   if (!post) notFound();
 
-  return <BlogArticle post={post} related={getRelated(slug)} />;
+  return <BlogArticle post={post} related={await getRelatedPosts(slug)} />;
 }

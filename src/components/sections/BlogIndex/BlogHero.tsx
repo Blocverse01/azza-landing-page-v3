@@ -3,7 +3,11 @@ import { ArticleCard, DisplayHeading, Section, type BlogPost } from "@/component
 const HEADING_ID = "blog-hero-title";
 
 export interface BlogHeroProps {
-  featured: BlogPost;
+  /**
+   * Optional since the feed era (2026-09-05): an unreachable Hashnode feed
+   * yields no posts, and the masthead must still stand without its card.
+   */
+  featured?: BlogPost;
 }
 
 /**
@@ -67,7 +71,8 @@ export function BlogHero({ featured }: BlogHeroProps) {
         */}
         <h2 className="sr-only">Featured article</h2>
 
-        <ArticleCard post={featured} variant="featured" priority />
+        {/* No card without a post - the masthead stands alone on a dead feed. */}
+        {featured ? <ArticleCard post={featured} variant="featured" priority /> : null}
       </div>
     </Section>
   );

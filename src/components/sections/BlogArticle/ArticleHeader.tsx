@@ -23,10 +23,13 @@ import { ShareRow } from "./ShareRow";
  * to land in both halves at once.
  */
 
-/** 352:3689. The design names one author; `BlogPost` has no author field. */
+/**
+ * 352:3689. The drawn byline, now the FALLBACK: since 2026-09-05 `BlogPost`
+ * carries the author from the Hashnode feed and real posts name themselves.
+ */
 const BYLINE = "Ngwube Precious";
 
-/** 352:3693. */
+/** 352:3693 - likewise the fallback behind the feed's computed value. */
 const READING_TIME = "4 min read";
 
 /** 352:3686, verbatim. Used when the post record carries no standfirst. */
@@ -85,7 +88,7 @@ export function ArticleHeader({ post, titleId }: ArticleHeaderProps) {
          */}
         <div className="text-md text-fg-subtle flex flex-wrap items-center gap-x-4 gap-y-2">
           <span className="flex items-center gap-4">
-            {BYLINE}
+            {post.author ?? BYLINE}
             <MetaDot />
           </span>
           <span className="flex items-center gap-4">

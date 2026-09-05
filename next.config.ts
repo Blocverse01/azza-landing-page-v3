@@ -15,6 +15,20 @@ const nextConfig: NextConfig = {
     root: __dirname,
   },
   outputFileTracingRoot: path.join(__dirname),
+
+  /*
+   * Blog covers come from the Hashnode CDN since 2026-09-05 (lib/hashnode.ts).
+   * next/image refuses remote hosts it has not been told about, so the one
+   * host the feed serves from is allow-listed here - and only that one.
+   */
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "cdn.hashnode.com",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

@@ -66,13 +66,12 @@ function heroRatio(
   image: BlogPost["image"],
   [designed, value]: (typeof HERO_RATIO)[number],
 ): string {
-  return image.width / image.height > value
-    ? `${image.width}/${image.height}`
-    : designed;
+  return image.width / image.height > value ? `${image.width}/${image.height}` : designed;
 }
 
 export interface BlogArticleProps {
-  post: BlogPost;
+  /** The full article - the card contract plus its body. */
+  post: BlogPost & { contentHtml: string };
   related: BlogPost[];
 }
 
@@ -126,7 +125,7 @@ export function BlogArticle({ post, related }: BlogArticleProps) {
           priority
         />
 
-        <ArticleBody title={post.title} />
+        <ArticleBody title={post.title} contentHtml={post.contentHtml} />
       </Container>
 
       <RelatedArticles posts={relatedPosts} />
