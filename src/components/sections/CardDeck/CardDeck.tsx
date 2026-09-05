@@ -135,8 +135,7 @@ export function CardDeck() {
 
     const pinTop = Number.parseFloat(computed.top);
     const travel = track.offsetHeight - stage.offsetHeight;
-    metrics.current =
-      Number.isFinite(pinTop) && travel > 0 ? { pinTop, travel } : null;
+    metrics.current = Number.isFinite(pinTop) && travel > 0 ? { pinTop, travel } : null;
   }, []);
 
   /*
@@ -352,11 +351,7 @@ export function CardDeck() {
 
         {/* The scroll track. Height only where the fan is pinned - at `lg` and
          *  under reduced motion this is a plain wrapper of auto height. */}
-        <div
-          ref={trackRef}
-          data-deck-track=""
-          className="motion-safe:xl:hidden"
-        >
+        <div ref={trackRef} data-deck-track="" className="motion-safe:xl:hidden">
           {/*
            * The sticky stage. `max-w` on the fan, not `max-h`, is what keeps
            * the 13:7 stage inside a short viewport: capping the height would

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { StaticImageData } from "next/image";
 import type { CSSProperties } from "react";
 
@@ -8,6 +9,8 @@ import coinUsdcAsset from "@design-system/assets/illustration/coin-usdc.svg";
 import coinUsdtAsset from "@design-system/assets/illustration/coin-usdt-tilted.svg";
 import deckFlagRibbonAsset from "@design-system/assets/illustration/deck-flag-roundel-ribbon.svg";
 import deckGlobeAsset from "@design-system/assets/illustration/deck-globe.svg";
+import deckPinAsset from "@design-system/assets/illustration/deck-pin.svg";
+import deckPinBackAsset from "@design-system/assets/illustration/deck-pin-back.svg";
 
 import { DECK_RECORDS, DECK_SCREEN_ALT, type DeckArt, type DeckRecord } from "./deck-content";
 
@@ -21,6 +24,8 @@ import { DECK_RECORDS, DECK_SCREEN_ALT, type DeckArt, type DeckRecord } from "./
 const coinUsdc = coinUsdcAsset as { src: string };
 const coinUsdtTilted = coinUsdtAsset as { src: string };
 const deckGlobe = deckGlobeAsset as StaticImageData;
+const deckPin = deckPinAsset as StaticImageData;
+const deckPinBack = deckPinBackAsset as StaticImageData;
 const deckFlagRibbon = deckFlagRibbonAsset as StaticImageData;
 
 /* ---------------------------------------------------------------------------
@@ -104,6 +109,18 @@ const HEADLINE_SIZE = "[font-size:clamp(2rem,10.6667cqw,8rem)]!";
  */
 const BODY_SIZE = "[font-size:clamp(1rem,1.6667cqw,1.25rem)]!";
 const BLOCK_GAP = "[gap:clamp(0.75rem,2cqw,1.5rem)]";
+
+/*
+ * The FLOW steps - Figma 862:785, the 2026-09 mobile redesign of the card.
+ * Same cqw idiom, re-based on the drawn 380px card instead of the fan's 1200:
+ * 18.9474cqw is 72/380 and 4.7368cqw is 18/380, so each is exactly the drawn
+ * value at the drawn width and ratio-scales below it. The caps ARE the drawn
+ * values - under reduced motion the flow card can be 1200px wide, and a 72px
+ * mobile headline must not become a 227px one there. The drawn leading is 0.9
+ * against display-3's 1, hence the second important term.
+ */
+const FLOW_HEADLINE_SIZE = "[font-size:clamp(2rem,18.9474cqw,4.5rem)]! [line-height:0.9]!";
+const FLOW_BODY_SIZE = "[font-size:clamp(1rem,4.7368cqw,1.125rem)]!";
 
 export type DeckPresentation = "fan" | "flow";
 
@@ -189,9 +206,7 @@ export function DeckCard({
   const interiorClass = isFan
     ? cn(
         "transition-opacity duration-[var(--motion-base)] ease-[var(--ease-out)]",
-        active
-          ? "opacity-100"
-          : "pointer-events-none opacity-0 select-none",
+        active ? "opacity-100" : "pointer-events-none opacity-0 select-none",
       )
     : undefined;
 
@@ -222,35 +237,44 @@ export function DeckCard({
       }
     : {};
 
-  const art = renderDeckArt(record.art, interiorClass);
+  const art = renderDeckArt(record.art, interiorClass, isFan);
 
   const textBlock = (
     <div
-        className={cn(
-          "relative z-10 flex flex-col",
-          BLOCK_GAP,
-          interiorClass,
-          isFan
-            ? "absolute -translate-y-1/2"
-            : "w-full @min-[52rem]/deck:w-[46.0833%] @min-[52rem]/deck:shrink-0",
-        )}
-        style={
-          isFan
-            ? { left: `${TEXT_LEFT}%`, top: "50%", width: `${TEXT_WIDTH}%` }
-            : undefined
-        }
+      className={cn(
+        "z-10 flex flex-col",
+        interiorClass,
+        /*
+         * The fan keeps its exact historical class set (`relative` included -
+         * it ships and is not relitigated here). The flow block is the drawn
+         * 862:1017 geometry: inset 30/380 each side, block CENTRE pinned at
+         * 189/380ths of the card width from the top - the drawn
+         * `top: calc(50% - 118.5px)` restated in the card-relative unit the
+         * deck already uses, so it holds at any carousel width under the
+         * locked 380:615 aspect. At `52rem`+ (the reduced-motion desktop
+         * stack) it returns to the static side-by-side flow.
+         */
+        isFan
+          ? cn("absolute relative -translate-y-1/2", BLOCK_GAP)
+          : cn(
+              "absolute inset-x-[7.8947cqw] top-[49.7368cqw] -translate-y-1/2 gap-4",
+              "@min-[52rem]/deck:static @min-[52rem]/deck:translate-y-0",
+              "@min-[52rem]/deck:w-[46.0833%] @min-[52rem]/deck:shrink-0",
+            ),
+      )}
+      style={isFan ? { left: `${TEXT_LEFT}%`, top: "50%", width: `${TEXT_WIDTH}%` } : undefined}
+    >
+      <DisplayHeading
+        as="h2"
+        step="display-3"
+        id={headingId}
+        className={cn(isFan ? HEADLINE_SIZE : FLOW_HEADLINE_SIZE, record.titleClass)}
       >
-        <DisplayHeading
-          as="h2"
-          step="display-3"
-          id={headingId}
-          className={cn(HEADLINE_SIZE, record.titleClass)}
-        >
-          {record.title}
-        </DisplayHeading>
-        <p className={cn("text-md-card", BODY_SIZE, record.bodyClass)}>
-          {record.body}
-        </p>
+        {record.title}
+      </DisplayHeading>
+      <p className={cn("text-md-card", isFan ? BODY_SIZE : FLOW_BODY_SIZE, record.bodyClass)}>
+        {record.body}
+      </p>
     </div>
   );
 
@@ -269,11 +293,21 @@ export function DeckCard({
        * stacked above a 700px phone: the worst of both layouts, and it
        * typechecks, builds and lints clean.
        */
+      /*
+       * 862:785 (2026-09): the flow card is the drawn 380x615 at radius 16
+       * (rounded-2xl - the fan keeps its own 12), its proportion locked with
+       * `aspect` rather than the old min-height ladder so the composition
+       * scales as one object at any carousel width. The text block positions
+       * itself absolutely inside (see above), and the PHONE MOCKUP IS GONE -
+       * the redesign draws none, on any card. At `52rem`+ the aspect unlocks
+       * and the reduced-motion desktop stack lays text out in its old centred
+       * row, minus that phone.
+       */
       <li
         {...rest}
         ref={itemRef}
         className={cn(
-          "@container/deck relative overflow-hidden rounded-xl",
+          "@container/deck relative overflow-hidden rounded-2xl",
           record.surfaceClass,
           className,
         )}
@@ -281,18 +315,11 @@ export function DeckCard({
         {art}
         <div
           className={cn(
-            "relative z-10 flex min-h-[520px] flex-col justify-center gap-6 p-6 xs:min-h-[560px] sm:min-h-[600px] sm:p-8",
-            "@min-[52rem]/deck:flex-row @min-[52rem]/deck:items-center @min-[52rem]/deck:justify-between @min-[52rem]/deck:gap-10 @min-[52rem]/deck:p-12",
+            "relative z-10 aspect-[380/615]",
+            "@min-[52rem]/deck:flex @min-[52rem]/deck:aspect-auto @min-[52rem]/deck:min-h-[520px] @min-[52rem]/deck:flex-row @min-[52rem]/deck:items-center @min-[52rem]/deck:justify-between @min-[52rem]/deck:gap-10 @min-[52rem]/deck:p-12",
           )}
         >
           {textBlock}
-          <div className="relative z-10 mx-auto w-[156px] shrink-0 @min-[52rem]/deck:mx-0 @min-[52rem]/deck:w-[28.583%]">
-            <PhoneMockup
-              screen="whatsapp-transfer"
-              width={PHONE_INTRINSIC}
-              screenAlt={DECK_SCREEN_ALT}
-            />
-          </div>
         </div>
       </li>
     );
@@ -403,14 +430,14 @@ export function DeckCard({
  * A switch rather than a lookup object so an unhandled member of `DeckArt` is a
  * type error at the call site rather than `undefined` at runtime.
  */
-function renderDeckArt(art: DeckArt, className: string | undefined) {
+function renderDeckArt(art: DeckArt, className: string | undefined, fan: boolean) {
   switch (art) {
     case "crypto-coins":
-      return <CryptoCoins className={className} />;
+      return <CryptoCoins className={className} fan={fan} />;
     case "globe":
-      return <DeckGlobe className={className} />;
+      return <DeckGlobe className={className} fan={fan} />;
     case "flag-ribbon":
-      return <FlagRoundelRibbon className={className} />;
+      return <FlagRoundelRibbon className={className} fan={fan} />;
     default:
       return null;
   }
@@ -470,26 +497,93 @@ function renderDeckArt(art: DeckArt, className: string | undefined) {
  * The durable fix is re-exporting the SVG with the boolean applied. That file
  * is outside this agent's allowlist; raised as a finding.
  */
-function DeckGlobe({ className }: { className?: string }) {
+function DeckGlobe({ className, fan }: { className?: string; fan: boolean }) {
+  if (fan) {
+    return (
+      <div
+        aria-hidden="true"
+        className={cn("pointer-events-none absolute inset-0 z-0 overflow-hidden", className)}
+      >
+        <div
+          className="absolute overflow-hidden rounded-full"
+          style={{
+            left: "34.6667cqw", // 416 / 12
+            bottom: "-42.9167cqw", // -(678 - 163) / 12
+            width: "56.5cqw", // 678 / 12
+          }}
+        >
+          <Media src={deckGlobe} alt="" ratio="1 / 1" />
+        </div>
+      </div>
+    );
+  }
+
+  /*
+   * FLOW - 862:909, the drawn mobile composition. Offsets are <drawn px>/3.8
+   * cqw against the 380 card - the same idiom, re-based at the flow width.
+   * The globe rises 166/380ths of the card width above the bottom edge, and
+   * THE THREE RED PINS EXIST HERE: 862:785 finally draws them (the fan's
+   * variant never did - deck-content.ts's "nothing was invented to stand in
+   * for them" note describes the fan, not this presentation), and both pin
+   * layers are committed exports of 862:866/872.
+   */
   return (
     <div
       aria-hidden="true"
-      className={cn(
-        "pointer-events-none absolute inset-0 z-0 overflow-hidden",
-        className,
-      )}
+      className={cn("pointer-events-none absolute inset-0 z-0 overflow-hidden", className)}
     >
       <div
         className="absolute overflow-hidden rounded-full"
         style={{
-          left: "34.6667cqw", // 416 / 12
-          bottom: "-42.9167cqw", // -(678 - 163) / 12
-          width: "56.5cqw", // 678 / 12
+          left: "-9.7368cqw", // -37 / 3.8
+          bottom: "-96.5789cqw", // -(532.93 - 165.75) / 3.8
+          width: "140.2456cqw", // 532.93 / 3.8
         }}
       >
         <Media src={deckGlobe} alt="" ratio="1 / 1" />
       </div>
+      {/* 862:865 / 878 / 893 - large, mid, small. The drawn front pin sits
+       * 6.6/167.1ths of the height below its shadow layer in all three, so
+       * one composite serves every size. */}
+      <DeckPin leftCqw={33.0789} bottomCqw={25.4973} widthCqw={25.3438} />
+      <DeckPin leftCqw={60.3868} bottomCqw={13.2357} widthCqw={11.0708} />
+      <DeckPin leftCqw={34.7368} bottomCqw={14.2684} widthCqw={6.4218} />
     </div>
+  );
+}
+
+/**
+ * One drawn map pin - the back layer filling the box, the pin itself offset
+ * 6.6/167.1ths of the height below it (the drawn relationship at all three
+ * sizes - the ratio is identical in each, so one composite serves them all).
+ *
+ * Plain `next/image`, NOT `Media`: `Media` is a ratio SLOT whose className
+ * lands on its own frame, so an `absolute` passed in resolves against the
+ * card rather than this span - the first cut scattered pin layers a hundred
+ * pixels from their boxes. Two fixed-geometry svg layers need no slot.
+ */
+function DeckPin({
+  leftCqw,
+  bottomCqw,
+  widthCqw,
+}: {
+  leftCqw: number;
+  bottomCqw: number;
+  widthCqw: number;
+}) {
+  return (
+    <span
+      className="absolute"
+      style={{
+        left: `${leftCqw}cqw`,
+        bottom: `${bottomCqw}cqw`,
+        width: `${widthCqw}cqw`,
+        aspectRatio: "96.3066 / 167.126",
+      }}
+    >
+      <Image src={deckPinBack} alt="" className="absolute inset-0 size-full" />
+      <Image src={deckPin} alt="" className="absolute top-[3.95%] left-0 size-full" />
+    </span>
   );
 }
 
@@ -509,22 +603,37 @@ function DeckGlobe({ className }: { className?: string }) {
  * TOP-anchored, because the ribbon enters through the card's top-left corner.
  * `overflow: hidden` on the card removes the 169 above and the 126 below.
  */
-function FlagRoundelRibbon({ className }: { className?: string }) {
+function FlagRoundelRibbon({ className, fan }: { className?: string; fan: boolean }) {
+  /*
+   * FLOW - 862:1020 re-lays the five roundels as one 20-degree row of 162px
+   * coins sweeping the card bottom. That node cannot be exported: its rotated
+   * auto-layout renders a 36px sliver, a Figma exporter defect reproduced
+   * twice. So the flow places THE SAME committed ribbon export much larger
+   * and bottom-anchored to match the drawn sweep - the same five roundels
+   * through the same corner at the drawn coin scale, the export's own
+   * diagonal standing in for the drawn 20 degrees. Values tuned against the
+   * 862:785 render.
+   */
   return (
     <div
       aria-hidden="true"
-      className={cn(
-        "pointer-events-none absolute inset-0 z-0 overflow-hidden",
-        className,
-      )}
+      className={cn("pointer-events-none absolute inset-0 z-0 overflow-hidden", className)}
     >
       <div
         className="absolute"
-        style={{
-          left: "-2.1642cqw", // -25.97 / 12
-          top: "-14.0833cqw", // -169 / 12
-          width: "105.97cqw", // 1271.64 / 12
-        }}
+        style={
+          fan
+            ? {
+                left: "-2.1642cqw", // -25.97 / 12
+                top: "-14.0833cqw", // -169 / 12
+                width: "105.97cqw", // 1271.64 / 12
+              }
+            : {
+                left: "-42cqw",
+                bottom: "-58cqw",
+                width: "210cqw",
+              }
+        }
       >
         <Media src={deckFlagRibbon} alt="" ratio="1271.64 / 920.31" />
       </div>
@@ -548,21 +657,36 @@ function FlagRoundelRibbon({ className }: { className?: string }) {
  * responsive.md S7.0.1: USDT is dropped below `md` (two coins at 360px is
  * noise) and USDC drops to 40% opacity below `sm`.
  */
-function CryptoCoins({ className }: { className?: string }) {
+function CryptoCoins({ className, fan }: { className?: string; fan: boolean }) {
+  /*
+   * FLOW - 862:1072/1082: both coins present at the drawn 70%, each nearly a
+   * card-width across, USDT breaking the left edge and USDC the bottom right.
+   * The fan-era mobile rules (USDT dropped below `md`, USDC dimmed to 40% -
+   * responsive.md S7.0.1) were about coins a third this size and now apply
+   * only to the fan's own art.
+   *
+   * NO opacity is set here for the flow, and that is measured, not missed:
+   * both exports carry the wash BAKED IN (opacity="0.7" on their own groups -
+   * the fan design's value, which is also the drawn mobile 70%). Setting 0.7
+   * again multiplied to 49% and rendered the coins visibly paler than the
+   * 862:785 frame.
+   */
+  const usdt: CSSProperties = fan
+    ? { left: 0, bottom: "-0.667cqw", width: "29.25cqw" }
+    : { left: "-23.1579cqw", bottom: "1.1842cqw", width: "86.7466cqw" };
+  const usdc: CSSProperties = fan
+    ? { left: "22.3333cqw", bottom: 0, width: "35.6667cqw" }
+    : { left: "42.2342cqw", bottom: 0, width: "83.0611cqw" };
+
   return (
     <div
       aria-hidden="true"
-      className={cn(
-        "pointer-events-none absolute inset-0 z-0 overflow-hidden",
-        className,
-      )}
+      className={cn("pointer-events-none absolute inset-0 z-0 overflow-hidden", className)}
     >
       <span
-        className="absolute hidden md:block"
+        className={cn("absolute", fan && "hidden md:block")}
         style={{
-          left: 0,
-          bottom: "-0.667cqw",
-          width: "29.25cqw",
+          ...usdt,
           aspectRatio: "351 / 268",
           backgroundImage: `url(${coinUsdtTilted.src})`,
           backgroundSize: "contain",
@@ -571,11 +695,9 @@ function CryptoCoins({ className }: { className?: string }) {
         }}
       />
       <span
-        className="absolute opacity-40 sm:opacity-100"
+        className={cn("absolute", fan && "opacity-40 sm:opacity-100")}
         style={{
-          left: "22.3333cqw",
-          bottom: 0,
-          width: "35.6667cqw",
+          ...usdc,
           aspectRatio: "428 / 299",
           backgroundImage: `url(${coinUsdc.src})`,
           backgroundSize: "contain",

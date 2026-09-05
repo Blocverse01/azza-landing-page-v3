@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { Icon } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import { scrollBehavior, useReducedMotion } from "@/lib/motion";
 
@@ -35,12 +34,55 @@ export interface DeckCarouselProps {
  * Swipe is native scroll-snap. There is deliberately NO custom drag or pointer
  * handler: a hand-rolled gesture layer loses momentum, rubber-banding and
  * accessibility, and reliably fights the browser.
+ *
+ * THE 2026-09-05 REVISION (Figma 862:785, operator-specified behaviour):
+ *
+ *   - The arrow controls are GONE, on request. The dots stay: with the
+ *     carousel advancing on its own, the reader needs to see where they are,
+ *     and the dots remain the one non-gestural way to reach a card - the
+ *     drawn frame shows no controls at all, so keeping them is a deliberate
+ *     departure recorded here, not an oversight.
+ *   - Cards snap to the START edge, not the centre: the drawn frame parks the
+ *     active card on the left gutter with the next one peeking in from the
+ *     right, which start-snapping produces at every width.
+ *   - AUTO-ADVANCE: the next card slides into focus every 2 seconds (the
+ *     operator's interval - brisker than a read-through of a card's copy,
+ *     flagged as such), wrapping from the last card to the first.
+ *
+ * AUTO-ADVANCE STOPS, in three ways, because a carousel that fights the
+ * reader is worse than no carousel:
+ *
+ *   - It PAUSES while the carousel is off-screen or the tab is hidden -
+ *     scrolling a stage nobody can see spends main-thread for nothing, and a
+ *     reader returning mid-lap deserves a card at rest, not one in flight.
+ *   - It ENDS - permanently, for the page's life - at the first sign of the
+ *     reader taking over: a touch, a wheel, a key, or focus landing anywhere
+ *     inside. "Users can also scroll between cards" only works if the machine
+ *     lets go the moment they do; resuming after an idle timer reliably
+ *     yanks the card mid-read. This is also the WCAG 2.2.2 pause mechanism:
+ *     any interaction is the pause.
+ *   - It never STARTS under reduced motion, where there is no carousel to
+ *     drive - the same media query that removes the scroller.
+ *
+ * The aria-live region only speaks once auto-advance has ended: announcing a
+ * self-advancing carousel every two seconds is exactly the noise a screen
+ * reader user cannot dismiss, and once the reader is driving, every change is
+ * theirs and worth reporting.
  */
+
+/** The operator's interval. One number to tune when 2s proves too brisk. */
+const AUTO_ADVANCE_MS = 2000;
 export function DeckCarousel({ className }: DeckCarouselProps) {
   const reduced = useReducedMotion();
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const itemRefs = useRef<(HTMLLIElement | null)[]>([]);
+
+  /* Auto-advance: `autoPlay` ends for good on first interaction; the other two
+   * merely gate it while the stage is out of sight. */
+  const [autoPlay, setAutoPlay] = useState(true);
+  const [inView, setInView] = useState(false);
+  const [docVisible, setDocVisible] = useState(true);
 
   const count = DECK_RECORDS.length;
   const activeRecord = DECK_RECORDS[activeIndex];
@@ -89,6 +131,25 @@ export function DeckCarousel({ className }: DeckCarouselProps) {
     return () => observer.disconnect();
   }, []);
 
+  /* Only auto-advance a stage someone can see. */
+  useEffect(() => {
+    const root = scrollerRef.current;
+    if (!root || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.intersectionRatio >= 0.4),
+      { threshold: [0, 0.4] },
+    );
+    observer.observe(root);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const onChange = () => setDocVisible(document.visibilityState === "visible");
+    onChange();
+    document.addEventListener("visibilitychange", onChange);
+    return () => document.removeEventListener("visibilitychange", onChange);
+  }, []);
+
   const goTo = useCallback(
     (index: number) => {
       const target = itemRefs.current[index];
@@ -105,8 +166,20 @@ export function DeckCarousel({ className }: DeckCarouselProps) {
     [reduced],
   );
 
-  const atStart = activeIndex === 0;
-  const atEnd = activeIndex === count - 1;
+  /*
+   * One timeout per resting card rather than an interval: every advance (auto
+   * or manual) re-arms the clock via the `activeIndex` dependency, so a card
+   * always gets its full dwell from the moment it settles.
+   */
+  useEffect(() => {
+    if (reduced || !autoPlay || !inView || !docVisible) return;
+    const id = window.setTimeout(() => goTo((activeIndex + 1) % count), AUTO_ADVANCE_MS);
+    return () => window.clearTimeout(id);
+  }, [reduced, autoPlay, inView, docVisible, activeIndex, count, goTo]);
+
+  /* The reader has taken over. Capture-phase, so a touch anywhere in the
+   * region - card, dot, gap - ends the machine before anything else runs. */
+  const stopAutoPlay = useCallback(() => setAutoPlay(false), []);
 
   return (
     /*
@@ -115,7 +188,15 @@ export function DeckCarousel({ className }: DeckCarouselProps) {
      * tree into the reduced-motion vertical stack when the script never runs.
      * They are inert whenever scripting is on.
      */
-    <div data-deck-flow="" className={cn("w-full", className)}>
+    <div
+      data-deck-flow=""
+      className={cn("w-full", className)}
+      onPointerDownCapture={stopAutoPlay}
+      onTouchStartCapture={stopAutoPlay}
+      onWheelCapture={stopAutoPlay}
+      onKeyDownCapture={stopAutoPlay}
+      onFocusCapture={stopAutoPlay}
+    >
       {/*
        * role="group" + a name + tabindex make the scroller keyboard-operable,
        * which WCAG 2.1.1 requires of any region that only scrolling can reveal.
@@ -133,7 +214,7 @@ export function DeckCarousel({ className }: DeckCarouselProps) {
           "[margin-inline:calc(var(--gutter)*-1)] [padding-inline:var(--gutter)]",
           "[scroll-padding-inline:var(--gutter)]",
           "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-          "motion-reduce:overflow-visible motion-reduce:[margin-inline:0] motion-reduce:[padding-inline:0]",
+          "motion-reduce:[margin-inline:0] motion-reduce:overflow-visible motion-reduce:[padding-inline:0]",
         )}
       >
         <ul
@@ -148,7 +229,9 @@ export function DeckCarousel({ className }: DeckCarouselProps) {
               index={index}
               presentation="flow"
               data-deck-index={index}
-              className="w-[min(88vw,420px)] shrink-0 snap-center motion-reduce:w-full"
+              /* 380 is the drawn card (862:967); 88vw keeps the drawn peek -
+               * at the drawn 430 frame it is 378, within a point of the file. */
+              className="w-[min(88vw,380px)] shrink-0 snap-start motion-reduce:w-full"
               itemRef={(node) => {
                 itemRefs.current[index] = node;
               }}
@@ -160,7 +243,7 @@ export function DeckCarousel({ className }: DeckCarouselProps) {
       {/* Announced for anyone driving the carousel from the buttons, where the
        * focus never moves and nothing else would report the change. */}
       <span className="sr-only" aria-live="polite">
-        {activeRecord
+        {!autoPlay && activeRecord
           ? `Card ${activeIndex + 1} of ${count}: ${activeRecord.title}`
           : ""}
       </span>
@@ -169,14 +252,6 @@ export function DeckCarousel({ className }: DeckCarouselProps) {
         data-deck-controls=""
         className="mt-6 flex items-center justify-center gap-2 motion-reduce:hidden"
       >
-        <CarouselButton
-          label="Previous card"
-          disabled={atStart}
-          onActivate={() => goTo(activeIndex - 1)}
-        >
-          <Icon name="arrow-right" size="sm" rotate={180} />
-        </CarouselButton>
-
         <ul role="list" className="flex items-center gap-1">
           {DECK_RECORDS.map((record, index) => (
             <li key={record.id}>
@@ -191,64 +266,14 @@ export function DeckCarousel({ className }: DeckCarouselProps) {
                   aria-hidden="true"
                   className={cn(
                     "block size-2 rounded-full transition-colors duration-[var(--motion-fast)] ease-[var(--ease-out)]",
-                    index === activeIndex
-                      ? "bg-fg-primary"
-                      : "bg-fg-primary/25",
+                    index === activeIndex ? "bg-fg-primary" : "bg-fg-primary/25",
                   )}
                 />
               </button>
             </li>
           ))}
         </ul>
-
-        <CarouselButton
-          label="Next card"
-          disabled={atEnd}
-          onActivate={() => goTo(activeIndex + 1)}
-        >
-          <Icon name="arrow-right" size="sm" />
-        </CarouselButton>
       </div>
     </div>
-  );
-}
-
-/**
- * `aria-disabled`, not `disabled`.
- *
- * A real `disabled` attribute on the button you have just pressed to reach the
- * last card removes it from the focus order while it still holds focus, and the
- * browser drops focus to <body>. Keeping the control focusable and inert is the
- * accessible form of the same state.
- */
-function CarouselButton({
-  label,
-  disabled,
-  onActivate,
-  children,
-}: {
-  label: string;
-  disabled: boolean;
-  onActivate: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      aria-disabled={disabled || undefined}
-      onClick={() => {
-        if (disabled) return;
-        onActivate();
-      }}
-      className={cn(
-        "grid size-11 place-items-center rounded-full transition-colors duration-[var(--motion-fast)] ease-[var(--ease-out)]",
-        disabled
-          ? "cursor-default text-fg-primary/30"
-          : "cursor-pointer text-fg-primary hoverable:bg-surface-subtle",
-      )}
-    >
-      {children}
-    </button>
   );
 }

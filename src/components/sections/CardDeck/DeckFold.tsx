@@ -240,9 +240,7 @@ export function DeckFold({ className }: DeckFoldProps) {
     const travel = track.offsetHeight - stage.offsetHeight;
     const card = stage.offsetHeight;
     metrics.current =
-      Number.isFinite(pinTop) && travel > 0 && card > 0
-        ? { pinTop, travel, card }
-        : null;
+      Number.isFinite(pinTop) && travel > 0 && card > 0 ? { pinTop, travel, card } : null;
   }, []);
 
   /**
@@ -430,29 +428,29 @@ export function DeckFold({ className }: DeckFoldProps) {
            */}
           <div className="relative mx-auto aspect-[13/7] w-full max-w-[calc((100dvh-var(--height-nav))*13/7)]">
             <ul role="list" className="absolute inset-0">
-            {DECK_RECORDS.map((record, index) => (
-              /*
-               * THE CARDS ARE THE EXISTING `DeckCard`, UNCHANGED.
-               *
-               * A first pass rebuilt the card interior here - headline, body,
-               * fill - and that was the wrong call: the operator asked for the
-               * MECHANIC to change, not the design. Everything the fan draws
-               * (the fill, the art layer, the text block, every measure) is
-               * `DeckCard`'s and stays `DeckCard`'s. This component only decides
-               * where each card sits.
-               *
-               * `presentation="fan"` is what keeps that design. `depth={0}` on
-               * every card neutralises the fan: its own layer transform resolves
-               * to `translateX(0) scale(1)`, so it cannot fight the transform
-               * written to the root here, and `isPeeking` is false so no promote
-               * button is drawn over a card that no longer peeks. `active` is
-               * true on all three because the fold shows three interiors at once
-               * where the fan only ever shows one - the crossfade that hides the
-               * other two would blank the cards mid-scroll.
-               *
-               * `transform`, `transform-origin` and `z-index` are written to the
-               * root in `paint`, which is where the rest of the geometry lives.
-               */
+              {DECK_RECORDS.map((record, index) => (
+                /*
+                 * THE CARDS ARE THE EXISTING `DeckCard`, UNCHANGED.
+                 *
+                 * A first pass rebuilt the card interior here - headline, body,
+                 * fill - and that was the wrong call: the operator asked for the
+                 * MECHANIC to change, not the design. Everything the fan draws
+                 * (the fill, the art layer, the text block, every measure) is
+                 * `DeckCard`'s and stays `DeckCard`'s. This component only decides
+                 * where each card sits.
+                 *
+                 * `presentation="fan"` is what keeps that design. `depth={0}` on
+                 * every card neutralises the fan: its own layer transform resolves
+                 * to `translateX(0) scale(1)`, so it cannot fight the transform
+                 * written to the root here, and `isPeeking` is false so no promote
+                 * button is drawn over a card that no longer peeks. `active` is
+                 * true on all three because the fold shows three interiors at once
+                 * where the fan only ever shows one - the crossfade that hides the
+                 * other two would blank the cards mid-scroll.
+                 *
+                 * `transform`, `transform-origin` and `z-index` are written to the
+                 * root in `paint`, which is where the rest of the geometry lives.
+                 */
                 <DeckCard
                   key={record.id}
                   record={record}
@@ -486,11 +484,7 @@ export function DeckFold({ className }: DeckFoldProps) {
                 width: `${PHONE_WIDTH}%`,
               }}
             >
-              <PhoneMockup
-                screen="whatsapp-transfer"
-                width={PHONE_INTRINSIC}
-                screenAlt=""
-              />
+              <PhoneMockup screen="whatsapp-transfer" width={PHONE_INTRINSIC} screenAlt="" />
             </div>
           </div>
         </div>
