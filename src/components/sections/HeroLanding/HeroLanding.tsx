@@ -90,7 +90,7 @@ export default function HeroLanding() {
       id="hero"
       aria-labelledby={HEADING_ID}
       data-azza-hero-overlay=""
-      className="bg-surface-hero-deep relative -mt-(--azza-nav-h) flex min-h-svh w-full flex-col justify-start overflow-clip lg:justify-center 2xl:min-h-[914px]"
+      className="bg-surface-hero-deep relative -mt-(--azza-nav-h) flex min-h-svh w-full flex-col justify-start overflow-clip 2xl:min-h-[914px]"
     >
       <HeroBackdrop />
       <HeroOrnaments />
@@ -104,18 +104,16 @@ export default function HeroLanding() {
        * optical centre. Backdrop, ornaments and QR are all out of flow, so this
        * column is the only thing the section's flexbox lays out.
        *
-       * `lg:-translate-y-[10vh]` - operator request (2026-08-11, revised same
-       * day from 20vh): the whole content column (headline, subcopy, CTA)
-       * rides 10vh above the flex centre described above. A transform, not a
-       * margin, so the flow height the section centres against is untouched.
-       *
-       * PINNED, NOT CENTRED, ON PHONES (operator request 2026-09-05, with
-       * screenshot): "let there be 64px from the nav bar and the header".
-       * Below `lg` the section is `justify-start` and the column's top pad is
-       * the bar plus exactly 4rem, so the gap is 64px on every phone rather
-       * than whatever flex centring leaves on that screen's height - the
-       * reported device parked the headline nearly touching the bar. From
-       * `lg` the stage returns to the drawn centring.
+       * PINNED AT EVERY WIDTH - 64px from the bar to the column (operator,
+       * 2026-09-05, twice: first for phones with a screenshot, then for
+       * desktop with a screenshot of the headline riding up under the bar).
+       * The `-translate-y-[10vh]` lift (operator request, 2026-08-11) is
+       * RETIRED by that second report, and the numbers say why: centring
+       * minus 10vh put the headline 7px under the bar at 1024x700 and MINUS
+       * 11px at 1280x720 - behind the nav, with the column overlapping the
+       * strip where the nav's dropdown panels open. A designed 64px gap
+       * replaces a residue at every width; the stage's spare height moves to
+       * the foot, where the skyline lives.
        *
        * `lg:` SINCE THE INLINE QR ARRIVED (2026-09-05): with the badge under
        * the CTA the column fills a phone screen, and the 10vh ride pushed the
@@ -123,7 +121,7 @@ export default function HeroLanding() {
        * a bar bottom of 85 at 390x844. The lift was drawn for the roomy
        * desktop stage; on phones the column now centres where flex puts it.
        */}
-      <div className="xs:pb-16 relative flex flex-col items-center px-6 pt-[calc(var(--azza-nav-h)+4rem)] pb-14 sm:pb-18 md:pb-20 lg:-translate-y-[10vh] lg:pt-(--azza-nav-h) lg:pb-24 2xl:pb-0">
+      <div className="xs:pb-16 relative flex flex-col items-center px-6 pt-[calc(var(--azza-nav-h)+4rem)] pb-14 sm:pb-18 md:pb-20 lg:pb-24 2xl:pb-0">
         {/*
          * 709 is 734:344's own width - the headline's measure, not a container
          * token. `max-w` rather than `w` so it shrinks with the viewport instead
