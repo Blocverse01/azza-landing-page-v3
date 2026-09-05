@@ -757,21 +757,6 @@
        * 640 value (41.1 / 38.9), so the ramp would run backwards through the
        * breakpoint. Neither carries a hero.
        */
-      /*
-       * `display-masthead` IS DELIBERATELY NOT RESTORED. It was already the
-       * largest headline on a phone - 48px at 390 against the hero's 36 - so
-       * it was never part of what was reported. Raising it to 59 broke
-       * "CATCH THE LATEST WITH AZZA" onto a second line as a lone orphaned
-       * "AZZA", which is worse than the size it fixed. It keeps the drawn
-       * curve and its one-line fit at 390.
-       */
-      /*
-       * Flat 56 on request (operator, 2026-09-05: "bump it up to 56px"),
-       * replacing the restored curve's 40->56.57 ramp. The tier boundary
-       * stays seamless by arithmetic: the desktop curve passes through
-       * 56.57px at 640, a half-pixel above this constant.
-       */
-      --text-display-hero: 3.5rem;
       --text-display-1: clamp(3.1667rem, 2.1369rem + 5.1487vw, 4.1964rem);
       --text-display-2: clamp(3rem, 1.9643rem + 5.1786vw, 4.0357rem);
       --text-display-3: clamp(3rem, 2.1071rem + 4.4644vw, 3.8928rem);
@@ -801,6 +786,21 @@
       --radius-5xl: 24px; /* 32 -> 24 */
       --radius-6xl: 28px; /* 36 -> 28 */
       --radius-7xl: 40px; /* 48 -> 40 */
+    }
+  }
+
+  /*
+   * The landing hero headline, flat 64 (operator, 2026-09-05 - first 56, then
+   * "let's try 64px"). Its boundary is 45.5625rem (729px), NOT the tier's
+   * 40rem, and that number is solved, not styled: the untouched desktop curve
+   * f(w) = 3.4288px + 0.083036w reaches 64px at w = 729, so the constant
+   * hands over to the curve exactly where they meet and the size is monotonic
+   * at every width. Cutting at the tier's 640 instead would drop the headline
+   * 64 -> 56.6 the moment a phone rotates past the boundary.
+   */
+  @media (width < 45.5625rem) {
+    :root {
+      --text-display-hero: 4rem;
     }
   }
 

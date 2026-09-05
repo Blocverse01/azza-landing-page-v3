@@ -90,7 +90,7 @@ export default function HeroLanding() {
       id="hero"
       aria-labelledby={HEADING_ID}
       data-azza-hero-overlay=""
-      className="relative -mt-(--azza-nav-h) flex min-h-svh w-full flex-col justify-center overflow-clip bg-surface-hero-deep 2xl:min-h-[914px]"
+      className="bg-surface-hero-deep relative -mt-(--azza-nav-h) flex min-h-svh w-full flex-col justify-center overflow-clip 2xl:min-h-[914px]"
     >
       <HeroBackdrop />
       <HeroOrnaments />
@@ -104,13 +104,18 @@ export default function HeroLanding() {
        * optical centre. Backdrop, ornaments and QR are all out of flow, so this
        * column is the only thing the section's flexbox lays out.
        *
-       * `-translate-y-[10vh]` - operator request (2026-08-11, revised same
+       * `lg:-translate-y-[10vh]` - operator request (2026-08-11, revised same
        * day from 20vh): the whole content column (headline, subcopy, CTA)
        * rides 10vh above the flex centre described above. A transform, not a
-       * margin, so the flow height the section centres against is untouched
-       * and the shift is exactly 10vh at every breakpoint.
+       * margin, so the flow height the section centres against is untouched.
+       *
+       * `lg:` SINCE THE INLINE QR ARRIVED (2026-09-05): with the badge under
+       * the CTA the column fills a phone screen, and the 10vh ride pushed the
+       * headline's first line under the sticky bar - measured top 80 against
+       * a bar bottom of 85 at 390x844. The lift was drawn for the roomy
+       * desktop stage; on phones the column now centres where flex puts it.
        */}
-      <div className="relative flex -translate-y-[10vh] flex-col items-center px-6 pt-(--azza-nav-h) pb-14 xs:pb-16 sm:pb-18 md:pb-20 lg:pb-24 2xl:pb-0">
+      <div className="xs:pb-16 relative flex flex-col items-center px-6 pt-(--azza-nav-h) pb-14 sm:pb-18 md:pb-20 lg:-translate-y-[10vh] lg:pb-24 2xl:pb-0">
         {/*
          * 709 is 734:344's own width - the headline's measure, not a container
          * token. `max-w` rather than `w` so it shrinks with the viewport instead
@@ -128,9 +133,7 @@ export default function HeroLanding() {
            * -0.4px step the previous hero already used for this exact node; only
            * the colour changes, to white on the blue stage.
            */}
-          <p className="mx-auto max-w-146 text-center text-md-hero text-fg-on-brand">
-            {SUBCOPY}
-          </p>
+          <p className="text-md-hero text-fg-on-brand mx-auto max-w-146 text-center">{SUBCOPY}</p>
         </div>
 
         {/*
@@ -150,6 +153,15 @@ export default function HeroLanding() {
             {CTA_LABEL}
           </Button>
         </div>
+
+        {/*
+         * The QR card, under the CTA on phones (operator request 2026-09-05).
+         * `inline` sits in the flow and self-hides at `lg`, where the floating
+         * `landing` badge below takes the same job at the viewport's edge -
+         * exactly one badge exists at any width. 24px off the CTA, one step
+         * above the CTA's own 16, so the pair reads as button-then-aside.
+         */}
+        <QrBadge placement="inline" className="mt-6" />
       </div>
 
       <QrBadge placement="landing" />

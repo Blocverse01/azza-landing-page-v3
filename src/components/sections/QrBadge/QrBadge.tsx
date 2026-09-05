@@ -5,16 +5,24 @@ import { WHATSAPP_CHAT_URL } from "@/content/navigation";
 import { cn } from "@/lib/cn";
 
 /**
- * Which hero is hosting the badge. Both values pin it inside the hero's own
- * positioning context; they differ only in where.
+ * Which hero is hosting the badge, and how.
  *
- *   "float"   the three original heroes - vertically centred on the viewport
- *             at a right inset of 82 (see the placement note below)
- *   "landing" the redesigned landing hero - vertically centred on the viewport
- *             (operator request 2026-08-11, replacing 734:396's drawn top 517)
- *             at the frame's own right inset of 120
+ *   "float"   the three original heroes - pinned, vertically centred on the
+ *             viewport at a right inset of 82 (see the placement note below)
+ *   "landing" the redesigned landing hero - pinned, vertically centred on the
+ *             viewport (operator request 2026-08-11, replacing 734:396's
+ *             drawn top 517) at the frame's own right inset of 120
+ *   "inline"  IN THE FLOW, not pinned: rendered under the hero CTA on phones
+ *             (operator request 2026-09-05) and self-hidden at `lg`, where
+ *             the floating "landing" badge takes over. This REVERSES the
+ *             original below-`lg` rule ("a QR code cannot be scanned by the
+ *             device rendering it") for the landing hero: the operator wants
+ *             the badge present, it remains one big link so a tap starts the
+ *             same chat on this device, and the scannable use survives for
+ *             the second-screen case - a phone held up to a laptop, a
+ *             screenshot shown to a friend.
  */
-export type QrBadgePlacement = "float" | "landing";
+export type QrBadgePlacement = "float" | "landing" | "inline";
 
 export interface QrBadgeProps {
   /** Default "float", which is every hero except the redesigned landing one. */
@@ -29,9 +37,19 @@ export interface QrBadgeProps {
  * badge keeps its drawn relationship to the composition instead of drifting out
  * into an empty gutter.
  */
+/*
+ * Each placement carries its OWN position and visibility, because the two
+ * axes stopped being shared when "inline" arrived: the pinned placements are
+ * `absolute` and `lg`-up, the inline one is static flow and `lg`-down.
+ * Keeping "absolute" and "hidden ... lg:flex" in the shared card string would
+ * put both `flex lg:hidden` and `hidden lg:flex` on the inline badge - and
+ * `cn` joins without merging, so the cascade, not the call site, would pick
+ * the winner.
+ */
 const PLACEMENT_CLASS: Record<QrBadgePlacement, string> = {
+  inline: "flex lg:hidden",
   float:
-    "top-[calc(50vh-var(--height-nav)-87px)] right-[calc((100%_-_min(100%,90rem))_/_2_+_82px)]",
+    "absolute hidden lg:flex top-[calc(50vh-var(--height-nav)-87px)] right-[calc((100%_-_min(100%,90rem))_/_2_+_82px)]",
   /*
    * `50vh - 87px`, NOT float's `50vh - nav - 87px`: the landing hero pulls
    * itself up under the sticky bar with `-mt-(--azza-nav-h)`, so its box
@@ -40,7 +58,7 @@ const PLACEMENT_CLASS: Record<QrBadgePlacement, string> = {
    * than a `-translate-y-1/2` for the hover-lift reason in the VERTICAL note.
    */
   landing:
-    "top-[calc(50vh-87px)] right-[calc((100%_-_min(100%,90rem))_/_2_+_120px)]",
+    "absolute hidden lg:flex top-[calc(50vh-87px)] right-[calc((100%_-_min(100%,90rem))_/_2_+_120px)]",
 };
 
 /**
@@ -73,10 +91,7 @@ const PLACEMENT_CLASS: Record<QrBadgePlacement, string> = {
  * accessibility tree outright (responsive.md S7.1.2). The action survives as the
  * nav's "Chat with Azza" CTA, which is the modality-appropriate form on a phone.
  */
-export default function QrBadge({
-  placement = "float",
-  className,
-}: QrBadgeProps) {
+export default function QrBadge({ placement = "float", className }: QrBadgeProps) {
   return (
     <a
       href={WHATSAPP_CHAT_URL}
@@ -134,12 +149,12 @@ export default function QrBadge({
          * too since 2026-08-11 - also subtracts its 87px as `top` arithmetic
          * rather than centring with a transform.
          */
-        "absolute",
+        // Position and visibility live in the placement (see the note on
+        // PLACEMENT_CLASS); the card itself is placement-independent. For the
+        // pinned placements `display: none` below `lg` also keeps the badge
+        // out of the a11y tree there, exactly as before.
         PLACEMENT_CLASS[placement],
-        // Hidden below lg: a QR code cannot be scanned by the device rendering
-        // it. `display: none` also takes it out of the a11y tree, so a static
-        // aria-hidden would be redundant below lg and wrong at lg and above.
-        "hidden w-30 flex-col items-center gap-3 pt-3 pb-3.5 lg:flex",
+        "w-30 flex-col items-center gap-3 pt-3 pb-3.5",
         "bg-surface-contrast rounded-xl",
         // The Card `interactive` treatment, applied to the anchor itself:
         // translateY only, its focus-visible twin, no scale (components.md
