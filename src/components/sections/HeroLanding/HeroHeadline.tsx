@@ -123,10 +123,16 @@ export function HeroHeadline({ id }: HeroHeadlineProps) {
        * "ANYWHERE" measures wider than the screen at a hard 100, so the guard
        * is what keeps the widest word inside the gutters. Leading is the
        * mock's 80/100 = 0.8, carried as a ratio so it follows the guard down.
+       *
+       * `font-bold` is load-bearing, not decoration: the drawn lockup gets
+       * its 700 from the `text-display-hero` composite, which this span does
+       * not use, and Preflight resets <h1> to inherit - so the first cut
+       * rendered Lemon Regular and read a weight class lighter than the mock
+       * (operator report with screenshot, 2026-09-05).
        */}
       <span
         aria-hidden="true"
-        className="flex w-full flex-col items-center [font-size:min(100px,25.641vw)] leading-[0.8] lg:hidden"
+        className="flex w-full flex-col items-center [font-size:min(100px,25.641vw)] leading-[0.8] font-bold lg:hidden"
       >
         {WORDS.map(({ text, lime, features }) => (
           <span
