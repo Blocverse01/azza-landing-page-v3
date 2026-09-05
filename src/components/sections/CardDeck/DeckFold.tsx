@@ -305,6 +305,9 @@ export function DeckFold({ className }: DeckFoldProps) {
           if (!card) continue;
           if (i === beat) card.setAttribute("aria-current", "true");
           else card.removeAttribute("aria-current");
+          /* The pointer affordance for the click-to-beat shortcut below: a
+           * card that is not current advertises that clicking it goes there. */
+          card.style.cursor = i === beat ? "" : "pointer";
         }
       }
     },
@@ -384,6 +387,53 @@ export function DeckFold({ className }: DeckFoldProps) {
       window.removeEventListener("resize", onResize);
     };
   }, [measure, paint, tick]);
+
+  /*
+   * CLICK-TO-BEAT (operator report with screenshot, 2026-09-05: "the
+   * interaction here doesn't work"). The folded stack shows the back cards'
+   * slivers, and they LOOK clickable - the fan they replaced promoted on
+   * click, and the mobile carousel taps - but the owo mechanic is a pure
+   * function of scroll, so a click did nothing. This keeps the mechanic
+   * exactly as ruled (D-014 amended): a click does not promote a card, it
+   * DRIVES THE SCROLL to the position whose beat is that card, and the fold
+   * plays through its own phases on the way - the same inversion the maths
+   * already supports, since p = (pinTop - track.top) / travel.
+   *
+   * A card `<li>` is not a button and this is deliberate: the click is a
+   * pointer SHORTCUT over the universal path (scrolling), not the only route
+   * - keyboard and AT users scroll natively and hear `aria-current` move.
+   * Wired imperatively through the same refs `paint` writes, in the fold's
+   * own style; the cursor above is the affordance.
+   */
+  const scrollToCard = useCallback(
+    (index: number) => {
+      const cached = metrics.current;
+      const track = trackRef.current;
+      if (!cached || !track || count < 2) return;
+
+      const pTarget = SCROLL_START + (index / (count - 1)) * (1 - SCROLL_START);
+      const targetTop = cached.pinTop - pTarget * cached.travel;
+      const delta = track.getBoundingClientRect().top - targetTop;
+      if (Math.abs(delta) < 1) return;
+
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.scrollBy({ top: delta, behavior: reduce ? "auto" : "smooth" });
+    },
+    [count],
+  );
+
+  useEffect(() => {
+    const wired: Array<[HTMLElement, (e: MouseEvent) => void]> = [];
+    cardRefs.current.forEach((card, index) => {
+      if (!card) return;
+      const onClick = () => {
+        if (index !== currentBeat.current) scrollToCard(index);
+      };
+      card.addEventListener("click", onClick);
+      wired.push([card, onClick]);
+    });
+    return () => wired.forEach(([card, onClick]) => card.removeEventListener("click", onClick));
+  }, [scrollToCard]);
 
   return (
     <div ref={trackRef} data-deck-track="" className={cn("w-full", className)}>
