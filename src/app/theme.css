@@ -773,6 +773,28 @@
       --text-display-4: clamp(2.8333rem, 2.3631rem + 2.3513vw, 3.3036rem);
       --text-display-4-tight: clamp(2.8333rem, 2.3631rem + 2.3513vw, 3.3036rem);
       --text-display-5: clamp(2.8334rem, 2.4346rem + 1.994vw, 3.2322rem);
+
+      /* --- RADIUS ---------------------------------------------------------
+       * Operator rule, 2026-09-05: on a phone the corner radii come down with
+       * the viewport - large radii by 8, smaller ones by 4. "Large" is drawn
+       * at 20 and up (3xl+); "smaller" is the 8-16 band (lg / xl / 2xl). The
+       * three below that (2 / 4 / 6) do not move - another 4 would zero them -
+       * and `pill` stays fully round by definition. Every `rounded-*` utility
+       * resolves through `var(--radius-*)`, so as with the type tier no call
+       * site changes.
+       *
+       * One knowing casualty: the deck card's drawn mobile radius is 16
+       * (862:785), and its `rounded-2xl` now resolves to 12 on a phone - the
+       * operator's radius rule postdates that frame and wins.
+       */
+      --radius-lg: 4px; /*  8 -> 4 */
+      --radius-xl: 8px; /* 12 -> 8 */
+      --radius-2xl: 12px; /* 16 -> 12 */
+      --radius-3xl: 12px; /* 20 -> 12 */
+      --radius-4xl: 16px; /* 24 -> 16 */
+      --radius-5xl: 24px; /* 32 -> 24 */
+      --radius-6xl: 28px; /* 36 -> 28 */
+      --radius-7xl: 40px; /* 48 -> 40 */
     }
   }
 
