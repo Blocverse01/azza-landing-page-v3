@@ -1088,6 +1088,94 @@
   }
 }
 
+/* ----------------------------------------------------------------------------
+ * Testimonials - the "SUPER ___" word cycle and the tweet marquee (861:312,
+ * operator-specified motion, 2026-09-05).
+ *
+ * Both follow the azza-float contract above: the animation binds only under
+ * `prefers-reduced-motion: no-preference`, and the un-animated element already
+ * sits exactly where the design draws it - "Fast" resting at the centre, the
+ * tweet column at the top of its window.
+ *
+ * THE WORD CYCLE. Three words share one 7800ms loop; each owns a 2600ms slot
+ * and starts one slot after the previous, so exactly one word is ever in
+ * flight. Inside a slot:
+ *
+ *   900ms   in     translateX(-102%) -> 0   ease-out-expo: full speed off the
+ *                                           edge, then the long cinematic
+ *                                           brake into the centre
+ *   1000ms  hold   the operator's 1s dwell, exact
+ *   700ms   out    0 -> translateX(102%)    ease-in: pulls away slowly, is at
+ *                                           full speed crossing the edge
+ *
+ * As slot fractions of the 7800ms cycle: in ends at 11.538%, the hold at
+ * 24.359%, out at 33.333%; the word then jumps back behind the left edge
+ * (invisible - both endpoints are outside the clip) and waits out the other
+ * two slots. Each keyframe's timing-function shapes the segment it STARTS, so
+ * the brake and the launch are per-segment, not one curve stretched over all.
+ *
+ * `--word-slot` (0 / 1 / 2, set inline by SuperPanel) is the whole API: delay
+ * is slot x 2600ms. `animation-fill-mode: backwards` holds a delayed word at
+ * its 0% frame - off the left edge - during the wait, without which words two
+ * and three would sit at their BASE transform (parked off the RIGHT edge) and
+ * enter from the wrong side on the first lap.
+ *
+ * THE MARQUEE translates its track by half its own height - the track is the
+ * list twice in one gap-5 column, so the seam-accurate distance is
+ * `calc(-50% - 10px)` (half the inter-list gap). 90s per lap is reading pace.
+ * Hover pauses it, fine pointers only - the same guard every hover rule in
+ * this file carries.
+ * ------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  .testimonials-word {
+    animation: testimonials-word-cycle 7800ms linear infinite backwards;
+    animation-delay: calc(var(--word-slot, 0) * 2600ms);
+  }
+
+  .testimonials-marquee-track {
+    animation: testimonials-marquee-scroll 90s linear infinite;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .testimonials-marquee:hover .testimonials-marquee-track {
+      animation-play-state: paused;
+    }
+  }
+}
+
+@keyframes testimonials-word-cycle {
+  0% {
+    transform: translateX(-102%);
+    /* the cinematic brake - ease-out-expo */
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  11.538% {
+    transform: translateX(0);
+    animation-timing-function: linear;
+  }
+  24.359% {
+    transform: translateX(0);
+    /* the launch - ease-in, gathering speed toward the edge */
+    animation-timing-function: cubic-bezier(0.55, 0, 0.85, 0.36);
+  }
+  33.333% {
+    transform: translateX(102%);
+  }
+  33.334%,
+  100% {
+    transform: translateX(-102%);
+  }
+}
+
+@keyframes testimonials-marquee-scroll {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(calc(-50% - 10px));
+  }
+}
+
 @keyframes azza-float-coin-kenya {
   0% {
     transform: translateY(0) rotate(0deg);
