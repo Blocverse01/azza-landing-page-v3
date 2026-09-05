@@ -130,11 +130,7 @@ const NO_JS_STYLE =
  * inverse ring token (theme.css). The default ring is the brand blue, which is
  * close to unreadable against the near-black question rows.
  */
-export function FaqQuestionList({
-  items,
-  openId,
-  onOpenChange,
-}: FaqQuestionListProps) {
+export function FaqQuestionList({ items, openId, onOpenChange }: FaqQuestionListProps) {
   /*
    * Keyboard behaviour the design cannot express and the primitive does not
    * cover:
@@ -172,9 +168,7 @@ export function FaqQuestionList({
     if (event.key === "Escape") {
       if (openId === null) return;
       event.stopPropagation();
-      const trigger = readTriggers(root).find(
-        (element) => element.dataset.faqTrigger === openId,
-      );
+      const trigger = readTriggers(root).find((element) => element.dataset.faqTrigger === openId);
       onOpenChange(null);
       trigger?.focus();
       return;
@@ -206,7 +200,10 @@ export function FaqQuestionList({
       data-surface="inverse"
       onKeyDown={handleKeyDown}
       className={cn(
-        "relative grid grid-cols-1 p-3 sm:p-4",
+        // Phone insets per the 2026-09-05 mock: 16 around, 32 above the
+        // display line, a deeper 40 below the last row so the card bottom
+        // breathes the way the mock draws it.
+        "relative grid grid-cols-1 p-4 pt-8 pb-10 sm:px-5",
         "lg:grid-cols-[447fr_393fr] lg:gap-x-15 lg:p-0",
         // One auto row for QUESTIONS, one per question, then the empty 40px
         // track that becomes the dark panel's bottom padding (see the header).
@@ -238,8 +235,11 @@ export function FaqQuestionList({
       <div
         aria-hidden="true"
         className={cn(
-          "pointer-events-none absolute inset-0 rounded-4xl bg-accordion-panel",
-          "lg:static lg:col-start-1 lg:row-span-full lg:-mt-10 lg:rounded-5xl",
+          // rounded-6xl below `lg` (2026-09-05 mock - the panel is now the
+          // section card itself, so it takes the card-scale radius; the phone
+          // tier resolves it to 28). The drawn lg 5xl is untouched.
+          "rounded-6xl bg-accordion-panel pointer-events-none absolute inset-0",
+          "lg:rounded-5xl lg:static lg:col-start-1 lg:row-span-full lg:-mt-10",
         )}
       />
 
@@ -259,7 +259,21 @@ export function FaqQuestionList({
         swapIndices={[6]}
         swapWeight="medium"
         className={cn(
-          "relative mb-7 px-3 text-accordion-row-fg sm:px-4",
+          "text-accordion-row-fg relative mb-7 px-3 sm:px-4",
+          /*
+           * Phone size per the mock: display-6 resolves to 34px at 390, the
+           * mock draws QUESTIONS at ~48. An important arbitrary because the
+           * step utility sets the size on this same element and `cn` joins
+           * without merging - the deck's HEADLINE_SIZE precedent. display-6
+           * is excluded from the mobile display restoration for good reason
+           * (its curve is too flat to raise globally), so the bump is scoped
+           * to the one heading whose mock asks for it.
+           */
+          "max-lg:[font-size:3rem]!",
+          // The mock's QUESTIONS is Semi Bold against display-6's 400. No `!`
+          // needed: the step reads `var(--tw-font-weight, <step weight>)`, so
+          // the weight utility wins through the variable, not the cascade.
+          "max-lg:font-semibold",
           "lg:col-start-1 lg:row-start-1 lg:px-10",
         )}
       >
@@ -277,7 +291,7 @@ export function FaqQuestionList({
               <h3
                 className={cn(
                   "relative mt-3 px-3 sm:px-4",
-                  "lg:col-start-1 lg:px-10 lg:[grid-row:var(--faq-row)]",
+                  "lg:col-start-1 lg:[grid-row:var(--faq-row)] lg:px-10",
                 )}
                 style={{ "--faq-row": index + 2 } as CSSProperties}
               >
@@ -285,10 +299,12 @@ export function FaqQuestionList({
                   {...triggerProps}
                   data-faq-trigger={item.id}
                   className={cn(
-                    "w-full min-h-14 cursor-pointer rounded-lg text-left",
-                    "border border-accordion-row-border bg-accordion-row",
+                    // rounded-2xl on phones (2026-09-05 mock, ~12px via the
+                    // phone tier); the drawn lg row keeps its 8.
+                    "min-h-14 w-full cursor-pointer rounded-2xl text-left lg:rounded-lg",
+                    "border-accordion-row-border bg-accordion-row border",
                     "px-4 py-4 sm:px-6",
-                    "text-lg text-accordion-row-fg",
+                    "text-accordion-row-fg text-lg",
                     // Press feedback. The row is the whole interaction and it
                     // had none: a click changed the panel and the thing you
                     // actually touched never acknowledged you. 1% is under a
@@ -336,7 +352,5 @@ export function FaqQuestionList({
 }
 
 function readTriggers(root: HTMLElement): HTMLButtonElement[] {
-  return Array.from(
-    root.querySelectorAll<HTMLButtonElement>("[data-faq-trigger]"),
-  );
+  return Array.from(root.querySelectorAll<HTMLButtonElement>("[data-faq-trigger]"));
 }

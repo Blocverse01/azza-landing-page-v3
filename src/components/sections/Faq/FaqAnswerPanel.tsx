@@ -119,13 +119,7 @@ export interface FaqAnswerPanelProps {
  * `opacity: 0` or clipped at `0fr`: the open classes set the final state
  * outright, and only the transition between states is removed.
  */
-export function FaqAnswerPanel({
-  open,
-  panelProps,
-  answer,
-  row,
-  position,
-}: FaqAnswerPanelProps) {
+export function FaqAnswerPanel({ open, panelProps, answer, row, position }: FaqAnswerPanelProps) {
   return (
     <div
       {...panelProps}
@@ -135,9 +129,7 @@ export function FaqAnswerPanel({
        * be re-placed beside its own question at `lg`+. Neither has any effect
        * while scripting is on. */
       data-faq-panel=""
-      style={
-        { "--faq-row": row, "--faq-position": position } as CSSProperties
-      }
+      style={{ "--faq-row": row, "--faq-position": position } as CSSProperties}
       className={cn(
         "relative grid px-3 sm:px-4",
         // <lg: the accordion height animation. S10.5 - never max-height.
@@ -149,9 +141,7 @@ export function FaqAnswerPanel({
         // its slow start delayed the one moment the visitor is watching.
         "transition-[grid-template-rows,visibility] duration-(--motion-base)",
         "motion-reduce:transition-none",
-        open
-          ? "visible grid-rows-[1fr] ease-out"
-          : "invisible grid-rows-[0fr] ease-in",
+        open ? "visible grid-rows-[1fr] ease-out" : "invisible grid-rows-[0fr] ease-in",
         // lg+: every panel stacks in column 2, spanning the question rows, and
         // the height is pinned so only the crossfade moves.
         "lg:col-start-2 lg:row-start-2 lg:[grid-row-end:-1] lg:self-start",
@@ -182,9 +172,7 @@ export function FaqAnswerPanel({
             "pt-3 lg:pt-0",
             "transition-opacity duration-(--motion-fast)",
             "motion-reduce:transition-none",
-            open
-              ? "opacity-100 delay-[40ms] ease-out"
-              : "opacity-0 delay-0 ease-in",
+            open ? "opacity-100 delay-[40ms] ease-out" : "opacity-0 delay-0 ease-in",
             // At lg the outer element owns the crossfade instead.
             "lg:opacity-100 lg:delay-0 lg:duration-(--motion-base) lg:ease-out",
           )}

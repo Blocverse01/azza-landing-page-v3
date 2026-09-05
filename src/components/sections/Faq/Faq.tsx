@@ -59,8 +59,14 @@ export function Faq({ items, headingId }: FaqProps) {
       aria-labelledby={id}
     >
       <Reveal>
-        {/* 412:1555 */}
-        <h2 id={id} className="text-2xl text-fg-body">
+        {/* 412:1555. VISUALLY `lg`+ ONLY since the 2026-09-05 mobile mock: on
+         * a phone the dark panel with its own QUESTIONS display line IS the
+         * section, and a second small heading above it is chrome the mock
+         * deletes. `sr-only` rather than `hidden` because the section's
+         * `aria-labelledby` points here at every width - the accessible name
+         * must survive the visual removal (the QUESTIONS line is a <p> by
+         * design, see FaqQuestionList). */}
+        <h2 id={id} className="text-fg-body text-2xl max-lg:sr-only">
           Frequently Asked Questions
         </h2>
       </Reveal>
@@ -79,8 +85,16 @@ export function Faq({ items, headingId }: FaqProps) {
          * by `overflow-hidden`. */}
         <div
           className={cn(
-            "relative w-full overflow-hidden rounded-6xl bg-accordion-card",
-            "p-5 sm:p-6",
+            /*
+             * THE LIGHT RIM IS `lg`+ ONLY (operator mock, 2026-09-05): on a
+             * phone the mock draws the dark panel straight onto the page -
+             * no #EBEBEB card, no rim padding - so below `lg` this wrapper
+             * contributes nothing visual and the panel's own radius is the
+             * card edge. Surface, radius and padding all move behind `lg:`
+             * together; `overflow-hidden` stays at every width for the mask.
+             */
+            "relative w-full overflow-hidden",
+            "lg:rounded-6xl lg:bg-accordion-card",
             "lg:pt-[68px] lg:pr-[59px] lg:pb-6 lg:pl-7",
           )}
         >
@@ -109,18 +123,13 @@ export function Faq({ items, headingId }: FaqProps) {
            * `lg`; above the list and left-aligned below it, where there is no
            * corner to spare. The mark is decorative and the word beside it is
            * the accessible name - one name, never two. */}
-          <div className="relative mb-4 flex items-center gap-2 lg:absolute lg:top-7 lg:right-15 lg:mb-0">
+          {/* Chip hidden on phones with the rim it sat on (2026-09-05 mock). */}
+          <div className="hidden items-center gap-2 lg:absolute lg:top-7 lg:right-15 lg:flex">
             <Logo variant="mark" height={40} />
-            <span className="font-brand text-brand-wordmark text-fg-on-contrast">
-              Azza
-            </span>
+            <span className="font-brand text-brand-wordmark text-fg-on-contrast">Azza</span>
           </div>
 
-          <FaqQuestionList
-            items={items}
-            openId={openId}
-            onOpenChange={setOpenId}
-          />
+          <FaqQuestionList items={items} openId={openId} onOpenChange={setOpenId} />
         </div>
       </Reveal>
     </Section>
