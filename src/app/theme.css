@@ -196,6 +196,27 @@
   --text-display-7--letter-spacing: -0.01em;
   --text-display-7--font-weight: 700;
 
+  /*
+   * 120 - the business infrastructure band's headline (868:728, "One
+   * infrastructure for local currencies, stablecoins & global payments.").
+   *
+   * Another genuinely new size: the ramp had nothing between 128 (`display-3`)
+   * and 100 (`display-4`), and the frame draws 120 in `Lemon Medium` at
+   * leading 0.9 with +2.4px of tracking (= +0.02em - positive, like
+   * `display-2`, and deliberate). The weight is authored 500; the licensed
+   * family on disk ships 400 / 600 / 700 only, so CSS font matching resolves
+   * 500 to the Regular face (400-500 searches downward first) with no
+   * synthetic bolding. If a Lemon Medium file is ever licensed, adding it to
+   * layout.tsx is the whole change - nothing here moves.
+   *
+   * Clamped on the ramp's own 320 -> 1440 basis, floor 36 (the `display-3`
+   * floor - the two steps are eight points apart at the top and share it).
+   */
+  --text-display-8: clamp(2.25rem, 0.75rem + 7.5vw, 7.5rem); /* 120 */
+  --text-display-8--line-height: 0.9;
+  --text-display-8--letter-spacing: 0.02em; /* positive, deliberate */
+  --text-display-8--font-weight: 500;
+
   /* --- Accent ramp (font-accent) ----------------------------------------- */
   --text-accent-watermark: clamp(3rem, 0.375rem + 13.125vw, 12.1875rem); /* 195 */
   --text-accent-watermark--line-height: 1.03;
@@ -497,6 +518,48 @@
   --text-5xl-tight--line-height: 1.1;
   --text-5xl-tight--letter-spacing: -0.03em;
   --text-5xl-tight--font-weight: 500;
+
+  /*
+   * The business infrastructure cards (868:690). Five roles the ramp did not
+   * have, all measured on 877:294 / 877:321 / 877:341 and all carrying
+   * `text-box: trim-both cap alphabetic` in the file - the consumer applies the
+   * trim, the token carries the metrics.
+   *
+   *   5xl-card     48 / 1.00 / -0.02em / 500  card title      877:301, 877:324, 877:345
+   *   lg-eyebrow   24 / 1.00 /  0em    / 600  card eyebrow    877:298, 877:322, 877:343
+   *   md-eyebrow   20 / 1.00 /  0em    / 600  panel eyebrow   877:495 (uppercase, by the consumer)
+   *   md-chip      20 / 1.00 /  0em    / 500  chip label      877:304, 877:309, 877:311, 877:351
+   *   md-card-body 20 / 1.20 / -0.02em / 400  card body       877:302, 877:325, 877:346
+   *
+   * `5xl-card` is not `5xl-tight`: the title is set solid (leading 1) at -2%,
+   * where every other 48 in the file is 1.1-1.13 at -3%. `md-card-body` is
+   * not `md-feature` (1.28 / -3%) or `md-card` (Medium) for the same reason -
+   * each is one metric off, and one metric off is a different style.
+   */
+  --text-5xl-card: clamp(1.75rem, 1.3929rem + 1.7857vw, 3rem); /* 48 */
+  --text-5xl-card--line-height: 1;
+  --text-5xl-card--letter-spacing: -0.02em;
+  --text-5xl-card--font-weight: 500;
+
+  --text-lg-eyebrow: 1.5rem; /* 24 */
+  --text-lg-eyebrow--line-height: 1;
+  --text-lg-eyebrow--letter-spacing: 0em;
+  --text-lg-eyebrow--font-weight: 600;
+
+  --text-md-eyebrow: 1.25rem; /* 20 */
+  --text-md-eyebrow--line-height: 1;
+  --text-md-eyebrow--letter-spacing: 0em;
+  --text-md-eyebrow--font-weight: 600;
+
+  --text-md-chip: 1.25rem;
+  --text-md-chip--line-height: 1;
+  --text-md-chip--letter-spacing: 0em;
+  --text-md-chip--font-weight: 500;
+
+  --text-md-card-body: 1.25rem;
+  --text-md-card-body--line-height: 1.2;
+  --text-md-card-body--letter-spacing: -0.02em;
+  --text-md-card-body--font-weight: 400;
 
   /* --- Brand ramp (font-brand) ------------------------------------------- */
   --text-brand-wordmark: 1.5rem; /* 24 */

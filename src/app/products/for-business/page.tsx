@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 
 import { Faq } from "@/components/sections/Faq";
 import { HeroBusiness } from "@/components/sections/HeroBusiness";
-import { WhyAzzaNarrative, WhyAzzaSteps } from "@/components/sections/WhyAzzaBusiness";
+import {
+  WhyAzzaInfrastructure,
+  WhyAzzaNarrative,
+  WhyAzzaSteps,
+} from "@/components/sections/WhyAzzaBusiness";
 import { FAQ_BUSINESS } from "@/content/faq";
 
 /** Copy is the hero standfirst (`800:320`), verbatim. */
@@ -16,10 +20,11 @@ export const metadata: Metadata = {
  * of `412:2412`; the hero and FAQ carried over unchanged, the narrative and
  * steps band were re-authored - see each component's header for the diff).
  *
- * Four sections in the frame's own order: the hero with its flag collage
- * (`800:314`), the centred narrative (`800:393`), the dark "How to get
- * started with Azza Business" steps band (`800:403`), then the shared FAQ
- * (`800:425`).
+ * Five sections: the hero with its flag collage (`800:314`), the centred
+ * narrative (`800:393`), the dark "One infrastructure" card grid (`868:690` -
+ * added to `412:2412` in the 2026-09 revision, where it follows the narrative
+ * directly), the dark "How to get started with Azza Business" steps band
+ * (`800:403`), then the shared FAQ (`800:425`).
  *
  * `WhyAzzaNarrative` and `WhyAzzaSteps` are two components, not one
  * parameterised block (D-012); they share a directory because they share a
@@ -33,6 +38,7 @@ export default function ForBusinessPage() {
     <>
       <HeroBusiness />
       <WhyAzzaNarrative />
+      <WhyAzzaInfrastructure />
       <WhyAzzaSteps />
       <Faq items={FAQ_BUSINESS} />
     </>

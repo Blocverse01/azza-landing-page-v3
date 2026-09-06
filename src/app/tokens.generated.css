@@ -59,7 +59,10 @@
   --color-palette-indigo-350: #A09EFF;
   --color-palette-indigo-400: #7976EA;
   --color-palette-indigo-450: #7774FD;
+  --color-palette-indigo-465: #585BE3;
+  --color-palette-indigo-475: #4F4CEC;
   --color-palette-indigo-500: #504FB2;
+  --color-palette-indigo-525: #423EEB;
   --color-palette-indigo-550: #4642E2;
   --color-palette-indigo-600: #3430E9;
   --color-palette-indigo-650: #312DDB;
@@ -110,6 +113,9 @@
   --color-surface-brand-muted: #EAEAFF;
   --color-surface-brand-tint: #E4E4F2;
   --color-surface-brand-solid: #3430E9;
+  --color-surface-brand-card: #423EEB;
+  --color-surface-brand-card-raised: #4F4CEC;
+  --color-surface-brand-card-chip: #585BE3;
   --color-surface-accent-lime: #D3FEB6;
   --color-surface-accent-lime-alt: #D4FFB7;
   --color-surface-accent-mint: #E2F7D4;
@@ -143,6 +149,7 @@
   --color-fg-display: #000000;
   --color-fg-brand: #3430E9;
   --color-fg-stat-lime: #305306;
+  --color-fg-accent-lime: #D3FEB6;
   --color-fg-ghost: #222222;
   --color-fg-on-inverse: #FFFFFF;
   --color-fg-on-inverse-muted: #FFFFFFCC;

@@ -121,7 +121,18 @@ export type IconName =
   | "flag-gh" // GHS
   | "flag-ke" // KES
   | "flag-za" // ZAR
-  | "flag-rw"; // RWF
+  | "flag-rw" // RWF
+  /*
+   * The business infrastructure cards (868:690): the Fluent `_regular` glyphs
+   * on the three "Collect / Convert / Settle" chips (877:313, 877:315, 877:319)
+   * and the two on-/off-ramp chips (877:487, 877:491 - the same
+   * `transfer_horizontal_regular` as 877:315). Exported at the design's 20px
+   * box, single-colour, `currentColor` - the file paints them accent lime on
+   * the brand-card chip and the chip supplies that via `text-fg-accent-lime`.
+   */
+  | "archive" //             877:313 - archive_regular
+  | "transfer-horizontal" // 877:315 - transfer_horizontal_regular
+  | "send-plane"; //         877:319 - send_plane_regular
 
 /** 16 / 20 / 24 / 32 / 40. `md` (24) is the default. */
 export type IconSize = "xs" | "sm" | "md" | "lg" | "xl";
