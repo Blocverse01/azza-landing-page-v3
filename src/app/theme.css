@@ -530,6 +530,7 @@
    *   md-eyebrow   20 / 1.00 /  0em    / 600  panel eyebrow   877:495 (uppercase, by the consumer)
    *   md-chip      20 / 1.00 /  0em    / 500  chip label      877:304, 877:309, 877:311, 877:351
    *   md-card-body 20 / 1.20 / -0.02em / 400  card body       877:302, 877:325, 877:346
+   *   md-cta       20 / 1.20 /  0em    / 500  card CTA label  880:524, 880:529, 880:534
    *
    * `5xl-card` is not `5xl-tight`: the title is set solid (leading 1) at -2%,
    * where every other 48 in the file is 1.1-1.13 at -3%. `md-card-body` is
@@ -560,6 +561,11 @@
   --text-md-card-body--line-height: 1.2;
   --text-md-card-body--letter-spacing: -0.02em;
   --text-md-card-body--font-weight: 400;
+
+  --text-md-cta: 1.25rem;
+  --text-md-cta--line-height: 1.2;
+  --text-md-cta--letter-spacing: 0em;
+  --text-md-cta--font-weight: 500;
 
   /* --- Brand ramp (font-brand) ------------------------------------------- */
   --text-brand-wordmark: 1.5rem; /* 24 */

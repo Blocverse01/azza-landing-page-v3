@@ -6,26 +6,28 @@ import infraOtcNairaRoll from "@design-system/assets/illustration/infra-otc-nair
 import infraRampFlagCoins from "@design-system/assets/illustration/infra-ramp-flag-coins.svg";
 
 import { Icon, type IconName, Media, Reveal, Section } from "@/components/ui";
+import { WHATSAPP_CHAT_URL } from "@/content/navigation";
 import { cn } from "@/lib/cn";
 
 /**
  * "Why Azza?" — the dark "One infrastructure" band on /products/for-business.
  *
- * Figma `868:690` ONLY (added to `412:2412` in the 2026-09 revision). It is
- * the third "Why Azza?" block on this route and, per DECISIONS D-012, a
- * different component from the narrative and the steps band next door:
- * different palette, different child count, a card grid where they have a
- * prose column and a split. Nothing is shared between the three files.
+ * Figma `868:690` ONLY (added to `412:2412` in the 2026-09 revision, revised
+ * again on 2026-09-07 - see THE 2026-09-07 REVISION below). It is the second
+ * "Why Azza?" block on this route and, per DECISIONS D-012, a different
+ * component from the narrative next door: different palette, different child
+ * count, a card grid where it has a prose column. Nothing is shared between
+ * the two files.
  *
- * Structure (868:690, measured 2026-09-06):
+ * Structure (868:690, re-measured 2026-09-07):
  *
- *   868:690  section   1440 x 1822, pad 120 all round, V gap 80  -> Section rhythm="deep"
+ *   868:690  section   1440 x 1932, pad 120 all round, V gap 80  -> Section rhythm="deep"
  *   868:728  h2        1200 x 300, Lemon Medium 120 / 0.9 / +2%  -> text-display-8
  *   879:512  grid      1200 wide, V gap 12
- *   879:511  row       H gap 12 -> two 594 x 590 cards
+ *   879:511  row       H gap 12 -> two 594 x 620 cards
  *   877:294  card 1    "Collect Local Currency & Stablecoins"  + coin stack art (877:453)
  *   877:321  card 2    "OTC Trading"                           + naira roll art  (877:433)
- *   877:341  card 3    1200 x 600, "On-Ramp & Off-Ramp"        + flag coins art  (877:380)
+ *   877:341  card 3    1200 x 680, "On-Ramp & Off-Ramp"        + flag coins art  (877:380)
  *
  * Every card: radius 32, fill `surface.brand-card`, pad 40 / 48, `flex-col
  * justify-between`, overflow clipped. Card 3 pads 160 on the right so its copy
@@ -34,6 +36,19 @@ import { cn } from "@/lib/cn";
  * because it is what makes those gaps land; where `text-box` is unsupported
  * (Firefox) each block reads a few px looser, never broken - the same
  * ExchangeWidget / WhyAzzaNarrative precedent.
+ *
+ * THE 2026-09-07 REVISION
+ * -----------------------
+ * Every card grew (590 -> 620, 600 -> 680) to take a white "Contact the team"
+ * CTA at its foot (880:525 / 880:528 / 880:533: 300 x 56, pad 16, radius 56,
+ * `action.card` ink, 24px `right_regular` chevron at a 10 gap). The cards'
+ * `justify-between` spreads copy / chips / CTA at exactly the drawn 30.5 and
+ * 40 gaps, so nothing is hard-coded for it. Card 3 lost its "Your product.
+ * Our infrastructure" chip - the line moved into the body copy as a second
+ * paragraph - and its raised panel gained a `line.brand-card-raised` hairline,
+ * a lighter fill (`surface.brand-card-raised`, #5551ED) and deeper chips
+ * (`surface.brand-card-chip-deep`); its eyebrow reads "On & Off-ramp crYpto".
+ * The art was re-exported because the taller cards reveal more of each group.
  *
  * THE ART
  * -------
@@ -46,9 +61,9 @@ import { cn } from "@/lib/cn";
  * cards 2 and 3 its right edge too, which is why the art is anchored to those
  * edges rather than placed by a top-left offset:
  *
- *   877:453  at (297, 357.14) in a 594 card, visible 278.856 x 232.855 -> left 50%,  bottom 0
- *   877:433  at (56, 335)     in a 594 card, visible 538 x 255         -> right 0,   bottom 0
- *   877:380  at (268.62, 152.95) in a 1200 card, visible 931.383 x 447.051 -> right 0, bottom 0
+ *   877:453  at (297, 357.14) in a 594 x 620 card, visible 278.856 x 262.855 -> left 50%, bottom 0
+ *   877:433  at (56, 335)     in a 594 x 620 card, visible 538 x 285         -> right 0,  bottom 0
+ *   877:380  at (253.92, 191.26) in a 1200 x 680 card, visible 946.076 x 488.739 -> right 0, bottom 0
  *
  * Widths are percentages of the card width, so the art scales with the card
  * and stays put at its corner at every width. The card's own `overflow-clip`
@@ -60,7 +75,9 @@ import { cn } from "@/lib/cn";
  * art above theirs. All three are drawn beneath here: in the file no ink
  * overlaps any text at the design width (the art groups' boxes do, their
  * pixels do not), so the render is identical, and at narrower widths, where
- * the copy wraps down into the art's box, the copy must win.
+ * the copy wraps down into the art's box, the copy must win. The CTA is
+ * likewise above the art: at the design width its right end (x 340) crosses
+ * the coin stack's box (from x 297) over the flat disc base, exactly as drawn.
  *
  * Server component (components.md S3). Nothing here holds state.
  */
@@ -77,7 +94,7 @@ interface InfraCard {
   id: string;
   eyebrow: string;
   title: string;
-  /** One or more paragraphs, verbatim. 877:325 is the only two-paragraph body. */
+  /** One or more paragraphs, verbatim. 877:325 and 877:346 are two-paragraph bodies. */
   body: readonly string[];
   art: {
     src: StaticImageData;
@@ -105,7 +122,7 @@ const CARD_COLLECT: InfraCard = {
   art: {
     src: infraCollectCoins,
     width: 278.856,
-    height: 232.855,
+    height: 262.855,
     stage: 594,
     anchor: "left",
     left: 297,
@@ -131,37 +148,43 @@ const CARD_OTC: InfraCard = {
   art: {
     src: infraOtcNairaRoll,
     width: 538,
-    height: 255,
+    height: 285,
     stage: 594,
     anchor: "right",
     sizes: "(min-width: 1024px) 538px, 91vw",
   },
 };
 
-/** 877:341 - 877:343, 877:345, 877:346. */
+/**
+ * 877:341 - 877:343, 877:345, 877:346. The body is two paragraphs separated by
+ * a blank line, transcribed verbatim - "Stablecoins" capitalised and the
+ * trailing space on the first paragraph trimmed, "Your product, Our
+ * infrastructure." with the comma and capital as authored.
+ */
 const CARD_RAMP: InfraCard = {
   id: "877-341",
   eyebrow: "On-Ramp & Off-Ramp Infrastructure",
   title: "Let your users move between local currencies and stablecoins.",
   body: [
-    "Integrate Azza's APIs into your platform and give your users a seamless way to move between local currency and stablecoins.",
+    "Integrate Azza's APIs into your platform and give your users a seamless way to move between local currency and Stablecoins.",
+    "Your product, Our infrastructure.",
   ],
   art: {
     src: infraRampFlagCoins,
-    width: 931.383,
-    height: 447.051,
+    width: 946.076,
+    height: 488.739,
     stage: 1200,
     anchor: "right",
-    sizes: "(min-width: 1440px) 931px, 78vw",
+    sizes: "(min-width: 1440px) 946px, 79vw",
   },
 };
 
 /**
- * 877:495 - transcribed verbatim, stray capital and all ("crYptocurrency");
- * the node is set uppercase, so the CSS `uppercase` on the panel eyebrow is
- * what the reader sees either way.
+ * 877:495 - transcribed verbatim, stray capital and all ("crYpto"); the node
+ * is set uppercase, so the CSS `uppercase` on the panel eyebrow is what the
+ * reader sees either way.
  */
-const RAMP_PANEL_EYEBROW = "On & Off ramp crYptocurrency";
+const RAMP_PANEL_EYEBROW = "On & Off-ramp crYpto";
 
 /** 877:474 and 877:489 - the two directions, as [from, to]. */
 const RAMP_PAIRS: readonly (readonly [string, string])[] = [
@@ -169,19 +192,27 @@ const RAMP_PAIRS: readonly (readonly [string, string])[] = [
   ["Stablecoins", "Local currency"],
 ];
 
-/** 877:351 */
-const RAMP_TAGLINE = "Your product. Our infrastructure";
+/**
+ * 880:524 / 880:529 / 880:534 - the same label on all three cards. The file
+ * draws no destination; "Contact the team" goes where every other contact
+ * affordance on the site goes, the WhatsApp chat (`WHATSAPP_CHAT_URL`, the nav
+ * CTA's own target), so the three CTAs are three routes to one conversation.
+ */
+const CTA_LABEL = "Contact the team";
 
 /*
  * Below `lg` the cards are content-sized and stack, and the file draws no
- * layout for that. Cards 2 and 3 carry their art under the LAST lines of copy
- * (card 1's sits beside its chips, as drawn), so each reserves the art's own
- * height at the foot of the card - as a percentage of the card width, which is
- * exactly what the art's height is (255 / 594 and 447 / 1200), plus the
- * card's bottom padding at that width (32 below `sm`, 48 from `sm`).
+ * layout for that. Every card's art sits under the foot of its copy once the
+ * copy wraps, so each reserves the art's own height at the foot of the card -
+ * as a percentage of the card width, which is exactly what the art's height
+ * is (262.855 / 594, 285 / 594 and 488.739 / 1200) - plus the card's bottom
+ * padding at that width (32 below `sm`, 48 from `sm`). Card 1 needs it too
+ * now: the CTA spans the phone card's whole content box and would otherwise
+ * sit across the coins, where the file has it crossing only the disc's edge.
  */
-const ART_RESERVE_OTC = "max-sm:pb-[calc(43%+2rem)] sm:max-lg:pb-[calc(43%+3rem)]";
-const ART_RESERVE_RAMP = "max-sm:pb-[calc(37%+2rem)] sm:max-lg:pb-[calc(37%+3rem)]";
+const ART_RESERVE_COLLECT = "max-sm:pb-[calc(44%+2rem)] sm:max-lg:pb-[calc(44%+3rem)]";
+const ART_RESERVE_OTC = "max-sm:pb-[calc(48%+2rem)] sm:max-lg:pb-[calc(48%+3rem)]";
+const ART_RESERVE_RAMP = "max-sm:pb-[calc(41%+2rem)] sm:max-lg:pb-[calc(41%+3rem)]";
 
 export default function WhyAzzaInfrastructure() {
   return (
@@ -228,7 +259,7 @@ export default function WhyAzzaInfrastructure() {
          * semantics from an un-marked list.
          */}
         <ul className="grid w-full grid-cols-1 gap-3 lg:grid-cols-2" role="list">
-          <InfraCardShell card={CARD_COLLECT} index={1}>
+          <InfraCardShell card={CARD_COLLECT} index={1} className={ART_RESERVE_COLLECT}>
             <CardCopy card={CARD_COLLECT} />
             {/*
              * 877:312 - the chip row wraps at the design's own 277 measure,
@@ -247,28 +278,31 @@ export default function WhyAzzaInfrastructure() {
                 </li>
               ))}
             </ul>
+            <ContactCta />
           </InfraCardShell>
 
           <InfraCardShell card={CARD_OTC} index={2} className={ART_RESERVE_OTC}>
             <CardCopy card={CARD_OTC} />
+            <ContactCta />
           </InfraCardShell>
 
           <InfraCardShell card={CARD_RAMP} index={3} wide className={ART_RESERVE_RAMP}>
             <CardCopy card={CARD_RAMP} />
 
             {/*
-             * 877:494 - the raised panel, hug-width (403 in the file), radius
-             * 32, pad 24, V gap 24; its two chips 877:474 / 877:489 stack at
-             * 12 and run label / arrow / label at a 16 gap.
+             * 877:494 - the raised panel, hug-width (387 in the file), radius
+             * 32, pad 24 inside a 1px `line.brand-card-raised` hairline, V gap
+             * 24; its two chips 877:474 / 877:489 stack at 12 and run
+             * label / arrow / label at a 16 gap on the deeper chip fill.
              */}
-            <div className="bg-surface-brand-card-raised rounded-5xl relative flex w-fit max-w-full flex-col gap-6 p-6">
+            <div className="bg-surface-brand-card-raised border-line-brand-card-raised rounded-5xl relative flex w-fit max-w-full min-w-0 flex-col gap-6 border p-6">
               <p className="text-md-eyebrow text-fg-accent-lime uppercase [text-box:trim-both_cap_alphabetic]">
                 {RAMP_PANEL_EYEBROW}
               </p>
               <ul className="flex flex-col gap-3" role="list">
                 {RAMP_PAIRS.map(([from, to]) => (
                   <li key={`${from}-${to}`} className="flex">
-                    <ChipPill className="gap-x-4">
+                    <ChipPill className="bg-surface-brand-card-chip-deep gap-x-4">
                       <ChipLabel>{from}</ChipLabel>
                       <Icon
                         name="transfer-horizontal"
@@ -283,12 +317,7 @@ export default function WhyAzzaInfrastructure() {
               </ul>
             </div>
 
-            {/* 877:348 */}
-            <div className="relative flex">
-              <ChipPill>
-                <ChipLabel>{RAMP_TAGLINE}</ChipLabel>
-              </ChipPill>
-            </div>
+            <ContactCta />
           </InfraCardShell>
         </ul>
       </div>
@@ -297,12 +326,12 @@ export default function WhyAzzaInfrastructure() {
 }
 
 /*
- * The card box. 590 / 600 tall in the file with the copy at the top and the
- * chips at the foot; `min-h` rather than `h` so a title that wraps one line
+ * The card box. 620 / 680 tall in the file with the copy at the top and the
+ * CTA at the foot; `min-h` rather than `h` so a title that wraps one line
  * further at `lg` (where the card is 458 wide) grows the card instead of
  * spilling out of it. At `xl`+ the content is well inside the minimum and the
  * card resolves to the drawn height exactly. The `gap-12` is the floor between
- * the copy and the chips wherever the minimum is not what sets the height.
+ * the blocks wherever the minimum is not what sets the height.
  */
 function InfraCardShell({
   card,
@@ -323,7 +352,7 @@ function InfraCardShell({
       index={index}
       className={cn(
         "bg-surface-brand-card rounded-5xl relative flex min-w-0 flex-col justify-between gap-12 overflow-clip px-6 py-8 sm:px-10 sm:py-12",
-        wide ? "lg:col-span-2 lg:min-h-[600px] lg:pr-40" : "lg:min-h-[590px]",
+        wide ? "lg:col-span-2 lg:min-h-[680px] lg:pr-40" : "lg:min-h-[620px]",
         className,
       )}
     >
@@ -345,10 +374,10 @@ function CardCopy({ card }: { card: InfraCard }) {
           {card.title}
         </h3>
         {/*
-         * 877:325 is one text node with an empty paragraph between its two
-         * sentences - a blank 24px line. With each paragraph cap-trimmed, the
-         * blank line plus the trimmed descent and cap gap come to ~34px from
-         * one baseline to the next cap, which is `gap-8.5`.
+         * 877:325 and 877:346 are each one text node with an empty paragraph
+         * between two sentences - a blank 24px line. With each paragraph
+         * cap-trimmed, the blank line plus the trimmed descent and cap gap
+         * come to ~34px from one baseline to the next cap, which is `gap-8.5`.
          */}
         <div className="text-md-card-body text-fg-on-brand flex flex-col gap-8.5">
           {card.body.map((paragraph) => (
@@ -387,7 +416,9 @@ function CardArt({ art }: { art: InfraCard["art"] }) {
 
 /*
  * 877:305 and its siblings: 40 tall, pad 12 / 16, radius 40 (a pill at this
- * height), `surface.brand-card-chip`, H gap 8 - 16 on the on-/off-ramp pair.
+ * height), `surface.brand-card-chip`, H gap 8 - 16 on the on-/off-ramp pair,
+ * which also sits on the deeper `surface.brand-card-chip-deep` since the
+ * 2026-09-07 revision (passed in by the panel).
  *
  * `min-h-10` and `flex-wrap` rather than a fixed 40: the on-/off-ramp pair
  * measures 337 in the file, wider than a phone card's content box, so below
@@ -415,5 +446,44 @@ function ChipLabel({ children }: { children: ReactNode }) {
     <span className="text-md-chip text-fg-on-brand whitespace-nowrap [text-box:trim-both_cap_alphabetic]">
       {children}
     </span>
+  );
+}
+
+/*
+ * 880:525 / 880:528 / 880:533 - the white CTA at the foot of every card:
+ * 300 x 56, pad 16, H gap 10, radius 56 (a pill at this height, so
+ * `rounded-pill`), `action.card` ink, 20px Medium label at leading 1.2, and
+ * the 24px `right_regular` chevron.
+ *
+ * Not `Button`: its size ladder tops out at a 16px Semi Bold label with a 20px
+ * icon at an 8 gap, and its variants map onto the `action.*` families it
+ * already knows - this control is a 20px Medium label with a 24px glyph on a
+ * family that exists only here. It borrows Button's interaction contract
+ * verbatim instead (components.md S10.6): hover recolours the fill only, with
+ * a `:focus-visible` twin; press adds `translateY(1px)` and the active fill;
+ * the release rides `--ease-spring`. `action.card-hover` / `-active` are the
+ * indigo-50 / indigo-100 tints the `soft` family steps through, which is what
+ * a white pill on brand blue reads as when pressed.
+ *
+ * `w-full max-w-[300px]`: the drawn 300 at every width the card can hold it,
+ * and the card's content box below that (a 320 phone leaves 232), so the pill
+ * never overruns the card.
+ */
+function ContactCta() {
+  return (
+    <div className="relative flex">
+      <a
+        href={WHATSAPP_CHAT_URL}
+        className={cn(
+          "bg-action-card text-action-card-fg rounded-pill text-md-cta inline-flex w-full max-w-[300px] items-center justify-center gap-2.5 p-4 no-underline select-none",
+          "ease-spring transition-[background-color,color,transform] duration-(--motion-fast)",
+          "hoverable:bg-action-card-hover focus-visible:bg-action-card-hover",
+          "active:bg-action-card-active active:translate-y-px active:duration-(--motion-instant) active:ease-out",
+        )}
+      >
+        {CTA_LABEL}
+        <Icon name="chevron-right-regular" size="md" />
+      </a>
+    </div>
   );
 }

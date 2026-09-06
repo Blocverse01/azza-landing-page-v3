@@ -132,7 +132,15 @@ export type IconName =
    */
   | "archive" //             877:313 - archive_regular
   | "transfer-horizontal" // 877:315 - transfer_horizontal_regular
-  | "send-plane"; //         877:319 - send_plane_regular
+  | "send-plane" //          877:319 - send_plane_regular
+  /*
+   * 880:526 (right_regular) - the trailing chevron on the cards' "Contact the
+   * team" CTA (2026-09-07 revision). Fluent's 24-box drawing, NOT
+   * `chevron-right`, which is the same family's 20-box glyph with a different
+   * optical inset (name match is not glyph match). Baked #423EEB in the
+   * export; shipped `currentColor` so the CTA inks it.
+   */
+  | "chevron-right-regular";
 
 /** 16 / 20 / 24 / 32 / 40. `md` (24) is the default. */
 export type IconSize = "xs" | "sm" | "md" | "lg" | "xl";

@@ -59,9 +59,11 @@
   --color-palette-indigo-350: #A09EFF;
   --color-palette-indigo-400: #7976EA;
   --color-palette-indigo-450: #7774FD;
+  --color-palette-indigo-455: #6F6BF0;
   --color-palette-indigo-465: #585BE3;
-  --color-palette-indigo-475: #4F4CEC;
+  --color-palette-indigo-475: #5551ED;
   --color-palette-indigo-500: #504FB2;
+  --color-palette-indigo-515: #4D49D5;
   --color-palette-indigo-525: #423EEB;
   --color-palette-indigo-550: #4642E2;
   --color-palette-indigo-600: #3430E9;
@@ -114,8 +116,9 @@
   --color-surface-brand-tint: #E4E4F2;
   --color-surface-brand-solid: #3430E9;
   --color-surface-brand-card: #423EEB;
-  --color-surface-brand-card-raised: #4F4CEC;
+  --color-surface-brand-card-raised: #5551ED;
   --color-surface-brand-card-chip: #585BE3;
+  --color-surface-brand-card-chip-deep: #4D49D5;
   --color-surface-accent-lime: #D3FEB6;
   --color-surface-accent-lime-alt: #D4FFB7;
   --color-surface-accent-mint: #E2F7D4;
@@ -174,6 +177,7 @@
   --color-line-on-inverse: #FFFFFF99;
   --color-line-brand: #3430E9;
   --color-line-brand-strong: #4642E2;
+  --color-line-brand-card-raised: #6F6BF0;
   --color-line-accent-lime: #D3FEB6;
   --color-line-placeholder: #787878;
   --color-action-primary: #111111;
@@ -204,6 +208,10 @@
   --color-action-ghost-hover: #F5F5F5;
   --color-action-ghost-active: #EBEBEB;
   --color-action-ghost-fg: #353535;
+  --color-action-card: #FFFFFF;
+  --color-action-card-hover: #F1F1FF;
+  --color-action-card-active: #EAEAFF;
+  --color-action-card-fg: #423EEB;
   --color-link-default: #353535;
   --color-link-hover: #1E1E1E;
   --color-link-active: #000000;
