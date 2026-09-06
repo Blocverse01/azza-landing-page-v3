@@ -797,6 +797,16 @@
       --text-xl: 1.5rem; /* 28 -> 24 */
       --text-xl-h2: 1.5rem;
 
+      /* The business infrastructure cards (868:690) - the same rungs, so the
+       * chip labels, CTA label and body copy land on one 18 and the card
+       * eyebrow on 20 (operator request, 2026-09-07: chip type must match the
+       * paragraph type on a phone). */
+      --text-lg-eyebrow: 1.25rem; /* 24 -> 20 */
+      --text-md-eyebrow: 1.125rem; /* 20 -> 18 */
+      --text-md-chip: 1.125rem;
+      --text-md-card-body: 1.125rem;
+      --text-md-cta: 1.125rem;
+
       /* --- DISPLAY --------------------------------------------------------
        * THE ONE PLACE THIS TIER MAKES TYPE BIGGER, NOT SMALLER (operator
        * report, 2026-09-02: "the hero header text is too small on mobile").

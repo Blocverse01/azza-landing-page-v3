@@ -271,7 +271,11 @@ export default function WhyAzzaInfrastructure() {
                 <li key={chip.label} className="flex">
                   <ChipPill>
                     {chip.icon ? (
-                      <Icon name={chip.icon} size="sm" className="text-fg-accent-lime" />
+                      <Icon
+                        name={chip.icon}
+                        size="sm"
+                        className="text-fg-accent-lime max-sm:size-4"
+                      />
                     ) : null}
                     <ChipLabel>{chip.label}</ChipLabel>
                   </ChipPill>
@@ -308,7 +312,7 @@ export default function WhyAzzaInfrastructure() {
                         name="transfer-horizontal"
                         size="sm"
                         title="to"
-                        className="text-fg-accent-lime"
+                        className="text-fg-accent-lime max-sm:size-4"
                       />
                       <ChipLabel>{to}</ChipLabel>
                     </ChipPill>
@@ -468,6 +472,13 @@ function ChipLabel({ children }: { children: ReactNode }) {
  * `w-full max-w-[300px]`: the drawn 300 at every width the card can hold it,
  * and the card's content box below that (a 320 phone leaves 232), so the pill
  * never overruns the card.
+ *
+ * PHONE TYPE. Below `sm` the theme's phone tier steps `md-cta` to 18 with the
+ * rest of the 20px rungs, and the chevron follows it down 4px (`max-sm:size-5`)
+ * so the glyph keeps its drawn proportion to the label; the chips' 20px
+ * glyphs do the same to 16 (`max-sm:size-4`). A class, not a `size` prop,
+ * because `Icon` writes `size` as width/height attributes and a utility
+ * class is what can change them at a breakpoint.
  */
 function ContactCta() {
   return (
@@ -482,7 +493,7 @@ function ContactCta() {
         )}
       >
         {CTA_LABEL}
-        <Icon name="chevron-right-regular" size="md" />
+        <Icon name="chevron-right-regular" size="md" className="max-sm:size-5" />
       </a>
     </div>
   );
