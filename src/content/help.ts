@@ -1,5 +1,7 @@
 import type { IconName } from "@/components/ui";
 
+import { SOCIAL_URLS, WHATSAPP_CHAT_URL } from "./navigation";
+
 /**
  * `/help` content - Figma `500:1736` (closed) and `500:2305` (opened).
  *
@@ -256,27 +258,36 @@ export const HELP_COMMUNITY_STANDFIRST = HELP_HUB_STANDFIRST;
  * (`500:1805`, `500:1810`, `500:1815` are byte-identical), so the Instagram and
  * WhatsApp rows describe X. Source-file defect; ships as designed.
  */
-const HELP_COMMUNITY_DESCRIPTION =
-  "Follow us on X to get the latest news and updates.";
+const HELP_COMMUNITY_DESCRIPTION = "Follow us on X to get the latest news and updates.";
 
+/*
+ * `href` is populated now (operator, 2026-09-06): the real account URLs
+ * arrived - see SOCIAL_URLS in navigation.ts, the one place a profile URL
+ * lives - and WhatsApp reuses the confirmed D-041 chat number. The interface's
+ * "absent for all three" note described the design source, which still
+ * authors no destination; the rows stop being dead labels regardless.
+ */
 export const HELP_COMMUNITY: readonly HelpCommunityLink[] = [
   {
     id: "x",
     label: "X (Twitter)",
     description: HELP_COMMUNITY_DESCRIPTION,
     icon: "social-x",
+    href: SOCIAL_URLS.x,
   },
   {
     id: "instagram",
     label: "Instagram",
     description: HELP_COMMUNITY_DESCRIPTION,
     icon: "social-instagram",
+    href: SOCIAL_URLS.instagram,
   },
   {
     id: "whatsapp",
     label: "WhatsApp",
     description: HELP_COMMUNITY_DESCRIPTION,
     icon: "social-whatsapp",
+    href: WHATSAPP_CHAT_URL,
   },
 ];
 
@@ -321,9 +332,7 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
 /** The single authored article, for a route that wants to land on the open state. */
 export const HELP_ARTICLE: HelpArticle = HELP_ARTICLES[0];
 
-export function getHelpArticle(
-  topicId: string | null | undefined,
-): HelpArticle | undefined {
+export function getHelpArticle(topicId: string | null | undefined): HelpArticle | undefined {
   if (!topicId) return undefined;
   return HELP_ARTICLES.find((article) => article.topicId === topicId);
 }

@@ -89,14 +89,26 @@ const WHATSAPP_NUMBER = "2347041900011";
 export const WHATSAPP_CHAT_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
 
 /**
- * PLACEHOLDER - the design names the three social destinations but carries no
- * URLs and no handles. Empty handles resolve to each platform's own home page,
- * which is a real destination rather than an invented account.
+ * THE REAL ACCOUNTS - supplied by the operator on 2026-09-06, replacing the
+ * empty-handle placeholders that resolved to each platform's home page.
+ *
+ * Canonical profile URLs, exactly as each platform's address bar shows them.
+ * The operator's pasted links carried per-share tracking tokens (Instagram's
+ * `stkn`, YouTube's `si`, TikTok's `_r`/`_t`) - those identify the person who
+ * copied the link, not the profile, so they are stripped rather than shipped
+ * on a public site. Note the handles genuinely differ per platform: `useazza`
+ * on X and YouTube, `azza.hq` on Instagram, `useazza_` (trailing underscore)
+ * on TikTok.
+ *
+ * Exported as the ONE place a profile URL lives: Help's community rows import
+ * from here. D-037 still governs which PLATFORMS each surface shows; this
+ * object only settles where each platform points.
  */
-const SOCIAL_HANDLE = {
-  x: "",
-  instagram: "",
-  youtube: "",
+export const SOCIAL_URLS = {
+  x: "https://x.com/useazza",
+  instagram: "https://www.instagram.com/azza.hq",
+  youtube: "https://www.youtube.com/@useazza",
+  tiktok: "https://www.tiktok.com/@useazza_",
 } as const;
 
 /** Products - REDESIGNED, now `771:303` (was `94:850`). Same three rows, same
@@ -159,21 +171,36 @@ const PRODUCT_ITEMS: readonly NavDropdownItem[] = [
 const SOCIAL_ITEMS: readonly NavDropdownItem[] = [
   {
     label: "Follow on X (Twitter)",
-    href: `https://x.com/${SOCIAL_HANDLE.x}`,
+    href: SOCIAL_URLS.x,
     icon: "social-x-regular",
     iconFilled: "brand-x",
   },
   {
     label: "Follow on Instagram",
-    href: `https://www.instagram.com/${SOCIAL_HANDLE.instagram}`,
+    href: SOCIAL_URLS.instagram,
     icon: "social-instagram-regular",
     iconFilled: "social-instagram-filled",
   },
   {
     label: "Subscribe to YouTube",
-    href: `https://www.youtube.com/${SOCIAL_HANDLE.youtube}`,
+    href: SOCIAL_URLS.youtube,
     icon: "social-youtube-regular",
     iconFilled: "social-youtube-filled",
+  },
+  /*
+   * NOT IN 776:464 - the drawn dropdown authors three rows. The TikTok row is
+   * an operator addition (2026-09-06, supplied with the real account URLs).
+   * TikTok's flat brand mark is a solid silhouette with no outline variant, so
+   * the rest state reuses the share row's `share-tiktok-filled` (a
+   * currentColor shape - the tile's grey token paints it, matching the other
+   * rows' rest ink) and the hover state gets `social-tiktok-filled`, the same
+   * path baked black the way `brand-x`'s hover block is.
+   */
+  {
+    label: "Follow on TikTok",
+    href: SOCIAL_URLS.tiktok,
+    icon: "share-tiktok-filled",
+    iconFilled: "social-tiktok-filled",
   },
 ];
 

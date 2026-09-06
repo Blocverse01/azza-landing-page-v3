@@ -77,6 +77,7 @@ export type IconName =
   | "social-youtube-regular" //   776:459 - Socials rest
   | "social-instagram-filled" //  776:455 - Socials hover, #FF0069
   | "social-youtube-filled" //    776:457 - Socials hover, #FF4040
+  | "social-tiktok-filled" //     809:304's path baked black - Socials hover (operator row, 2026-09-06)
   /*
    * The crypto-wallet converter's asset and currency pickers (operator request,
    * 2026-08-11: assets USDC / USDT / cNGN, currencies XOF / UGX / GHS / KES /

@@ -66,9 +66,7 @@ type FocusIntent = "article" | "hub" | "keep";
  * floor collapses to 0.01ms under `prefers-reduced-motion: reduce`.
  */
 export function HelpSupport({ topics, article }: HelpSupportProps) {
-  const [activeTopicId, setActiveTopicId] = useState<string | null>(
-    article?.topicId ?? null,
-  );
+  const [activeTopicId, setActiveTopicId] = useState<string | null>(article?.topicId ?? null);
 
   const hubHeadingRef = useRef<HTMLHeadingElement | null>(null);
   const articleRef = useRef<HTMLElement | null>(null);
@@ -80,13 +78,10 @@ export function HelpSupport({ topics, article }: HelpSupportProps) {
       : getHelpArticle(activeTopicId)
     : undefined;
 
-  const selectTopic = useCallback(
-    (topicId: string | null, intent: FocusIntent) => {
-      pendingFocus.current = intent;
-      setActiveTopicId(topicId);
-    },
-    [],
-  );
+  const selectTopic = useCallback((topicId: string | null, intent: FocusIntent) => {
+    pendingFocus.current = intent;
+    setActiveTopicId(topicId);
+  }, []);
 
   // Runs only after a user-initiated change, never on mount: `pendingFocus` is
   // null until a handler sets it, so the initial render never steals focus.
@@ -98,25 +93,17 @@ export function HelpSupport({ topics, article }: HelpSupportProps) {
     }
     pendingFocus.current = null;
 
-    const node =
-      intent === "article" ? articleRef.current : hubHeadingRef.current;
+    const node = intent === "article" ? articleRef.current : hubHeadingRef.current;
     node?.focus();
   }, [activeTopicId]);
 
   return (
     <Section rhythm="standard" container="wide" align="start" gap={0}>
-      <div
-        className={cn(
-          "flex w-full flex-col gap-10",
-          "lg:flex-row lg:items-start lg:gap-18",
-        )}
-      >
+      <div className={cn("flex w-full flex-col gap-10", "lg:flex-row lg:items-start lg:gap-18")}>
         <HelpSidebar
           topics={topics}
           activeTopicId={activeTopicId}
-          onSelectTopic={(topicId, open) =>
-            selectTopic(open ? topicId : null, "keep")
-          }
+          onSelectTopic={(topicId, open) => selectTopic(open ? topicId : null, "keep")}
         />
 
         {/*
@@ -140,7 +127,7 @@ export function HelpSupport({ topics, article }: HelpSupportProps) {
          * 217 x 4px = 868, the same spacing-scale idiom as the sidebar's
          * `lg:w-75` (300).
          */}
-        <div className="flex w-full min-w-0 flex-col lg:flex-1 lg:max-w-217">
+        <div className="flex w-full min-w-0 flex-col lg:max-w-217 lg:flex-1">
           {openArticle ? (
             /* `500:2334` - V, gap 48. */
             <div className="flex w-full min-w-0 flex-col gap-12">
@@ -168,11 +155,7 @@ export function HelpSupport({ topics, article }: HelpSupportProps) {
                  * matching the frame. Same number on `500:1797` below.
                  */}
                 <header className="flex w-full max-w-[586px] flex-col gap-4">
-                  <h1
-                    ref={hubHeadingRef}
-                    tabIndex={-1}
-                    className="text-4xl text-fg-primary"
-                  >
+                  <h1 ref={hubHeadingRef} tabIndex={-1} className="text-fg-primary text-4xl">
                     {HELP_HUB_HEADING}
                   </h1>
                   <p className="text-md text-fg-muted">{HELP_HUB_STANDFIRST}</p>
@@ -191,15 +174,10 @@ export function HelpSupport({ topics, article }: HelpSupportProps) {
               >
                 {/* `500:1797` - 586 x 84, the closed state's header measure. */}
                 <Reveal className="flex w-full max-w-[586px] flex-col gap-4">
-                  <h2
-                    id="help-community-heading"
-                    className="text-2xl-section text-fg-primary"
-                  >
+                  <h2 id="help-community-heading" className="text-2xl-section text-fg-primary">
                     {HELP_COMMUNITY_HEADING}
                   </h2>
-                  <p className="text-md text-fg-muted">
-                    {HELP_COMMUNITY_STANDFIRST}
-                  </p>
+                  <p className="text-md text-fg-muted">{HELP_COMMUNITY_STANDFIRST}</p>
                 </Reveal>
 
                 {/*
@@ -221,22 +199,36 @@ export function HelpSupport({ topics, article }: HelpSupportProps) {
                    * drops list semantics from an un-marked list. `display: grid`
                    * is a second, independent trigger for the same loss.
                    */}
-                  <ul
-                    role="list"
-                    className="grid grid-cols-1 gap-10 xs:grid-cols-2 md:grid-cols-3"
-                  >
+                  <ul role="list" className="xs:grid-cols-2 grid grid-cols-1 gap-10 md:grid-cols-3">
                     {HELP_COMMUNITY.map((item) => (
                       <li key={item.id} className="flex min-w-0 gap-3">
-                        <span className="flex size-8 shrink-0 items-center justify-center text-fg-body">
+                        <span className="text-fg-body flex size-8 shrink-0 items-center justify-center">
                           <Icon name={item.icon} size="sm" />
                         </span>
                         <div className="flex min-w-0 flex-col gap-2">
-                          <h3 className="text-base text-fg-body">
-                            {item.label}
+                          {/*
+                           * The label became the row's link when the real
+                           * account URLs arrived (help.ts, 2026-09-06). The
+                           * anchor keeps the label's own ink - the design
+                           * draws no link styling here - and the guard keeps
+                           * a plain heading for any future row that ships
+                           * without a destination again.
+                           */}
+                          <h3 className="text-fg-body text-base">
+                            {item.href ? (
+                              <a
+                                href={item.href}
+                                target="_blank"
+                                rel="noreferrer noopener"
+                                className="hoverable:underline text-inherit no-underline"
+                              >
+                                {item.label}
+                              </a>
+                            ) : (
+                              item.label
+                            )}
                           </h3>
-                          <p className="text-sm-regular text-fg-muted">
-                            {item.description}
-                          </p>
+                          <p className="text-sm-regular text-fg-muted">{item.description}</p>
                         </div>
                       </li>
                     ))}
