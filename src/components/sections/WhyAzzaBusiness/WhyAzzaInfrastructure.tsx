@@ -223,8 +223,9 @@ export default function WhyAzzaInfrastructure() {
          * spanning both. Below `lg` the 594 cards would fall under 460 and the
          * 48px title would wrap to four lines, so they stack.
          *
-         * `role="list"` for the Safari/VoiceOver reason WhyAzzaSteps records:
-         * preflight strips the markers and with them the list semantics.
+         * `role="list"` for the reason WhyAzzaCrossBorder.tsx records: Tailwind's
+         * preflight sets `list-style: none`, and Safari/VoiceOver drops list
+         * semantics from an un-marked list.
          */}
         <ul className="grid w-full grid-cols-1 gap-3 lg:grid-cols-2" role="list">
           <InfraCardShell card={CARD_COLLECT} index={1}>

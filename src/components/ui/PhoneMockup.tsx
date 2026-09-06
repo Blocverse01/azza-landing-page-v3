@@ -71,7 +71,8 @@ export interface PhoneMockupProps {
  *   - `screen` still defaults to "redacted" (a flat surface.placeholder panel,
  *     `aria-hidden`), so no consumer shows a chat screen it did not ask for.
  *   - `screen="whatsapp-business"` renders the scrubbed business-onboarding
- *     chat. Its one consumer is `WhyAzzaSteps` (800:421).
+ *     chat. Its one consumer, `WhyAzzaSteps` (800:421), was retired on
+ *     2026-09-07; the screen stays available for the next design that draws it.
  *   - `screen="whatsapp-transfer"` serves all four other mockups
  *     (507:764, 570:465, 553:298, 553:304 - one file, md5-verified).
  */
