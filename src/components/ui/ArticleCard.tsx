@@ -189,12 +189,27 @@ export function ArticleCard({
       bordered={false}
       className={cn("relative flex h-full flex-col gap-6", className)}
     >
+      {/*
+       * 40/21 AT EVERY BREAKPOINT AND BOTH VARIANTS (operator, 2026-09-06:
+       * "adapt the frame size to the prevalent dimensions of the covers ...
+       * so nothing is getting cut off and the full art is in view").
+       *
+       * The drawn frames - 10/3 (featured banner), 2/1 and 9/7 (grid), 3/2
+       * (base) - were shaped around the retired dummy bitmaps. Every cover
+       * the Hashnode feed serves today measures 3600x1890, exactly 40:21
+       * (Hashnode's own standard cover frame), and inside the drawn 10/3 the
+       * banner showed 57% of the art's height while 9/7 cut a third of its
+       * width - each cover carries composed art and baked text, so the crops
+       * read as a broken design rather than a tighter one. One constant
+       * rather than per-image `width/height` so the grid stays uniform if a
+       * future cover arrives at an odd size - that one crops, the grid holds.
+       */}
       <Media
         src={post.image}
         alt={post.imageAlt}
-        ratio={featured ? "10/3" : "9/7"}
-        ratioMd={featured ? "2/1" : "9/7"}
-        ratioBase="3/2"
+        ratio="40/21"
+        ratioMd="40/21"
+        ratioBase="40/21"
         placeholderColor={post.placeholderColor}
         position={imagePosition ?? cropAnchor(post.image)}
         priority={priority}
