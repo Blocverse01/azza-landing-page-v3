@@ -261,26 +261,41 @@ export function ArticleCard({
         </div>
       ) : (
         <>
+          {/*
+           * UNIFORM CARDS (operator, 2026-09-06): real feed titles and
+           * standfirsts run anywhere from one line to four, so the columns
+           * in a 3-up ended at different heights. Title and standfirst are
+           * clamped to two lines each, and the chip takes `mt-auto` so the
+           * foot of every card sits on the same line even when a clamped
+           * block comes up a line short. The clamp is visual only - the
+           * link's accessible name is still the full title string.
+           */}
           <div className="flex flex-col gap-4">
-            <h3 className="text-lg-card">
+            <h3 className="text-lg-card line-clamp-2">
               <StretchedLink href={`/blog/${post.slug}`} className={TITLE_SWEEP}>
                 {post.title}
               </StretchedLink>
             </h3>
 
             {post.standfirst ? (
-              <p className="text-sm-body text-fg-body-strong">{post.standfirst}</p>
+              <p className="text-sm-body text-fg-body-strong line-clamp-2">{post.standfirst}</p>
             ) : null}
 
-            {/* 802:649 - 20px Medium at -0.03em, `fg.subtle`. */}
-            <p className="text-md text-fg-subtle">
+            {/*
+             * Body-text size (operator, 2026-09-06: "same font size as the
+             * body text"), keeping the drawn 802:649 ink and Medium weight -
+             * `text-sm-body` carries 400, so the weight is restated.
+             */}
+            <p className="text-sm-body text-fg-subtle font-medium">
               <time dateTime={post.date}>{published.toLocaleDateString("en-US", DATE_FORMAT)}</time>
               {post.readingTime ? <> · {post.readingTime}</> : null}
             </p>
           </div>
 
-          {/* 802:645 - the chip closes the card, 24px under the meta line. */}
-          <Pill variant="tag">{post.category}</Pill>
+          {/* 802:645 - the chip closes the card, pinned to the card's foot. */}
+          <Pill variant="tag" className="mt-auto">
+            {post.category}
+          </Pill>
         </>
       )}
     </Card>
