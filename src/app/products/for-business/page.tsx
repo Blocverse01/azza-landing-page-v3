@@ -17,9 +17,9 @@ export const metadata: Metadata = {
  * re-authored - see its header for the diff).
  *
  * Four sections: the hero with its flag collage (`800:314`), the centred
- * narrative (`800:393`), the dark "One infrastructure" card grid (`868:690` -
- * added to `412:2412` in the 2026-09 revision, where it follows the narrative
- * directly), then the shared FAQ (`800:425`). The "How to get started" steps
+ * narrative (`800:393`), the dark "One infrastructure" card grid (`888:1479`, the 2026-09-08
+ * re-authoring of `868:690`, added to `412:2412` in the 2026-09 revision where
+ * it follows the narrative directly; `885:540` is its phone frame), then the shared FAQ (`800:425`). The "How to get started" steps
  * band (`800:403`) sat between the grid and the FAQ until 2026-09-07, when the
  * operator retired it.
  *
