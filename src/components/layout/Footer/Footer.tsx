@@ -156,6 +156,14 @@ export function Footer({ className, currentPath }: FooterProps) {
              * responsive.md S7.1.1 requires. `flex-wrap` is the safety net: if a
              * fallback face measures wider than Inter, a column drops to a
              * second row rather than pushing the page sideways.
+             *
+             * THE `xl` GAP IS 68, NOT THE DRAWN 80 (2026-09-07). "Chat with the
+             * team" replaced the phone number in the Contact column and measures
+             * ~150 where 07041900011 measured 119, so the row is ~593 + gaps and
+             * the drawn 80 (802 + 31) no longer fits the 802 the block has at
+             * the pin - the fourth column wrapped under the first. 68 is the
+             * largest 4px step at which 593 + 3 x gap stays inside 802; it is
+             * the row that is preserved, not the gap.
              */}
             <nav aria-label="Footer" className="w-full">
               <div
@@ -165,7 +173,7 @@ export function Footer({ className, currentPath }: FooterProps) {
                   "sm:gap-x-16",
                   "md:flex md:flex-row md:flex-wrap md:gap-x-10 md:gap-y-12",
                   "lg:gap-x-12",
-                  "xl:gap-x-20",
+                  "xl:gap-x-17",
                 )}
               >
                 {FOOTER_COLUMNS.map((column) => (
