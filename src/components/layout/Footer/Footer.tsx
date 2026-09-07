@@ -52,10 +52,21 @@ function isExternalHref(href: string): boolean {
  */
 const LINK_CLASS = cn(
   "-my-3 inline-flex items-center py-3",
-  "text-base text-link-on-inverse",
+  "text-base",
   "transition-colors duration-(--motion-fast) ease-out",
   "hoverable:text-link-on-inverse-hover focus-visible:text-link-on-inverse-hover",
 );
+
+/**
+ * The rest colour, chosen per link rather than baked into LINK_CLASS because
+ * `cn` does not merge and two `text-*` colours on one element would leave the
+ * winner to Tailwind's emission order. `tone: "brand"` (content/footer.ts)
+ * is the one link inked in Azza blue; everything else is the column grey.
+ * Both share the white hover.
+ */
+function linkClass(tone: "brand" | undefined): string {
+  return cn(LINK_CLASS, tone === "brand" ? "text-link-on-inverse-brand" : "text-link-on-inverse");
+}
 
 /**
  * The site footer - Figma `498:599` and its seven identical siblings
@@ -186,17 +197,15 @@ export function Footer({ className, currentPath }: FooterProps) {
                         return (
                           <li key={link.href} className="flex">
                             {external ? (
-                              <a href={link.href} className={LINK_CLASS}>
+                              <a href={link.href} className={linkClass(link.tone)}>
                                 {link.label}
                               </a>
                             ) : (
                               <Link
                                 href={link.href}
                                 prefetch={link.prefetch}
-                                aria-current={
-                                  currentPath === link.href ? "page" : undefined
-                                }
-                                className={LINK_CLASS}
+                                aria-current={currentPath === link.href ? "page" : undefined}
+                                className={linkClass(link.tone)}
                               >
                                 {link.label}
                               </Link>

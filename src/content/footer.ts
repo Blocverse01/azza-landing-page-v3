@@ -8,7 +8,8 @@
  *   498:615-618  Products     Crypto Wallet / Cross-Border Payments / Azza Business
  *   498:620-623  Resources    Blog / Documentation / Help & Support
  *   498:625-628  Company      Media Kit / Privacy Policy / Terms of Use
- *   498:630-632  Contact Us   07041900011 / hq@azza.com
+ *   498:630-632  Contact Us   07041900011 / hq@azza.com  (the number was replaced by
+ *                             "Chat with the team" on 2026-09-07 - see the column)
  *   498:612      RC line      "RC: 7810789"
  *   498:635/636  legal row    "(c) 2026 - Use Azza LTD"  /  "All rights reserved."
  *
@@ -41,6 +42,13 @@ export interface NavLink {
    * same treatment, same destination. Delete the flag when the route lands.
    */
   prefetch?: false;
+  /**
+   * "brand" inks the link in Azza blue (`link.on-inverse-brand`) instead of the
+   * column grey. One consumer: the footer's "Chat with the team" (operator
+   * request, 2026-09-07), a highlighted contact affordance where the design
+   * once printed a phone number.
+   */
+  tone?: "brand";
 }
 
 export interface FooterColumn {
@@ -97,9 +105,14 @@ export const FOOTER_COLUMNS: readonly FooterColumn[] = [
   {
     heading: "Contact Us",
     links: [
-      // Kept in the authored local Nigerian format. Promoting it to +234 would
-      // be inventing a country code the design never states.
-      { label: "07041900011", href: "tel:07041900011" },
+      // Operator request, 2026-09-07: the design's phone number (498:630,
+      // "07041900011") is replaced by a WhatsApp deep link to the team, inked
+      // in Azza blue. The prefilled text is the operator's, verbatim.
+      {
+        label: "Chat with the team",
+        href: "https://api.whatsapp.com/send/?phone=2348146843432&text=Hi+Victor%2C+Im+from+Azza+Website.&type=phone_number&app_absent=0",
+        tone: "brand",
+      },
       { label: "hq@azza.com", href: "mailto:hq@azza.com" },
     ],
   },
