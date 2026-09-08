@@ -9,7 +9,7 @@ import infraRampFlagCoinsPhone from "@design-system/assets/illustration/infra-ra
 import infraRampFlagCoins from "@design-system/assets/illustration/infra-ramp-flag-coins.svg";
 
 import { Icon, type IconName, Media, Reveal, Section } from "@/components/ui";
-import { WHATSAPP_CHAT_URL } from "@/content/navigation";
+import { WHATSAPP_TEAM_URL } from "@/content/navigation";
 import { cn } from "@/lib/cn";
 
 /**
@@ -231,10 +231,10 @@ const RAMP_PAIRS: readonly (readonly [string, string])[] = [
 
 /**
  * 888:1533 / 888:1620 / 888:1643 - the same label on all three cards. The
- * file draws no destination; "Contact the team" goes where every other
- * contact affordance on the site goes, the WhatsApp chat (`WHATSAPP_CHAT_URL`,
- * the nav CTA's own target), so the three CTAs are three routes to one
- * conversation.
+ * file draws no destination; "Contact the team" goes to the team's own
+ * WhatsApp (`WHATSAPP_TEAM_URL` - the footer's "Chat with the team" and
+ * "Help & Support" target, a person rather than the bot the nav CTA opens),
+ * so the three CTAs are three routes to one conversation.
  */
 const CTA_LABEL = "Contact the team";
 
@@ -529,7 +529,7 @@ function ContactCta() {
   return (
     <div className="relative flex">
       <a
-        href={WHATSAPP_CHAT_URL}
+        href={WHATSAPP_TEAM_URL}
         className={cn(
           "bg-action-card text-action-card-fg rounded-pill text-md-cta inline-flex w-full max-w-[300px] items-center justify-center gap-2.5 p-4 no-underline select-none",
           "ease-spring transition-[background-color,color,transform] duration-(--motion-fast)",

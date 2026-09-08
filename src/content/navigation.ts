@@ -7,7 +7,8 @@ import type { IconName } from "@/components/ui";
  * inside a component. Contract: design/components.md S7.3.
  *
  * Copy is transcribed verbatim from the Figma nodes:
- *   bar          412:2066  (Products / Socials / Blog / About Us / Chat with Azza)
+ *   bar          412:2066  (Products / Socials / Blog / About Us / Chat with Azza -
+ *                           About Us retired 2026-09-08, see PRIMARY_NAV)
  *   Products     94:850    (three rows, title + description)
  *   Socials      765:340   (three rows, label only) - supersedes 63:350
  */
@@ -87,6 +88,18 @@ export interface NavItem extends Omit<NavLink, "href"> {
 const WHATSAPP_NUMBER = "2347041900011";
 
 export const WHATSAPP_CHAT_URL = `https://wa.me/${WHATSAPP_NUMBER}`;
+
+/**
+ * THE TEAM'S OWN CHAT - a different number from the bot above (2348146843432),
+ * supplied by the operator on 2026-09-07 for the footer's "Chat with the team"
+ * and extended on 2026-09-08 to "Help & Support" and the business page's
+ * "Contact the team" CTAs. The prefilled text is the operator's, verbatim
+ * (so the team can see the message came from the site). The one place this
+ * URL lives; the footer, the business cards and anything else that means
+ * "talk to a person, not the bot" imports it from here.
+ */
+export const WHATSAPP_TEAM_URL =
+  "https://api.whatsapp.com/send/?phone=2348146843432&text=Hi+Victor%2C+Im+from+Azza+Website.&type=phone_number&app_absent=0";
 
 /**
  * THE REAL ACCOUNTS - supplied by the operator on 2026-09-06, replacing the
@@ -205,20 +218,24 @@ const SOCIAL_ITEMS: readonly NavDropdownItem[] = [
 ];
 
 /**
- * The four bar destinations, in design order (412:2077 / 412:2081 / 412:2085 /
- * 412:2086).
+ * The bar destinations, in design order (412:2077 / 412:2081 / 412:2085).
  *
- * `/about` has no frame in the Figma file and no route in the D-002 sitemap.
- * The label is the designer's, so the destination is kebab-cased from it the
- * same way every other route was, and the gap is raised rather than papered
- * over by pointing the link at a page that exists but is not About Us. It
- * therefore carries `prefetch: false` - see `NavLink.prefetch`.
+ * "ABOUT US" IS RETIRED (operator, 2026-09-08: "remove the about page").
+ * 412:2086 drew it, but `/about` never had a frame in the Figma file nor a
+ * route in the D-002 sitemap - the link only ever pointed at a page that did
+ * not exist, which is why it carried `prefetch: false`. It is kept here as a
+ * comment rather than deleted so the day an About page is designed the entry
+ * goes back in one line, in its designed position:
+ *
+ *   { label: "About Us", href: "/about", prefetch: false },
+ *
+ * TopNav and MobileNavPanel both render this list, so the bar and the sheet
+ * lose the item together.
  */
 export const PRIMARY_NAV: readonly NavItem[] = [
   { label: "Products", items: PRODUCT_ITEMS },
   { label: "Socials", items: SOCIAL_ITEMS },
   { label: "Blog", href: "/blog" },
-  { label: "About Us", href: "/about", prefetch: false },
 ];
 
 /** 412:2087 - the product's entire conversion action. */

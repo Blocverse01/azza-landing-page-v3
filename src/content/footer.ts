@@ -21,12 +21,15 @@
  * `{ label, href }`.
  *
  * design/components.md S7.3 declares the same shape in `src/content/navigation.ts`,
- * which a DIFFERENT agent writes in this same wave. Importing it would be exactly
- * the same-wave content dependency that S8/S13.2 exists to prevent - if that module
- * lands late or deviates, this one stops compiling. The two are structurally
- * identical, so TypeScript treats them as the same type at every call site and
- * either import satisfies any consumer.
+ * which a DIFFERENT agent wrote in that wave. Importing the TYPE would have been
+ * exactly the same-wave content dependency that S8/S13.2 exists to prevent, so
+ * the shape is restated; the two are structurally identical and TypeScript
+ * treats them as one type at every call site. (The wave is long over - the
+ * `WHATSAPP_TEAM_URL` VALUE is now imported from there, because a URL that
+ * appears in three places must live in one.)
  */
+import { WHATSAPP_TEAM_URL } from "./navigation";
+
 export interface NavLink {
   label: string;
   href: string;
@@ -72,7 +75,9 @@ export interface FooterColumn {
  * on 2026-09-01 from operator-supplied documents, at exactly the paths this
  * table already named, so both dropped `prefetch: false` - the flag exists to
  * stop the browser requesting a page that does not exist, and these now do.
- * Documentation and Media Kit still carry it.
+ * Documentation and Media Kit are PARKED as comments (operator, 2026-09-08)
+ * until there is something to link to; the Resources column runs two links
+ * and Company three in the meantime.
  */
 export const FOOTER_COLUMNS: readonly FooterColumn[] = [
   {
@@ -90,14 +95,23 @@ export const FOOTER_COLUMNS: readonly FooterColumn[] = [
     heading: "Resources",
     links: [
       { label: "Blog", href: "/blog" },
-      { label: "Documentation", href: "/docs", prefetch: false },
-      { label: "Help & Support", href: "/help" },
+      // PARKED (operator, 2026-09-08): no documentation exists to link to yet.
+      // Restore this line when it does - the route it names is still the one.
+      // { label: "Documentation", href: "/docs", prefetch: false },
+      //
+      // "Help & Support" goes to the team's WhatsApp, not `/help` (operator,
+      // 2026-09-08: it "should redirect to the number Chat with the team has").
+      // The `/help` route itself still builds and is reachable by URL; only
+      // the footer stops pointing at it.
+      { label: "Help & Support", href: WHATSAPP_TEAM_URL },
     ],
   },
   {
     heading: "Company",
     links: [
-      { label: "Media Kit", href: "/media-kit", prefetch: false },
+      // PARKED (operator, 2026-09-08): no media kit exists to link to yet.
+      // Restore this line when it does - the route it names is still the one.
+      // { label: "Media Kit", href: "/media-kit", prefetch: false },
       { label: "Privacy Policy", href: "/privacy-policy" },
       { label: "Terms of Use", href: "/terms-of-use" },
     ],
@@ -110,7 +124,7 @@ export const FOOTER_COLUMNS: readonly FooterColumn[] = [
       // in Azza blue. The prefilled text is the operator's, verbatim.
       {
         label: "Chat with the team",
-        href: "https://api.whatsapp.com/send/?phone=2348146843432&text=Hi+Victor%2C+Im+from+Azza+Website.&type=phone_number&app_absent=0",
+        href: WHATSAPP_TEAM_URL,
         tone: "brand",
       },
       { label: "hq@azza.com", href: "mailto:hq@azza.com" },
