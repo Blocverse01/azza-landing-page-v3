@@ -9,7 +9,8 @@
  *   498:620-623  Resources    Blog / Documentation / Help & Support
  *   498:625-628  Company      Media Kit / Privacy Policy / Terms of Use
  *   498:630-632  Contact Us   07041900011 / hq@azza.com  (the number was replaced by
- *                             "Chat with the team" on 2026-09-07 - see the column)
+ *                             "Chat with the team" on 2026-09-07 and the address by
+ *                             info@blocverse.com on 2026-09-08 - see the column)
  *   498:612      RC line      "RC: 7810789"
  *   498:635/636  legal row    "(c) 2026 - Use Azza LTD"  /  "All rights reserved."
  *
@@ -127,7 +128,9 @@ export const FOOTER_COLUMNS: readonly FooterColumn[] = [
         href: WHATSAPP_TEAM_URL,
         tone: "brand",
       },
-      { label: "hq@azza.com", href: "mailto:hq@azza.com" },
+      // Operator, 2026-09-08: the real address is info@blocverse.com. The frame
+      // (498:632) still prints hq@azza.com; it was never a live mailbox.
+      { label: "info@blocverse.com", href: "mailto:info@blocverse.com" },
     ],
   },
 ];

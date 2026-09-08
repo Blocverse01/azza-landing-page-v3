@@ -35,8 +35,8 @@ export const SITE = {
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://useazza.com",
   /** The registered company, as the footer prints it ("Use Azza LTD"). */
   legalName: "Use Azza LTD",
-  /** The contact address the footer publishes. */
-  email: "hq@azza.com",
+  /** The contact address the footer publishes (operator, 2026-09-08 - the frame's hq@azza.com was never live). */
+  email: "info@blocverse.com",
   /** The X handle, for `twitter:site` / `twitter:creator` - SOCIAL_URLS.x. */
   twitter: "@useazza",
   /**
