@@ -13,7 +13,7 @@ import { FeatureList, type Feature } from "./FeatureList";
  * -------------------------------------------
  * One feature is active at a time. The active row sits dead centre of a fixed
  * viewport with its description open; every other row is a title at 40% opacity.
- * Every 3 seconds the active row travels up and out of the middle, its
+ * Every 2 seconds the active row travels up and out of the middle, its
  * description closing behind it, while the NEXT row arrives at the exact
  * position the old one left and opens its own description. A blue marker sits
  * permanently at the centre - the rows move past the highlighter, not the other
@@ -75,7 +75,7 @@ import { FeatureList, type Feature } from "./FeatureList";
  *
  * ON THE DURATION. This was `--motion-deck` (640ms) while the beat was 6s, which
  * is the token the project reserves for exactly this kind of promotion. The beat
- * is now 3s and 640ms of it would be spent moving - better than a fifth of every
+ * is now 2s and 640ms of it would be spent moving - nearly a third of every
  * cycle - which reads as a list that never settles. `--motion-slow` (360ms)
  * restores the move-then-rest rhythm at the faster cadence and is still
  * unhurried for a 72px step. The frequency rule cuts both ways: the same motion
@@ -105,7 +105,7 @@ import { FeatureList, type Feature } from "./FeatureList";
  * scrolls itself is still the wrong shape for a phone - so the viewport
  * height, the clip, the translate, the padding copies and the centre marker
  * stay `lg`-gated. What is no longer gated is the timer: the active row - its
- * marker and its open description - walks the list on the same 3s dwell at
+ * marker and its open description - walks the list on the same 2s dwell at
  * every width, pausing for the same reasons (touch or focus inside, the
  * pause toggle, off-screen, reduced motion). The rows do not travel; the
  * highlight does.
@@ -115,8 +115,8 @@ import { FeatureList, type Feature } from "./FeatureList";
  *  run of rows both above and below the real copy at every position. */
 const COPIES = 3;
 
-/** How long a row stays active (operator, 2026-08-05: 3s, down from 6). */
-const DWELL_MS = 3000;
+/** How long a row stays active (operator, 2026-09-08: 2s, down from 3; 2026-08-05: 3s, down from 6). */
+const DWELL_MS = 2000;
 
 /*
  * How long to wait before renormalising the counter - the travel duration plus a
