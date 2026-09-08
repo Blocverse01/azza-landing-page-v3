@@ -2,10 +2,13 @@ import type { Metadata } from "next";
 
 import { LegalPage } from "@/components/sections/LegalDocument";
 import { PRIVACY_POLICY } from "@/content/legal";
+import { pageOpenGraph } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: PRIVACY_POLICY.title,
   description: PRIVACY_POLICY.standfirst,
+  alternates: { canonical: "/privacy-policy" },
+  openGraph: pageOpenGraph("/privacy-policy"),
 };
 
 /**

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { AllArticles, BlogHero } from "@/components/sections/BlogIndex";
 import { getBlogPosts } from "@/lib/hashnode";
+import { pageOpenGraph } from "@/lib/seo";
 
 /**
  * Copy is the blog hero's own standfirst (`802:835`), verbatim. The `<title>`
@@ -14,6 +15,8 @@ export const metadata: Metadata = {
   description:
     "Stay updated with the latest product releases, crypto tips, and " +
     "insights from the Azza team.",
+  alternates: { canonical: "/blog" },
+  openGraph: pageOpenGraph("/blog"),
 };
 
 /**

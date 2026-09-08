@@ -3,12 +3,16 @@ import type { Metadata } from "next";
 import { Faq } from "@/components/sections/Faq";
 import { HeroBusiness } from "@/components/sections/HeroBusiness";
 import { WhyAzzaInfrastructure, WhyAzzaNarrative } from "@/components/sections/WhyAzzaBusiness";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { FAQ_BUSINESS } from "@/content/faq";
+import { faqPageJsonLd, pageOpenGraph } from "@/lib/seo";
 
 /** Copy is the hero standfirst (`800:320`), verbatim. */
 export const metadata: Metadata = {
   title: "Azza for Business",
   description: "Receive payments, move money across borders, and access USD with ease.",
+  alternates: { canonical: "/products/for-business" },
+  openGraph: pageOpenGraph("/products/for-business"),
 };
 
 /**
@@ -37,6 +41,7 @@ export default function ForBusinessPage() {
       <WhyAzzaNarrative />
       <WhyAzzaInfrastructure />
       <Faq items={FAQ_BUSINESS} />
+      <JsonLd data={faqPageJsonLd(FAQ_BUSINESS)} />
     </>
   );
 }

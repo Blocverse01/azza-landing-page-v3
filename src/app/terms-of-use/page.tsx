@@ -2,10 +2,13 @@ import type { Metadata } from "next";
 
 import { LegalPage } from "@/components/sections/LegalDocument";
 import { TERMS_OF_USE } from "@/content/legal";
+import { pageOpenGraph } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: TERMS_OF_USE.title,
   description: TERMS_OF_USE.standfirst,
+  alternates: { canonical: "/terms-of-use" },
+  openGraph: pageOpenGraph("/terms-of-use"),
 };
 
 /**

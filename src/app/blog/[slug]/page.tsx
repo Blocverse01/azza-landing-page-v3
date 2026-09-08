@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { BlogArticle } from "@/components/sections/BlogArticle";
+import { JsonLd } from "@/components/seo/JsonLd";
 import type { BlogPost } from "@/content/blog";
 import { getBlogPost, getBlogPosts, getRelatedPosts } from "@/lib/hashnode";
+import { blogPostingJsonLd } from "@/lib/seo";
 
 interface ArticlePageProps {
   /** Next 15 hands route params in as a promise. */
@@ -48,21 +50,37 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
    */
   if (!post) return {};
 
+  const description = describe(post);
+
+  /*
+   * The cover is the same image the article renders: an absolute Hashnode
+   * CDN URL for posts that have one, the committed banner's `/_next/static`
+   * path for those that do not - both resolve through layout.tsx's
+   * `metadataBase` (set, since the 2026-09-08 SEO pass, to the brand domain).
+   * Hashnode's frame is 1600 x 840, which the record carries as width / height.
+   */
+  const image = {
+    url: post.image.src,
+    width: post.image.width,
+    height: post.image.height,
+    alt: post.title,
+  };
+
   return {
     title: post.title,
-    description: describe(post),
-    /*
-     * NO `images` HERE still - the covers are absolute Hashnode CDN URLs now,
-     * which WOULD satisfy Open Graph, but `metadataBase` remains unset in
-     * layout.tsx and adding og images consistently belongs with that
-     * site-wide decision. The standing note from the dummy era carries over.
-     */
+    description,
+    alternates: { canonical: `/blog/${slug}` },
     openGraph: {
       type: "article",
       title: post.title,
-      description: describe(post),
+      description,
+      url: `/blog/${slug}`,
       publishedTime: post.date,
+      authors: post.author ? [post.author] : undefined,
+      section: post.category,
+      images: [image],
     },
+    twitter: { card: "summary_large_image", title: post.title, description, images: [image.url] },
   };
 }
 
@@ -84,5 +102,11 @@ export default async function BlogArticlePage({ params }: ArticlePageProps) {
 
   if (!post) notFound();
 
-  return <BlogArticle post={post} related={await getRelatedPosts(slug)} />;
+  return (
+    <>
+      <BlogArticle post={post} related={await getRelatedPosts(slug)} />
+      {/* The same record the page renders, as schema.org BlogPosting - lib/seo.ts. */}
+      <JsonLd data={blogPostingJsonLd(post, describe(post))} />
+    </>
+  );
 }

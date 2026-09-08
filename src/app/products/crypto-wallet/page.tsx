@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 
 import { Faq } from "@/components/sections/Faq";
 import { HeroCryptoWallet } from "@/components/sections/HeroCryptoWallet";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { FAQ_CRYPTO_WALLET } from "@/content/faq";
+import { faqPageJsonLd, pageOpenGraph } from "@/lib/seo";
 
 /** Copy is the hero standfirst (`412:1621`), verbatim. */
 export const metadata: Metadata = {
@@ -10,6 +12,8 @@ export const metadata: Metadata = {
   description:
     "Deposit, withdraw, buy, sell, swap, and spend — all in one place. " +
     "No apps. No switching platforms. Just WhatsApp.",
+  alternates: { canonical: "/products/crypto-wallet" },
+  openGraph: pageOpenGraph("/products/crypto-wallet"),
 };
 
 /**
@@ -43,6 +47,7 @@ export default function CryptoWalletPage() {
     <>
       <HeroCryptoWallet />
       <Faq items={FAQ_CRYPTO_WALLET} />
+      <JsonLd data={faqPageJsonLd(FAQ_CRYPTO_WALLET)} />
     </>
   );
 }

@@ -1,16 +1,15 @@
 import type { Metadata } from "next";
 
 import { HelpSupport } from "@/components/sections/HelpSupport";
-import {
-  HELP_HUB_HEADING,
-  HELP_HUB_STANDFIRST,
-  HELP_TOPICS,
-} from "@/content/help";
+import { HELP_HUB_HEADING, HELP_HUB_STANDFIRST, HELP_TOPICS } from "@/content/help";
+import { pageOpenGraph } from "@/lib/seo";
 
 /** Both strings are the hub's own nodes - `500:1768` and `500:1769`. */
 export const metadata: Metadata = {
   title: HELP_HUB_HEADING,
   description: HELP_HUB_STANDFIRST,
+  alternates: { canonical: "/help" },
+  openGraph: pageOpenGraph("/help"),
 };
 
 /**

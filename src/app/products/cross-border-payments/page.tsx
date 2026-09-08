@@ -3,13 +3,16 @@ import type { Metadata } from "next";
 import { Faq } from "@/components/sections/Faq";
 import { HeroCrossBorder } from "@/components/sections/HeroCrossBorder";
 import { WhyAzzaCrossBorder } from "@/components/sections/WhyAzzaCrossBorder";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { FAQ_CROSS_BORDER } from "@/content/faq";
+import { faqPageJsonLd, pageOpenGraph } from "@/lib/seo";
 
 /** Copy is the hero standfirst (`412:1860`), verbatim. */
 export const metadata: Metadata = {
   title: "Cross-Border Payments",
-  description:
-    "Make payments globally with your local currency — wherever you are.",
+  description: "Make payments globally with your local currency — wherever you are.",
+  alternates: { canonical: "/products/cross-border-payments" },
+  openGraph: pageOpenGraph("/products/cross-border-payments"),
 };
 
 /**
@@ -37,6 +40,7 @@ export default function CrossBorderPaymentsPage() {
       <HeroCrossBorder />
       <WhyAzzaCrossBorder />
       <Faq items={FAQ_CROSS_BORDER} />
+      <JsonLd data={faqPageJsonLd(FAQ_CROSS_BORDER)} />
     </>
   );
 }

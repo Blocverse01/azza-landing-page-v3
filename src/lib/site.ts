@@ -25,7 +25,23 @@ export const SITE = {
    * to all ten article pages before `impl-routes-content` caught it.
    *
    * Override with NEXT_PUBLIC_SITE_URL at build time for the real domain. The
-   * fallback is a placeholder and MUST be replaced before a public deploy.
+   * fallback is the brand's own domain as far as the site knows it (the
+   * handles are `useazza`, the company is Use Azza LTD) - it was
+   * `https://azza.example` until the 2026-09-08 SEO pass. Every canonical,
+   * og:url, sitemap entry and JSON-LD id is built from it, so if the live
+   * domain differs, SET THE VARIABLE; a wrong host here is a wrong canonical
+   * on every page.
    */
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://azza.example",
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://useazza.com",
+  /** The registered company, as the footer prints it ("Use Azza LTD"). */
+  legalName: "Use Azza LTD",
+  /** The contact address the footer publishes. */
+  email: "hq@azza.com",
+  /** The X handle, for `twitter:site` / `twitter:creator` - SOCIAL_URLS.x. */
+  twitter: "@useazza",
+  /**
+   * Open Graph locale. The copy is British English ("authorised", "optimise")
+   * and Facebook's locale list has no en_NG, so en_GB is the honest match.
+   */
+  locale: "en_GB",
 } as const;

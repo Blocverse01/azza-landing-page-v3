@@ -1,8 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Poppins } from "next/font/google";
 import localFont from "next/font/local";
 
 import { SiteChrome } from "@/components/layout/SiteChrome";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { organizationJsonLd, webSiteJsonLd } from "@/lib/seo";
 import { SITE } from "@/lib/site";
 
 import "./globals.css";
@@ -92,7 +94,8 @@ export const metadata: Metadata = {
    * `impl-routes-content` hit exactly this on all ten article pages and pulled
    * its OG images rather than ship it.
    *
-   * Set NEXT_PUBLIC_SITE_URL at build time. The fallback is a placeholder.
+   * Set NEXT_PUBLIC_SITE_URL at build time; the fallback is the brand domain
+   * (see lib/site.ts).
    */
   metadataBase: new URL(SITE.url),
   title: {
@@ -100,6 +103,44 @@ export const metadata: Metadata = {
     template: `%s · ${SITE.name}`,
   },
   description: SITE.description,
+  applicationName: SITE.name,
+  /*
+   * The social-card defaults (2026-09-08 SEO pass). Deliberately WITHOUT a
+   * title, description or url: Next fills those per route from the page's
+   * own `title` / `description` / canonical, whereas a title set here would
+   * be inherited verbatim by every page. The image is the file convention
+   * `app/opengraph-image.png` (and `twitter-image.png`), which Next attaches
+   * to every route with an absolute URL through `metadataBase` - an article
+   * with a cover overrides it in its own `generateMetadata`.
+   */
+  openGraph: {
+    type: "website",
+    siteName: SITE.name,
+    locale: SITE.locale,
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: SITE.twitter,
+    creator: SITE.twitter,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+  },
+  /* The favicons are the file conventions `app/icon.svg` and `app/apple-icon.png`. */
+  formatDetection: { telephone: false },
+};
+
+/**
+ * `theme-color` is the brand blue - the mark, the manifest and the browser
+ * chrome then agree. Width and scale are the defaults, restated so the
+ * export owns the whole tag.
+ */
+export const viewport: Viewport = {
+  themeColor: "#3430E9",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
@@ -140,6 +181,14 @@ export default function RootLayout({
         />
 
         <SiteChrome>{children}</SiteChrome>
+
+        {/*
+         * Structured data that is true of every route: who publishes the site
+         * and what the site is. Per-page shapes (FAQPage, BlogPosting) live on
+         * the pages that render that content - lib/seo.ts.
+         */}
+        <JsonLd data={organizationJsonLd()} />
+        <JsonLd data={webSiteJsonLd()} />
       </body>
     </html>
   );

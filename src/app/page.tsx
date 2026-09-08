@@ -6,7 +6,9 @@ import { HeroLanding } from "@/components/sections/HeroLanding";
 import { Testimonials } from "@/components/sections/Testimonials";
 import { UseAzzaToday } from "@/components/sections/UseAzzaToday";
 import { WhyAzzaLanding } from "@/components/sections/WhyAzzaLanding";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { FAQ_LANDING } from "@/content/faq";
+import { faqPageJsonLd, pageOpenGraph } from "@/lib/seo";
 
 /**
  * Copy is the landing hero's own standfirst (`412:789`), verbatim. `absolute`
@@ -18,6 +20,8 @@ export const metadata: Metadata = {
   description:
     "Send, receive, and spend money across borders, instantly on WhatsApp. " +
     "Crypto or local currency, without the usual stress.",
+  alternates: { canonical: "/" },
+  openGraph: pageOpenGraph("/"),
 };
 
 /**
@@ -49,6 +53,7 @@ export default function HomePage() {
       <CardDeck />
       <Testimonials />
       <Faq items={FAQ_LANDING} />
+      <JsonLd data={faqPageJsonLd(FAQ_LANDING)} />
       <UseAzzaToday />
     </>
   );
