@@ -178,7 +178,8 @@ export const FAQ_CROSS_BORDER: readonly FaqItem[] = [
  * 561 tall rather than 712 because two question rows are absent, not because
  * the layout differs (layout.md S5.3).
  *
- * All three answers come from the client document.
+ * The first three answers come from the client document; the last two were
+ * added by the operator on 2026-09-08.
  */
 export const FAQ_BUSINESS: readonly FaqItem[] = [
   {
@@ -192,8 +193,7 @@ export const FAQ_BUSINESS: readonly FaqItem[] = [
   {
     id: "business-international-payments",
     // 412:2644
-    question:
-      "Can businesses send and receive payments from international customers?",
+    question: "Can businesses send and receive payments from international customers?",
     /**
      * THE ONE PLACE THE CLIENT DOCUMENT IS NOT TRANSCRIBED VERBATIM. It reads:
      *
@@ -220,5 +220,22 @@ export const FAQ_BUSINESS: readonly FaqItem[] = [
     question: "Do you offer OTC services for businesses?",
     answer:
       "Yes. Businesses can access OTC (Over-the-Counter) services for large-volume crypto and fiat transactions, with dedicated support, competitive rates, and customized settlement options.",
+  },
+  /*
+   * Operator additions, 2026-09-08 - transcribed verbatim from the request.
+   * Neither has a Figma node; the panel is list-driven (see Faq.tsx) and takes
+   * five rows the same way it takes three.
+   */
+  {
+    id: "business-integrate",
+    question: "Can I integrate Azza directly into my product?",
+    answer:
+      "Yes. Businesses can integrate Azza's APIs into their products to provide local currency collection, stablecoin payments, on-ramp, off-ramp, conversion, and settlement capabilities.",
+  },
+  {
+    id: "business-get-started",
+    question: "How do I get started?",
+    answer:
+      "Contact the Azza team to discuss your use case, required markets, expected volumes, and integration requirements. We'll help determine the right infrastructure for your business.",
   },
 ];
