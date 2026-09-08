@@ -15,45 +15,40 @@ export interface FooterWatermarkProps {
  * The orb (`498:639`, the blurred brand disc in `mix-blend-difference`) is
  * gone from the new frame and gone from here.
  *
- * THE CLIPPING IS THE DESIGN. The band is 1002 x 162 and the text, cap-trimmed
- * (`text-box: trim-both cap alphabetic`), measures 1256 x 179 with its caps
- * flush to the band's top - so the glyphs are cut across the bottom by 17px
- * and overhang the band by 127px each side, exactly centred (its centre is
- * the band's, 501). Reproduced with a shorter `overflow: hidden` box, the
- * trim, and `text-center`, which clips any width the box cannot hold evenly
- * from both ends (operator ruling, 2026-09-04) - and at the design width
- * that IS the 127px overhang.
+ * THE BAND IS THE TEXT'S OWN HEIGHT, NOT THE FRAME'S 162. `891:1710` is a
+ * 1002 x 162 band and `891:1711`, cap-trimmed (`text-box: trim-both cap
+ * alphabetic`), measures 1256 x 179 with its caps flush to the band's top -
+ * so the frame cuts 17px off every letter's foot. Built that way, the cut
+ * read as a chop rather than a bleed on the substituted face, and the
+ * operator ruled against it (2026-09-08, "text is getting cut off"). So the
+ * band no longer fixes a height: the span sits in flow and the cap trim
+ * makes its box exactly the cap height (179 at 250px), which is what the
+ * band becomes - 17px taller than the frame at 1440, and the whole glyph
+ * visible. Where `text-box` is unsupported (Firefox) the box is the full
+ * 1.03 line, a little air above and below the caps - looser, never cut, the
+ * ExchangeWidget precedent.
  *
- * The box height is expressed as a ratio of the type token rather than a fixed
- * 162px so that it tracks the clamp: design/responsive.md S7.1.1 requires the
- * band height to clamp with the wordmark at every stop, while the frame
- * requires exactly 162px at the design width. `162 / 250` satisfies both - it
- * resolves to 162px when the clamp is at its 250px ceiling and shrinks in
- * proportion below it.
+ * The 1256 still overhangs the band by 127px each side, exactly centred (its
+ * centre is the band's, 501). `text-center` keeps it so at every width, and
+ * clips any width the viewport cannot hold evenly from both ends (operator
+ * ruling, 2026-09-04).
  *
  * DECORATIVE, and deliberately so. It carries no meaning and contains nothing
  * focusable, so it is `aria-hidden` with no accessible name - the C-08 ruling
  * that covered the old 1.18:1 ghost ink holds for the same reason even though
  * the new grey reads at 4.6:1.
  *
- * THE BAND CLIPS VERTICALLY ONLY. `overflow-y: clip` cuts the glyphs at 162;
- * `overflow-x: visible` lets the 127px overhang show on either side of the
- * 1002 container, as the frame draws it (with `clip` on the other axis a
- * `visible` axis stays visible - it is `hidden`/`auto` that would promote it
- * to `auto`). The horizontal clip that stops the overhang becoming page-wide
- * scroll sits on the <footer> itself, at the viewport (`overflow-x-clip` in
- * Footer.tsx). The wordmark is `whitespace-nowrap` at a clamped size, so at
- * every width below the design's it is narrower than the band and the
+ * THE BAND CLIPS NOTHING. The horizontal clip that stops the 127px overhang
+ * becoming page-wide scroll sits on the <footer> itself, at the viewport
+ * (`overflow-x-clip` in Footer.tsx); vertically there is nothing to clip any
+ * more. The wordmark is `whitespace-nowrap` at a clamped size, so at every
+ * width below the design's it is narrower than the band and the overhang
  * question does not arise.
  */
 export function FooterWatermark({ children = "USE AZZA" }: FooterWatermarkProps) {
   return (
-    <div
-      aria-hidden="true"
-      className="relative w-full overflow-x-visible overflow-y-clip select-none"
-      style={{ height: "calc(var(--text-accent-watermark) * 162 / 250)" }}
-    >
-      <span className="font-accent text-accent-watermark text-fg-muted absolute inset-x-0 top-0 block text-center whitespace-nowrap [text-box:trim-both_cap_alphabetic]">
+    <div aria-hidden="true" className="relative w-full select-none">
+      <span className="font-accent text-accent-watermark text-fg-muted block text-center whitespace-nowrap [text-box:trim-both_cap_alphabetic]">
         {children}
       </span>
     </div>
