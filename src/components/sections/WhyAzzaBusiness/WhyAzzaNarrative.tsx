@@ -1,4 +1,6 @@
-import { Pill, Prose, Reveal, Section } from "@/components/ui";
+import { Pill, Section } from "@/components/ui";
+
+import { NarrativeReveal } from "./NarrativeReveal";
 
 /**
  * "Why Azza?" — the narrative block on /products/for-business.
@@ -28,7 +30,15 @@ import { Pill, Prose, Reveal, Section } from "@/components/ui";
  * above the first cap - looser, never broken - exactly the ExchangeWidget
  * precedent.
  *
- * Server component (components.md S3). Nothing here holds state.
+ * THE SCROLL REVEAL (operator request, 2026-09-08). The block sits on a
+ * sticky stage inside a tall track and its words light up in reading order
+ * as the page scrolls - `NarrativeReveal` owns the mechanic and its own
+ * header explains it. This file stays a server component; the client
+ * boundary is the reveal, which takes the paragraphs as data and the pill as
+ * a node; the container and its measurements are still declared here.
+ *
+ * The one-block `Reveal` entrance that used to wrap this is gone: the words
+ * arriving IS the entrance now, and two verbs on one block would fight.
  */
 
 /** 800:396 — transcribed verbatim; `Pill` supplies the uppercase treatment. */
@@ -73,45 +83,23 @@ export default function WhyAzzaNarrative() {
       aria-labelledby={EYEBROW_ID}
     >
       {/*
-       * One Reveal for the whole block. components.md S10.4 permits entrances on
-       * section headings and grids but explicitly NOT on body paragraphs, so the
-       * five paragraphs are never staggered individually.
+       * `Pill` takes no `id` prop and the contract forbids adding one, so the
+       * wrapper carries the id that names the section. Its text content is the
+       * pill's, which is exactly the accessible name we want.
+       *
+       * No top-margin compensation: 800:532 top-aligns the pill with the prose
+       * column, and the paragraphs' cap trim is what makes the first cap land
+       * at the column's top edge. The old `lg:mt-3.5` existed to chase the
+       * untrimmed ascender space and would now double-shift.
        */}
-      <Reveal className="w-full">
-        <div className="flex w-full flex-col gap-12 lg:flex-row lg:items-start">
-          {/*
-           * `Pill` takes no `id` prop and the contract forbids adding one, so the
-           * wrapper carries the id that names the section. Its text content is
-           * the pill's, which is exactly the accessible name we want.
-           *
-           * No top-margin compensation: 800:532 top-aligns the pill with the
-           * prose column, and the paragraphs' cap trim is what makes the first
-           * cap land at the column's top edge. The old `lg:mt-3.5` existed to
-           * chase the untrimmed ascender space and would now double-shift.
-           */}
+      <NarrativeReveal
+        paragraphs={PARAGRAPHS}
+        aside={
           <div id={EYEBROW_ID} className="shrink-0">
             <Pill variant="eyebrow-md">{EYEBROW}</Pill>
           </div>
-
-          {/*
-           * measure={false} because this column caps at the designed 650, which
-           * is tighter than the 842 reading measure - never wider.
-           *
-           * The cap trim on every paragraph is the frame's own setting (see the
-           * header); a progressive enhancement per the ExchangeWidget note.
-           */}
-          <Prose
-            step="2xl-prose"
-            gap={48}
-            measure={false}
-            className="max-w-[650px] min-w-0 flex-1 [&>p]:[text-box:trim-both_cap_alphabetic]"
-          >
-            {PARAGRAPHS.map((paragraph) => (
-              <p key={paragraph.id}>{paragraph.text}</p>
-            ))}
-          </Prose>
-        </div>
-      </Reveal>
+        }
+      />
     </Section>
   );
 }

@@ -108,10 +108,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${inter.variable} ${lemon.variable} ${poppins.variable}`}
-    >
+    <html lang="en" className={`${inter.variable} ${lemon.variable} ${poppins.variable}`}>
       <body>
         {/*
          * THE `Reveal` NO-JS COUNTERPART. Do not remove it (D-031, seam 1).
@@ -138,7 +135,7 @@ export default function RootLayout({
         <noscript
           dangerouslySetInnerHTML={{
             __html:
-              "<style>.reveal{opacity:1!important;transform:none!important}</style>",
+              "<style>.reveal{opacity:1!important;transform:none!important}.narrative-reveal{--p:1!important}</style>",
           }}
         />
 

@@ -1123,6 +1123,34 @@
   }
 
   /*
+   * NarrativeReveal - the business narrative's scroll-linked word reveal
+   * (WhyAzzaBusiness/NarrativeReveal.tsx). The block carries `--p`, the
+   * reveal progress 0..1, written by a rAF-throttled scroll handler; each word
+   * carries `--w`, its start as a fraction of the word count. A word is dim
+   * until `--p` reaches `--w`, then brightens over the next 1 / `--ramp` of
+   * progress - about four words wide - so the light travels along the line.
+   *
+   * `--p` DEFAULTS TO 1: with no script every word is fully visible, and the
+   * <noscript> in layout.tsx pins it. Under reduced motion the words are held
+   * at full opacity outright and `--p` is never consulted - the pin is off
+   * too (the track is `motion-safe:` only), so the block reads in plain flow.
+   */
+  .narrative-reveal {
+    --p: 1;
+    --ramp: 24;
+  }
+
+  .narrative-word {
+    opacity: calc(0.18 + 0.82 * clamp(0, (var(--p) - var(--w, 0)) * var(--ramp), 1));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .narrative-word {
+      opacity: 1;
+    }
+  }
+
+  /*
    * Media - art-directed ratio steps (components.md S4.7). The slot's ratio is
    * what reserves layout, so it must be set before the image loads; zero CLS is
    * a hard requirement.
