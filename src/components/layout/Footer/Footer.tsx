@@ -113,6 +113,13 @@ export function Footer({ className, currentPath }: FooterProps) {
       data-surface="inverse"
       className={cn(
         "bg-surface-inverse pt-(--spacing-footer-top) pb-(--spacing-footer-bottom)",
+        // The watermark overhangs its 1002 band by 127px each side at the
+        // design width (891:1711 is 1256 wide) and is meant to be seen doing
+        // it; the band clips it vertically only, so the horizontal clip has
+        // to live here, at the viewport, where it stops the overhang from
+        // ever becoming page-wide scroll. `clip`, not `hidden` - the footer
+        // must not become a scroll container.
+        "overflow-x-clip",
         className,
       )}
     >

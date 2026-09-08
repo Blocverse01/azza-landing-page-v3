@@ -218,10 +218,13 @@
   --text-display-8--font-weight: 500;
 
   /* --- Accent ramp (font-accent) ----------------------------------------- */
-  --text-accent-watermark: clamp(3rem, 0.375rem + 13.125vw, 12.1875rem); /* 195 */
+  /* 250 / Extra Bold since the 2026-09-08 footer (891:1711); was 195 / Black
+   * (498:638). Same -5% tracking, same 48px floor at 320, re-solved through
+   * the new ceiling. The cap trim on the consumer makes the leading moot. */
+  --text-accent-watermark: clamp(3rem, -0.6071rem + 18.0357vw, 15.625rem); /* 250 */
   --text-accent-watermark--line-height: 1.03;
   --text-accent-watermark--letter-spacing: -0.05em;
-  --text-accent-watermark--font-weight: 900;
+  --text-accent-watermark--font-weight: 800;
 
   --text-accent-1: clamp(2rem, 1.0357rem + 4.8214vw, 5.375rem); /* 86 */
   --text-accent-1--line-height: 0.98;
