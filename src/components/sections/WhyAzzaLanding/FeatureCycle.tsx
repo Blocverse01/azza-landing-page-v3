@@ -87,8 +87,11 @@ import { FeatureList, type Feature } from "./FeatureList";
  *
  * PAUSING
  * -------
- * The cycle stops while the pointer is over it, while focus is inside it, and
- * while the section is off screen. It never starts under
+ * The cycle stops while a mouse (or pen - anything that can hover, never a
+ * finger) is over it, while keyboard-visible focus is inside it, and while
+ * the section is off screen; a tap or click on a row does NOT pause it, it
+ * just restarts the dwell from that row - see the `hovered` / `focusWithin`
+ * note in the component for the tap-stall this replaces. It never starts under
  * `prefers-reduced-motion: reduce` - motion that begins without being asked for
  * is exactly what that preference is about - and the visually-hidden toggle
  * below is the WCAG 2.2.2 "pause, stop or hide" mechanism, reachable by keyboard
@@ -231,8 +234,47 @@ export function FeatureCycle({ features, initialId, className }: FeatureCyclePro
   const [reduceMotion, setReduceMotion] = useState(false);
   const [cycling, setCycling] = useState(false);
   const [inView, setInView] = useState(false);
-  const [engaged, setEngaged] = useState(false);
+  /*
+   * The two ways a person can be "in" the list, kept APART. They were one
+   * `engaged` flag set by pointerenter / focus and cleared by pointerleave /
+   * blur, and that shape had two faults, one of which stalled the cycle for
+   * every phone user who tapped a row (operator report with screenshot,
+   * 2026-09-08 - a focused row and a marker that never moved again):
+   *
+   *   1. A TAP IS A POINTERENTER WITH NO POINTERLEAVE TO FOLLOW. A finger
+   *      "enters" the viewport when it lands and the browser does send a
+   *      leave after it lifts - but on Android the tapped <button> is then
+   *      focused by the compatibility mousedown, which fires AFTER touchend
+   *      and so after that leave. The last write won: engaged = true, and
+   *      nothing a touch user does short of tapping somewhere else ever
+   *      clears it. iOS does not focus buttons on tap, which is why the
+   *      report came from Android and not from the desk.
+   *   2. One flag for two conditions cancels itself: leave-while-focused
+   *      resumed a cycle a keyboard user was reading, blur-while-hovered
+   *      resumed one under a resting mouse.
+   *
+   * So: `hovered` is only ever set by a pointer that CAN hover - mouse or
+   * pen, never touch (`pointerType`), the same distinction `hoverable:` makes
+   * in CSS. `focusWithin` is only ever set by focus the browser would draw a
+   * ring for (`:focus-visible` - keyboard, assistive tech, script), never by
+   * the focus a tap or click leaves on a row. A pointer selection therefore
+   * restarts the dwell from the row it picked and the beat carries on, which
+   * is what selecting something should do; a keyboard user still holds the
+   * list still for as long as they are in it.
+   */
+  const [hovered, setHovered] = useState(false);
+  const [focusWithin, setFocusWithin] = useState(false);
   const [paused, setPaused] = useState(false);
+
+  /*
+   * When a pointer last pressed inside the list. Focus that lands within half
+   * a second of a press came from that press - a tap or a click - and is not
+   * a reason to pause, whatever `:focus-visible` says about it: some Android
+   * builds draw the ring for a tapped button, and the whole point of this
+   * change is that a tap must never stall the beat. Keyboard and assistive
+   * focus arrive with no press in front of them and still pause.
+   */
+  const lastPress = useRef(0);
 
   const activeIndex = ((position % count) + count) % count;
   const activeId = features[activeIndex].id;
@@ -386,7 +428,26 @@ export function FeatureCycle({ features, initialId, className }: FeatureCyclePro
    * 2026-09-05, while `cycling` keeps gating the things that only exist at
    * `lg` - the translate, the padding copies, the centre marker.
    */
-  const running = inView && !engaged && !paused && !reduceMotion;
+  const running = inView && !hovered && !focusWithin && !paused && !reduceMotion;
+
+  /*
+   * Why the beat is or is not running, as a DOM attribute. Not read by any
+   * style or script on the site - it exists so a stalled cycle can be
+   * diagnosed from the element inspector (or a headless probe) instead of
+   * from guesswork: the 2026-09-08 stall was only pinned down once the state
+   * behind `running` could be read off the page.
+   */
+  const cycleState = running
+    ? "running"
+    : reduceMotion
+      ? "still:reduced-motion"
+      : paused
+        ? "still:paused"
+        : !inView
+          ? "still:offscreen"
+          : hovered
+            ? "still:hover"
+            : "still:focus";
 
   useEffect(() => {
     if (!running) return;
@@ -444,10 +505,34 @@ export function FeatureCycle({ features, initialId, className }: FeatureCyclePro
   return (
     <div
       ref={viewportRef}
-      onPointerEnter={() => setEngaged(true)}
-      onPointerLeave={() => setEngaged(false)}
-      onFocus={() => setEngaged(true)}
-      onBlur={() => setEngaged(false)}
+      data-cycle={cycleState}
+      onPointerEnter={(event) => {
+        if (event.pointerType !== "touch") setHovered(true);
+      }}
+      onPointerLeave={(event) => {
+        if (event.pointerType !== "touch") setHovered(false);
+      }}
+      /*
+       * `onFocus` / `onBlur` in React are focusin / focusout - they bubble, so
+       * these see every row's button. Only ring-worthy focus counts (see the
+       * state above); the blur clears it only when focus is LEAVING the list,
+       * not when it moves from one row to the next, which is what
+       * `relatedTarget` tells us.
+       */
+      onPointerDownCapture={() => {
+        lastPress.current = Date.now();
+      }}
+      onFocus={(event) => {
+        const target = event.target;
+        const fromPress = Date.now() - lastPress.current < 500;
+        if (!fromPress && target instanceof Element && target.matches(":focus-visible")) {
+          setFocusWithin(true);
+        }
+      }}
+      onBlur={(event) => {
+        const next = event.relatedTarget;
+        if (!(next instanceof Node) || !event.currentTarget.contains(next)) setFocusWithin(false);
+      }}
       className={cn("relative", "lg:h-[581px] lg:overflow-clip", className)}
     >
       {/*
